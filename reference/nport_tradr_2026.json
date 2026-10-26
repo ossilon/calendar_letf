@@ -1,0 +1,60 @@
+{
+  "_what": "Swap terms and holdings of the three live Tradr calendar-reset funds, copied from their SEC Form N-PORT filings (primary_doc.xml) on 2026-10-12. Values in USD as filed. 'unreal' = unrealizedAppr. Nothing here is summarized; see ASSUMPTIONS.md section 6 for the reading.",
+  "_source": "https://www.sec.gov/Archives/edgar/data/1587982/<accession without dashes>/primary_doc.xml ; filer Investment Managers Series Trust II, CIK 0001587982",
+  "_retrieved": "2026-10-12",
+  "SPYQ": {
+    "series_id": "S000086119",
+    "snapshots": [
+      {"adsh": "0001193125-26-363452", "period": "2026-06-30", "net_assets": 14354662.33, "total_assets": 16948944.49,
+       "direct_holding": {"name": "SPDR S&P 500 ETF Trust", "value": 5758343.47, "pct_nav": 40.11},
+       "swaps": [
+         {"cp": "Clear Street LLC", "receive": "Total Return on the SPY", "pay": "OBFR01 + 100bps (Spread)", "notional": 4667258.88, "unreal": 494415.36, "term": "2026-12-09"},
+         {"cp": "TD Cowen Financial Products LLC", "receive": "Total Return on the SPY", "pay": "OBFR01 + 75bps (Spread)", "notional": 5485187.36, "unreal": 1378375.71, "term": "2027-06-02"},
+         {"cp": "Wells Fargo Securities, LLC", "receive": "Total Return on the SPY", "pay": "OBFR01 + 100bps (Spread)", "notional": 6472810.88, "unreal": 1402625.54, "term": "2026-07-07"}]},
+      {"adsh": "0001193125-26-234818", "period": "2026-03-31", "net_assets": 11172754.07,
+       "direct_holding": {"name": "SPDR S&P 500 ETF Trust", "value": 6206194.62, "pct_nav": 55.55},
+       "swaps": [
+         {"cp": "Clear Street LLC", "pay": "OBFR01 + 100bps (Spread)", "notional": 4667258.88, "unreal": -172108.8, "term": "2026-12-09"},
+         {"cp": "TD Cowen Financial Products LLC", "pay": "OBFR01 + 75bps (Spread)", "notional": 5465610.05, "unreal": 492154.69, "term": "2026-05-01"},
+         {"cp": "Wells Fargo Securities, LLC", "pay": "OBFR01 + 100bps (Spread)", "notional": 6688300.16, "unreal": 434873.86, "term": "2026-07-07"}]},
+      {"adsh": "0001193125-26-074391", "period": "2025-12-31", "net_assets": 13277182.23,
+       "direct_holding": {"name": "SPDR S&P 500 ETF Trust", "value": 6313897.28, "pct_nav": 47.55},
+       "swaps": [
+         {"cp": "TD Cowen Financial Products LLC", "pay": "OBFR01 + 75bps (Spread)", "notional": 5490129.10, "unreal": 782171.06, "term": "2026-05-01"},
+         {"cp": "Wells Fargo Securities, LLC", "pay": "OBFR01 + 100bps (Spread)", "notional": 8254366.82, "unreal": 769480.54, "term": "2026-07-07"},
+         {"cp": "Clear Street LLC", "pay": "OBFR01 + 100bps (Spread)", "notional": 4667258.88, "unreal": 46172.16, "term": "2026-12-09"}]}
+    ]
+  },
+  "MQQQ": {
+    "snapshots": [
+      {"adsh": "0001193125-26-363434", "period": "2026-06-30", "net_assets": 282464835.42,
+       "direct_holding": {"name": "Invesco QQQ Trust", "value": 162047765.60, "pct_nav": 57.37},
+       "swaps": [
+         {"cp": "Clear Street LLC", "receive": "Total Return on the QQQ", "pay": "OBFR01 + 100bps (Spread)", "notional": 78073191.77, "unreal": 12357464.63, "term": "2026-11-30"},
+         {"cp": "TD Cowen Financial Products LLC", "receive": "Total Return on the QQQ", "pay": "OBFR01 + 75bps (Spread)", "notional": 10121714.74, "unreal": 4084914.06, "term": "2027-06-02"},
+         {"cp": "Wells Fargo Securities, LLC", "receive": "Total Return on the QQQ", "pay": "OBFR01 + 100bps (Spread)", "notional": 274802244.33, "unreal": 26883898.47, "term": "2027-03-01"}]},
+      {"adsh": "0001193125-26-234801", "period": "2026-03-31", "net_assets": 101673652.59,
+       "direct_holding": {"name": "Invesco QQQ Trust", "value": 62856056.36, "pct_nav": 61.82},
+       "swaps": [
+         {"cp": "Clear Street LLC", "pay": "OBFR01 + 100bps (Spread)", "notional": 78073191.77, "unreal": -7194910.59, "term": "2026-11-30"},
+         {"cp": "TD Cowen Financial Products LLC", "pay": "OBFR01 + 75bps (Spread)", "notional": 10222700.56, "unreal": 1006336.34, "term": "2026-05-01"},
+         {"cp": "Wells Fargo Securities, LLC", "pay": "OBFR01 + 100bps (Spread)", "notional": 68815592.62, "unreal": 1547844.0, "term": "2027-03-01"}]}
+    ]
+  },
+  "QQQP": {
+    "snapshots": [
+      {"adsh": "0001193125-26-363422", "period": "2026-06-30", "net_assets": 20515029.69,
+       "direct_holding": {"name": "Invesco QQQ Trust", "value": 9234456.00, "pct_nav": 45.01},
+       "swaps": [
+         {"cp": "Clear Street LLC", "receive": "Total Return on the QQQ", "pay": "OBFR01 + 100bps (Spread)", "notional": 6734343.75, "unreal": 1274006.25, "term": "2026-12-09"},
+         {"cp": "TD Cowen Financial Products LLC", "receive": "Total Return on the QQQ", "pay": "OBFR01 + 75bps (Spread)", "notional": 5275914.80, "unreal": 2811966.4, "term": "2027-06-02"},
+         {"cp": "Wells Fargo Securities, LLC", "receive": "Total Return on the QQQ", "pay": "OBFR01 + 100bps (Spread)", "notional": 6717339.97, "unreal": 2012682.03, "term": "2026-07-07"}]},
+      {"adsh": "0001193125-26-234816", "period": "2026-03-31", "net_assets": 15624087.04,
+       "direct_holding": {"name": "Invesco QQQ Trust", "value": 8817578.86, "pct_nav": 56.44},
+       "swaps": [
+         {"cp": "Wells Fargo Securities, LLC", "pay": "OBFR01 + 100bps (Spread)", "notional": 12379738.62, "unreal": 112745.3, "term": "2026-07-07"},
+         {"cp": "Clear Street LLC", "pay": "OBFR01 + 100bps (Spread)", "notional": 6734343.75, "unreal": -457511.25, "term": "2026-12-09"},
+         {"cp": "TD Cowen Financial Products LLC", "pay": "OBFR01 + 75bps (Spread)", "notional": 5278317.15, "unreal": 1063736.69, "term": "2026-05-01"}]}
+    ]
+  }
+}

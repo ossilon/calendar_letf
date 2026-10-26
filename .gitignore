@@ -1,0 +1,28 @@
+# Price data is licensed for display only: never commit it. Keep the export instructions (data/README.md).
+data/*
+!data/README.md
+
+# Raw per-run outputs (daily series can be reversed into index prices); only aggregates are published.
+results/raw/
+
+# Local cross-checks import private sibling folders that are not part of this repository.
+tests/*_local.py
+
+# The author's Pine Script source is not published; the Python port in calendar_letf/strategies/guppy.py is.
+reference/clean_guppy_v1.pine
+reference/clean_guppy_v1.pine.sha256
+
+# Python and numba caches
+__pycache__/
+*.pyc
+*.nbi
+*.nbc
+*.egg-info/
+
+# Private working notes live in the sibling folder calendar_letf_private; these lines are a second guard.
+PROMPT.md
+DESIGN.md
+BACKLOG.md
+
+# The private list of personal terms for scripts/scan_identifiers.py (never published).
+identifiers_local.txt

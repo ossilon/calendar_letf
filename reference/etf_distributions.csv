@@ -1,0 +1,21 @@
+ticker,ex_date,record_date,pay_date,amount_per_share,source,retrieved,note
+SPY,2024-06-21,2024-06-21,2024-07-31,1.75902,stockanalysis.com/etf/spy/dividend ("last checked" 2026-10-23),2026-10-24,quarterly income distribution
+SPY,2024-09-20,2024-09-20,2024-10-31,1.74553,stockanalysis.com/etf/spy/dividend,2026-10-24,
+SPY,2024-12-20,2024-12-20,2025-01-31,1.96555,stockanalysis.com/etf/spy/dividend,2026-10-24,
+SPY,2025-03-21,2025-03-21,2025-04-30,1.69553,stockanalysis.com/etf/spy/dividend,2026-10-24,
+SPY,2025-06-20,2025-06-20,2025-07-31,1.76112,stockanalysis.com/etf/spy/dividend,2026-10-24,
+SPY,2025-09-19,2025-09-19,2025-10-31,1.83111,stockanalysis.com/etf/spy/dividend,2026-10-24,
+SPY,2025-12-19,2025-12-19,2026-01-30,1.99337,stockanalysis.com/etf/spy/dividend,2026-10-24,
+SPY,2026-03-20,2026-03-20,2026-04-30,1.797,stockanalysis.com/etf/spy/dividend,2026-10-24,
+SPY,2026-06-18,2026-06-18,2026-07-31,1.90352,stockanalysis.com/etf/spy/dividend,2026-10-24,
+SPY,2026-09-18,2026-09-18,2026-10-30,1.88883,stockanalysis.com/etf/spy/dividend; TradingView MCP dividends calendar 2026-10-24: 1.888834 ex 2026-09-18 pay 2026-10-30 (agrees),2026-10-24,cross-checked against a second vendor
+QQQ,2024-06-24,,2024-07-31,0.7615,stockanalysis.com/etf/qqq/dividend ("last checked" 2026-10-23),2026-10-24,quarterly income distribution
+QQQ,2024-09-23,,2024-10-31,0.67686,stockanalysis.com/etf/qqq/dividend,2026-10-24,
+QQQ,2024-12-23,,2024-12-31,0.83466,stockanalysis.com/etf/qqq/dividend,2026-10-24,
+QQQ,2025-03-24,,2025-04-30,0.71571,stockanalysis.com/etf/qqq/dividend,2026-10-24,
+QQQ,2025-06-23,,2025-07-31,0.59111,stockanalysis.com/etf/qqq/dividend,2026-10-24,
+QQQ,2025-09-22,,2025-10-31,0.69395,stockanalysis.com/etf/qqq/dividend,2026-10-24,
+QQQ,2025-12-22,,2025-12-31,0.79408,stockanalysis.com/etf/qqq/dividend,2026-10-24,
+QQQ,2026-03-23,,2026-03-27,0.73282,stockanalysis.com/etf/qqq/dividend,2026-10-24,
+QQQ,2026-06-22,,2026-07-10,0.81349,stockanalysis.com/etf/qqq/dividend,2026-10-24,
+QQQ,2026-09-21,,2026-10-08,0.75143,stockanalysis.com/etf/qqq/dividend; TradingView MCP dividends calendar 2026-10-24: 0.751429975 ex 2026-09-21 pay 2026-10-08 (agrees),2026-10-24,cross-checked against a second vendor

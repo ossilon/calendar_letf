@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+title: "calendar_letf: calendar-reset versus daily-reset 2x leveraged funds"
+version: 0.1.0
+license: MIT
+authors:
+  - name: "calendar_letf contributors"
+abstract: >-
+  A tested engine that models calendar-reset 2x leveraged funds (weekly, monthly and quarterly resets with a 35%
+  early reset) against daily-reset twins at identical costs, validates the model against the live Tradr funds, and
+  tests timing rules without look-ahead. Research tooling, not investment advice.
+keywords:
+  - leveraged ETF
+  - calendar reset
+  - volatility drag
+  - backtest

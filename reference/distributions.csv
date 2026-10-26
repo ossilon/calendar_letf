@@ -1,0 +1,5 @@
+ticker,ex_date,record_date,pay_date,amount_per_share,type,split_adjusted,source,retrieved,note
+MQQQ,2024-12-23,2024-12-23,2024-12-27,0.0341,unknown,unknown,stockanalysis.com/etf/mqqq/dividend,2026-10-12,"before the 1-for-5 reverse split of June 2025; if quoted per pre-split share the split-adjusted amount is 0.1705. Immaterial (~0.1% of price) either way; OPEN"
+MQQQ,2025-12-23,2025-12-23,2025-12-26,3.65886,short-term capital gain,n/a (post-split),TradingView MCP dividends calendar + stockanalysis.com + dividend.com (type),2026-10-12,"about 1.5% of price; consistent with prospectus p.44 after-tax 30.47% vs 31.50% for 2025"
+QQQP,,,,0,none,n/a,TradingView MCP dividends calendar (null) + prospectus p.73 (after-tax return equals pre-tax for 2025),2026-10-12,"no distributions since inception 2024-09-30"
+SPYQ,2025-12-23,2025-12-23,2025-12-26,0.2711,unknown,n/a,TradingView MCP dividends calendar + stockanalysis.com/etf/spyq/dividend,2026-10-12,"about 0.14% of price; prospectus p.29 after-tax 26.15% vs 26.23% for 2025"
