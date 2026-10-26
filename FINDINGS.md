@@ -699,8 +699,8 @@ PROVEN A, UNCERTAINTY A, TRACEABLE A. The engine meets the release gate (A on al
 - CHANGELOG.md and CITATION.cff added.
 - The suite now enforces the identifier scan's release tier (0 problems in 93 public files).
 
-Still open before the first commit: the plain-English (ASD-STE100) lint of README, FINDINGS and ASSUMPTIONS
-(`scripts/ste_check.py`), and the Guppy state name "gray".
+*R4 plain-English pass, 2026-10-26.* The ASD-STE100 lint (`scripts/ste_check.py`) finds 0 problems in README,
+FINDINGS, ASSUMPTIONS and data/README. The Guppy state name is "gray" in the code, tests, golden keys and results.
 
 ## Results
 
