@@ -728,6 +728,9 @@ A scoped re-check graded the study EXACT A, PROVEN B, UNCERTAINTY B, TRACEABLE B
 The re-check's PROVEN gaps are closed too. Plain loops rebuild the Nasdaq-100 total-return index and both 3x models
 from the raw files. They match the published rows.
 
+**Grade of the GFC oracle study after a confirming check (2026-10-27): EXACT A, PROVEN A, UNCERTAINTY A, TRACEABLE A.**
+The real funds stay price only by decision; the results label them and state the bias.
+
 ## Results
 
 ### S2: model against the live funds and the issuer's NAV figures (R2 step 2, 2026-10-24; `scripts/run_validate_live.py`, `results/validate_live.{json,md}`)
