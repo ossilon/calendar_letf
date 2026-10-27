@@ -21,7 +21,7 @@ $env:CALENDAR_LETF_RATES = "C:\path\to\your\rates"
 
 ## Prices: what to export from TradingView
 
-Export daily bars, full history, for exactly these 11 symbols. Choose the data as **split-adjusted and NOT
+Export daily bars, full history, for exactly these 13 symbols. Choose the data as **split-adjusted and NOT
 dividend-adjusted**. The package adds dividends itself, and every banner says so. Use ISO dates (`2024-08-15`) if the
 export dialog offers a choice.
 
@@ -40,6 +40,8 @@ File name rule: the symbol with `:` replaced by `_`, then `_daily.csv`.
 | NASDAQ:QQQP | `NASDAQ_QQQP_daily.csv` | live calendar-reset fund (Nasdaq-100, quarterly) |
 | AMEX:UPRO | `AMEX_UPRO_daily.csv` | real 3x daily fund, S&P 500 (bottom-entry study) |
 | NASDAQ:TQQQ | `NASDAQ_TQQQ_daily.csv` | real 3x daily fund, Nasdaq-100 (bottom-entry study) |
+| AMEX:SSO | `AMEX_SSO_daily.csv` | real 2x daily fund, S&P 500 (GFC oracle entry) |
+| AMEX:QLD | `AMEX_QLD_daily.csv` | real 2x daily fund, Nasdaq-100 (GFC oracle entry) |
 
 The package accepts two layouts and detects them from the header row:
 
@@ -68,7 +70,7 @@ Download these four series as CSV from <https://fred.stlouisfed.org> (series pag
 
 ## Compare your files with ours
 
-The table lists the author's copy of each file on 2026-10-24. Rows count data rows that
+The table lists the author's copy of each file on 2026-10-24 (the SSO and QLD rows: 2026-10-26). Rows count data rows that
 carry a date and a value. The fingerprint is the first 12 characters of the file's SHA-256. Your export will have
 the same first date and similar row counts. It will end on a later date, and its fingerprint will differ, because a
 later export has later bars. A different first date or a much lower row count means a different symbol or a
@@ -95,6 +97,8 @@ Name any symbols and rate files in the two lists.
 | `NASDAQ_QQQP_daily.csv` | 508 | 2024-10-01 | 2026-10-09 | 916e98537ab4 |
 | `AMEX_UPRO_daily.csv` | 4345 | 2009-06-25 | 2026-10-02 | 2462a547956a |
 | `NASDAQ_TQQQ_daily.csv` | 4191 | 2010-02-11 | 2026-10-09 | d3dc0fa8dc69 |
+| `AMEX_SSO_daily.csv` | 5103 | 2006-06-21 | 2026-10-02 | 9f248b1bedac |
+| `AMEX_QLD_daily.csv` | 5108 | 2006-06-21 | 2026-10-09 | 298046184b2f |
 | `rates/DFF.csv` | 26398 | 1954-07-01 | 2026-10-08 | a93504210b53 |
 | `rates/DTB3.csv` | 18184 | 1954-01-04 | 2026-10-08 | 5ea29eadd254 |
 | `rates/TB3MS.csv` | 1112 | 1934-01-01 | 2026-08-01 | ebf04b1ae5bc |

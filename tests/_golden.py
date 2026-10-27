@@ -22,7 +22,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "results"
 GOLDEN = ROOT / "tests" / "golden"
-STUDIES = ("calendar_vs_daily", "strategies", "from_bottoms", "validate_live", "coverage_sim")
+STUDIES = ("calendar_vs_daily", "strategies", "from_bottoms", "validate_live", "coverage_sim", "gfc_oracle")
 REL_TOL = 1e-9
 ABS_TOL = 1e-12
 
@@ -58,6 +58,8 @@ SELECT = {
     # the coverage simulation: every published coverage, SE ratio, multiplier, autocorrelation, p-value and seed spread
     "coverage_sim": {"include": [r"(summary|iid|mechanism|regime|measured_persistence|matched|bb_seed_spread|bb_seed_spread_summary)(\..*)?"],
                      "exclude": []},
+    # the GFC oracle entry: entry and end dates, every row's dollars, return, CAGR, drawdown and entry leverage
+    "gfc_oracle": {"include": [r"worlds\..*"], "exclude": []},
 }
 NEVER = ("meta",)          # run dates and captions: not numbers to pin (the first path segment)
 

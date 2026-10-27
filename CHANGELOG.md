@@ -21,7 +21,8 @@ or a market standard (EXACT); every formula has a planted-answer test, a break c
 - Validates the model against the three live Tradr funds (SPYQ, MQQQ, QQQP) and against the one published month of
   the nine funds that closed in 2025.
 - Tests timing rules (moving-average trends, Clean Guppy, a volatility threshold, a drawdown stop) with fill delays
-  and costs, and entries from major market bottoms.
+  and costs, and entries from major market bottoms, with one hindsight entry at the 2007-2009 low next to the real
+  2x and 3x funds.
 
 ### How the numbers are checked
 

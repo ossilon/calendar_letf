@@ -68,6 +68,11 @@ F13-F16.
 - **Bought mid-period after a 30% fall, a calendar fund is a 3.5x position, not a 2x one.** At the 2020 bottom SPYQ
   was a 3.66x fund. In three years, $10,000 became $31,391. The same sum became $26,113 in a daily 2x fund and
   $36,394 in a 3x daily fund (which ran a -64% drawdown on the way). (F17)
+- **From the GFC low to the end of the data, $10,000 became $703,542 in the S&P monthly design and $3,080,655 in
+  MQQQ.** Both figures come from MODELED designs at the fixed cost encoding; the rate encoding gives $804,289 and $3,531,497. The real
+  SSO and QLD reached $776,671 and $3,053,260 (price only). So which side ends ahead depends on the assumed costs.
+  The entry uses hindsight and gives one path: an illustration, not a statistic.
+  [results/gfc_oracle.md](results/gfc_oracle.md) has the full table. (F21)
 - **The 35% early reset fired once on the S&P 500 in 76 years (2008-11-20). On the Nasdaq-100 it fired four times
   for a quarterly fund (1987, 2000, 2001, 2008) and once for a monthly one (1987).** It never fired for a monthly
   fund on the S&P. (F9)
@@ -109,7 +114,7 @@ the label MODELED everywhere they appear (FINDINGS F1b).
 | `calendar_letf/metrics.py`, `study.py` | risk metrics; the multi-start study (every window is a ratio of one full-history run) |
 | `calendar_letf/indicators.py` | SMA, TradingView-exact EMA (`ta.ema`), Guppy ribbon states, week-end closes |
 | `calendar_letf/backtest.py`, `strategies/` | the plugin contract, the wealth loop with fill delay and costs, seven example rules |
-| `scripts/` | the four studies: live-fund validation, calendar against daily, timing rules, entries from bottoms. `run_coverage_sim.py` simulates the coverage of the interval conventions. `plot_guppy.py` draws candles with the Guppy ribbons for any symbol. `fresh_clone_check.py`, `scan_identifiers.py`, `ste_check.py` and `refreeze_golden.py` check and pin a release |
+| `scripts/` | the four studies: live-fund validation, calendar against daily, timing rules, entries from bottoms. `run_gfc_oracle.py` adds one hindsight entry at the 2007-2009 low. `run_coverage_sim.py` simulates the coverage of the interval conventions. `plot_guppy.py` draws candles with the Guppy ribbons for any symbol. `fresh_clone_check.py`, `scan_identifiers.py`, `ste_check.py` and `refreeze_golden.py` check and pin a release |
 | `tests/run_tests.py` | known-answer checks, plus the golden files in `tests/golden/` that pin the published numbers; must print `0 failure(s)` |
 | `results/` | the studies' tables (markdown + JSON) and charts; aggregates only, never daily series |
 | `reference/` | SEC N-PORT extract of the funds' swaps, their payouts, Shiller's monthly S&P dividends (derived) |
@@ -227,7 +232,7 @@ No price data ships with this repository (see below). You need:
 1. **TradingView daily exports** (split-adjusted, not dividend-adjusted, full history), saved as
    `<EXCHANGE>_<TICKER>_daily.csv`. You need `SP:SPX`, `SP:SPXTR`, `NASDAQ:NDX`, `NASDAQ:XNDX`, `AMEX:SPY`,
    `NASDAQ:QQQ`, `NASDAQ:SPYQ`, `NASDAQ:MQQQ` and `NASDAQ:QQQP`. The bottoms study also needs `AMEX:UPRO` and
-   `NASDAQ:TQQQ`. The loader reads raw exports (a `time` column) and the clean `date` format. Details and symbols:
+   `NASDAQ:TQQQ`; the GFC oracle entry also needs `AMEX:SSO` and `AMEX:QLD`. The loader reads raw exports (a `time` column) and the clean `date` format. Details and symbols:
    [data/README.md](data/README.md).
 2. **FRED CSVs** in `data/rates/`: `DFF`, `DTB3`, `TB3MS`, `OBFR` (fred.stlouisfed.org, public).
 3. Python 3.10+, `numpy`, `pandas`, `numba` (`matplotlib` for charts). `pip install -e .`
@@ -242,6 +247,7 @@ py scripts\run_coverage_sim.py                      coverage of the interval con
 py scripts\run_calendar_vs_daily.py                 the passive study again: its banner quotes the coverage file
 py scripts\run_strategies.py                        the timing rules (under 30 s)
 py scripts\run_from_bottoms.py                      entries from major bottoms (under 10 s)
+py scripts\run_gfc_oracle.py                        the GFC oracle entry (seconds)
 ```
 Run them in that order on your own data. The coverage simulation reads the passive study's per-start gaps from
 `results/raw/`, so they must be yours, not the shipped ones. The passive study quotes the coverage file in one

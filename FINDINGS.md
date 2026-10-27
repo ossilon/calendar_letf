@@ -702,6 +702,32 @@ PROVEN A, UNCERTAINTY A, TRACEABLE A. The engine meets the release gate (A on al
 *R4 plain-English pass, 2026-10-26.* The ASD-STE100 lint (`scripts/ste_check.py`) finds 0 problems in README,
 FINDINGS, ASSUMPTIONS and data/README. The Guppy state name is "gray" in the code, tests, golden keys and results.
 
+*R4 addition, 2026-10-26.* The GFC oracle entry (F21): `scripts/run_gfc_oracle.py`, `tests/test_gfc_oracle.py` and a
+golden file. The test reads the raw price files with the csv module, a second route to the entry dates and the real-fund
+and index dollars.
+
+*R4 audit of the addition, 2026-10-27.* An independent audit graded the study EXACT B, PROVEN C, UNCERTAINTY C,
+TRACEABLE B. The fixes:
+- The README and F21 now show both cost encodings. F21 states that the comparison with the real funds measures the
+  assumed costs.
+- The leverage sentence was wrong: the extra exposure lasts only until the index regains its last reset level. F21
+  now names QQQP's early reset on the next session.
+- F21 no longer claims without a source that the real funds cost less. It compares the twins with the real funds.
+- `tests/run_tests.py` now restores the environment after each test module. `tests/test_data.py` had removed the data
+  variables, so the second route skipped in the full suite.
+- New: early-reset counts, an entry-shift table, a cost banner and a leverage cross-check with
+  `results/from_bottoms.json`. Raw-file routes now check the launch rows, the end date and QQQP's trigger day.
+- Nine planted bugs now each fail the suite, among them all three that passed the audit's mutation test.
+
+A scoped re-check graded the study EXACT A, PROVEN B, UNCERTAINTY B, TRACEABLE B. It found two new defects, now fixed:
+- The strict second route failed on any data other than the published files, so a routine top-up turned the suite red.
+  The route now runs only on files whose sha256 matches the results manifest, and a skip names the file and the reason.
+- The entry-shift grid skipped -2 and -1, and QQQP also trails its twin at -2. The grid now holds every session from
+  -10 to +21. The results publish its summary only, because one lead per session is a daily series.
+
+The re-check's PROVEN gaps are closed too. Plain loops rebuild the Nasdaq-100 total-return index and both 3x models
+from the raw files. They match the published rows.
+
 ## Results
 
 ### S2: model against the live funds and the issuer's NAV figures (R2 step 2, 2026-10-24; `scripts/run_validate_live.py`, `results/validate_live.{json,md}`)
@@ -1303,11 +1329,40 @@ the same calendar rule, with a planted test, and ACT/360 accounts for the rest. 
 $31,391 (+214%, as in the 3-year table). The 3-year CAGRs behind them run 25-60%/yr for SPYQ and 4-76% for MQQQ (1987
 is the 4%). So the dispersion is the story as much as the median.
 
+**F21. From the GFC low, every calendar design ended above its daily twin. The comparison with the real 2x funds
+depends on the assumed costs.**
+
+The study is `scripts/run_gfc_oracle.py`, with `results/gfc_oracle.{json,md}` (R4
+addition, 2026-10-26). The entry is the lowest index close from 2007 to 2009: 2009-03-09 on the S&P 500 and 2008-11-20
+on the Nasdaq-100. The end is the last date that the index, the real 2x fund and the real 3x fund all hold. What
+$10,000 became, fixed encoding:
+- S&P 500 (to 2026-10-02): SPYQ $715,067, monthly design $703,542, weekly design $625,447, daily twin $590,843, real
+  SSO $776,671 (price only), 3x model $2,608,783, index $158,186.
+- Nasdaq-100 (to 2026-10-09): MQQQ $3,080,655, QQQP $2,499,635, weekly design $2,576,009, MQQQ's daily twin
+  $2,200,375, real QLD $3,053,260 (price only), 3x model $11,505,261, index $355,113.
+
+Under the rate encoding the monthly design and MQQQ end at $804,289 and $3,531,497, above SSO and QLD. Under the fixed
+encoding the monthly design ends below SSO. Each daily twin is a daily fund like SSO and QLD, with the costs fitted to
+the live calendar funds. Every twin ends below the real fund under both encodings. So the comparison with the real
+funds measures the assumed costs, not the reset design. The real funds are price only, so their true lead over the
+twins is larger.
+
+Bought at the low, a calendar fund holds more than 2x until the index regains its last reset level. At the entry
+close MQQQ held 2.82x and the S&P monthly design 2.19x. QQQP held 4.40x, but its 35% early reset fired on the next session, 2008-11-21, and set
+it back to 2x. With an entry 2 to 10 sessions before the low, QQQP ends below its twin. The other five designs end
+above their twins at every entry shift from -10 to +21 sessions. This study does not split each lead into its causes.
+
+The real UPRO and TQQQ (price only) started after the low. From their first closes they ended above their 3x models:
+$1,251,553 and $3,758,161, with models at $1,126,404 and $3,191,084. One hindsight path has no interval, so F21 is an
+illustration, not a statistic.
+
 Could not test (B13):
 - the trigger's fill (the model assumes the level; the basis and the drop are sensitivities, F9);
 - no live calendar fund before 2024;
 - the margin benchmark has no margin call;
-- UPRO / TQQQ real prices exist only for the 2020 and 2022 entries and exclude dividends;
+- in the bottoms tables, UPRO / TQQQ real prices exist only for the 2020 and 2022 entries and exclude dividends;
+- F21's real funds are price only: the issuer's distribution table (fund pages, read 2026-10-26) starts in 2017, and
+  older annual reports stay unread;
 - seven bottoms per index is a small sample;
 - NDX pre-2006 yield assumed.
 

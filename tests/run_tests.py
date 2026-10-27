@@ -11,6 +11,7 @@ What it does
 3. Prints "N failure(s)" and exits with code 1 if anything failed (so scripts and CI can stop on it).
 """
 import importlib
+import os
 import sys
 import time
 import traceback
@@ -22,14 +23,20 @@ import _harness  # noqa: E402  (also puts the repository root on sys.path)
 
 
 def run_module(path):
-    """Import one test module; a crash during import counts as one failure, and the run carries on."""
+    """Import one test module; a crash during import counts as one failure, and the run carries on.
+    The environment is restored afterward, so a module that removes or sets a variable (test_data.py removes the data
+    folder variables) cannot change what the modules after it see."""
     print(f"\n===== {path.name} =====")
     t0 = time.perf_counter()
+    saved = dict(os.environ)
     try:
         importlib.import_module(path.stem)
     except Exception:  # noqa: BLE001
         print(traceback.format_exc())
         _harness.check(f"{path.name} ran to the end without crashing", False, "see traceback above")
+    finally:
+        os.environ.clear()
+        os.environ.update(saved)
     print(f"----- {path.name}: {time.perf_counter() - t0:.2f} s")
 
 
