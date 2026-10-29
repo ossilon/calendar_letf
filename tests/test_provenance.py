@@ -157,6 +157,69 @@ for _path in _json_files:
     check(f"{_path.name}: rendered by the code now in the tree (package + scripts/{_script_name}); a mismatch is a stale render: re-run py scripts\\{_script_name}",
           _current[_script_name]["sha256"] == _code["sha256"], f"file {_code['sha256'][:12]} vs tree {_current[_script_name]['sha256'][:12]}")
 
+# ---- stale inputs (R4 review): a file that SHIPS in the repository (reference/) must still be the file each result read.
+# Price and rate files are not compared: a stranger's own export always differs from the author's, and the README tells
+# them to expect a green suite. (The GFC second route compares them where they match; tests/test_gfc_oracle.py.)
+def _inputs_of(doc):
+    return (doc.get("meta") or {}).get("inputs") or (doc.get("provenance") or {}).get("inputs") or {}
+
+
+def _reference_mismatches(inputs, repo):
+    """[(file, reason)] for every reference record whose file is missing or whose sha256 differs now."""
+    out = []
+    for rec in list(inputs.get("reference_files", [])) + list(inputs.get("reference_json", [])):
+        f = Path(repo) / "reference" / rec["file"]
+        if not f.exists():
+            out.append((rec["file"], "missing"))
+        elif provenance.sha256_of(f) != rec["sha256"]:
+            out.append((rec["file"], "sha256 differs"))
+    return out
+
+
+for _path in _json_files:
+    _doc = json.loads(_path.read_text(encoding="utf-8"))
+    _inp = _inputs_of(_doc)
+    _script = ((_doc.get("meta") or {}).get("code") or {}).get("script", "the study")
+    _bad = _reference_mismatches(_inp, provenance.REPO)
+    check(f"{_path.name}: every reference/ file it read is unchanged (a mismatch is a stale result: re-run py scripts\\{_script})",
+          not _bad, _bad)
+    if any(r["file"] == "SP_SPX_daily.csv" for r in _inp.get("files", [])) and _path.name != "validate_live.json":
+        check(f"{_path.name}: an S&P result names the Shiller yield file it read in its manifest",
+              any(r["file"] == "shiller_sp500_monthly.csv" for r in _inp.get("reference_files", [])), _inp.get("reference_files"))
+with tempfile.TemporaryDirectory() as _tmp:
+    (Path(_tmp) / "reference").mkdir()
+    (Path(_tmp) / "reference" / "t.csv").write_text("month,y\n2000-01,1\n", encoding="utf-8")
+    _good = {"reference_files": [provenance.file_record(Path(_tmp) / "reference" / "t.csv")]}
+    _wrong = {"reference_files": [dict(_good["reference_files"][0], sha256="0" * 64)]}
+    check("stale inputs, planted: an unchanged reference file passes, a changed hash and a missing file are named",
+          _reference_mismatches(_good, _tmp) == [] and _reference_mismatches(_wrong, _tmp) == [("t.csv", "sha256 differs")]
+          and _reference_mismatches({"reference_json": [{"file": "gone.json", "sha256": "x"}]}, _tmp) == [("gone.json", "missing")])
+
+# ---- strict JSON (R4 review): no results file may hold a bare NaN / Infinity, which strict JSON readers reject ----
+import datetime as _dt  # noqa: E402
+
+import numpy as _np  # noqa: E402
+import pandas as _pd  # noqa: E402
+
+
+def _no_constant(name):
+    raise ValueError(f"non-standard JSON constant {name}")
+
+
+for _path in _json_files:
+    try:
+        json.loads(_path.read_text(encoding="utf-8"), parse_constant=_no_constant)
+        _ok = True
+    except ValueError as _err:
+        _ok = str(_err)
+    check(f"{_path.name}: strict JSON (no bare NaN / Infinity)", _ok is True, _ok)
+_js = provenance.json_safe({"a": float("nan"), "b": _np.int64(3), "c": [_np.float64(1.5), float("inf")], 4: _np.bool_(True),
+                            "d": _pd.Timestamp("2000-01-03 12:00"), "e": _dt.date(2026, 1, 2), "f": "x", "g": None})
+check("json_safe: NaN and infinity to null, numpy scalars to Python, dates to ISO text, keys to strings",
+      _js == {"a": None, "b": 3, "c": [1.5, None], "4": True, "d": "2000-01-03", "e": "2026-01-02", "f": "x", "g": None}
+      and type(_js["b"]) is int and type(_js["4"]) is bool, _js)
+raises("json_safe: a value with no JSON form raises (no silent string)", lambda: provenance.json_safe({"x": object()}), "no JSON form")
+
 # ---- the coverage simulation reads the passive study's per-start gaps: its raw-input hashes must match the files now in
 # results/raw, and its seed-0 bootstrap bounds must equal the bounds the passive study published (same function, same seed)
 _cov_path, _cvd_path = RESULTS / "coverage_sim.json", RESULTS / "calendar_vs_daily.json"

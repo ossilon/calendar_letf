@@ -19,7 +19,7 @@ from datetime import date
 import numpy as np
 import pandas as pd
 
-from _harness import check  # noqa: I001  (must come first: puts the repo root on sys.path)
+from _harness import check, worst_of  # noqa: I001  (must come first: puts the repo root on sys.path)
 from calendar_letf import kernel as k
 from calendar_letf import loader, nyse
 from calendar_letf import periods as cal
@@ -80,15 +80,18 @@ for T in (5, 21, 63):
             r = rng.normal(0.0004, 0.015, T)
             u = 100.0 * np.concatenate(([1.0], np.cumprod(1.0 + r)))
             err, _, dead = identity_error(u, beta)
-            worst_p1, n_p1, dead_p1 = max(worst_p1, err), n_p1 + 1, dead_p1 + dead
+            worst_p1, n_p1, dead_p1 = worst_of(worst_p1, err), n_p1 + 1, dead_p1 + dead
 check(f"P1: on {n_p1} random periods (T = 5, 21, 63 days; beta = 2 and 3; none terminated) the kernels' calendar - "
       f"daily gap equals sum_k (beta - beta^k) e_k to 1e-12 (worst {worst_p1:.1e})", worst_p1 < 1e-12 and dead_p1 == 0,
       (worst_p1, dead_p1))
 try:
     spx = loader.close("SP:SPX")
-except (FileNotFoundError, ValueError) as exc:                 # no price library on this machine
+except FileNotFoundError as exc:                               # no price library on this machine
     spx = None
     print(f"     P1 real SPX quarters: skipped ({exc})")
+except ValueError as exc:                                      # the file exists but fails the loader's checks: a failure
+    spx = None
+    check("P1 real SPX quarters: the SP:SPX file passes the loader's data checks", False, exc)
 if spx is not None:
     # 2008 Q4 at 3x is a planted wipe-out: SPX closed at 752.44 on 2008-11-20, 35.5% below its 2008-09-30 close of
     # 1166.36, and a 3x calendar fund is finished once 3 x u/u0 - 2 <= 0, i.e. at -33.3%. The identity is about the
@@ -262,7 +265,7 @@ for pi, u in enumerate(paths4):
         scaled = runs4(u * 7.0, sc_low, base4)
         for key, v in base.items():
             both = np.maximum(np.abs(v), 1e-300)
-            scale_worst = max(scale_worst, float(np.max(np.abs(scaled[key] - v) / both)))
+            scale_worst = worst_of(scale_worst, float(np.max(np.abs(scaled[key] - v) / both)))
 check(f"P4: no NaN, inf or negative NAV in any of {n_runs} runs (3 paths incl. a -38% day, close-only and with lows, "
       "3 resets x 3 modes x trigger on/off, daily, never)", finite_ok)
 check("P4: NAV is non-increasing in the rate, the spread and the fee, row by row on the same path (+1 pt each)",
@@ -290,7 +293,7 @@ for u in paths4:
         bound = (r_max + 0.02 + 0.01 * e_max) * r_max * tau ** 2 * np.exp(r_max * tau)
         diff = cal_nav - mg_nav
         first_ok &= bool((diff >= -1e-15).all() and (diff <= bound + 1e-15).all())
-        worst_ratio = max(worst_ratio, float(np.max(diff[1:] / bound[1:])))
+        worst_ratio = worst_of(worst_ratio, float(np.max(diff[1:] / bound[1:])))
 check(f"P4: inside the first period the calendar fund (trigger off) equals the margin position up to the "
       f"interest-on-interest bound, on every row, all resets and paths (largest gap / bound {worst_ratio:.2f})",
       first_ok and worst_ratio <= 1.0)
@@ -330,7 +333,7 @@ for seed_vol in (0.008, 0.015):
         kern = k.periodic_reset_series(lv, pd.Series(rt, index=s_p4), reset=reset, L=2.0, spread_per_nav=0.022, fee=0.0,
                                        early_drop=None).to_numpy()
         closed = calendar_closed_form(lv.to_numpy(), rt, a_fin, pe, 2.0, 0.022)
-        worst_p5 = max(worst_p5, float(np.max(np.abs(closed - kern) / kern)))
+        worst_p5 = worst_of(worst_p5, float(np.max(np.abs(closed - kern) / kern)))
         n_p5 += 1
 check(f"P5: the vectorized closed form equals the numba calendar kernel on every row ({n_p5} runs: 2 paths x weekly, "
       f"monthly, quarterly; worst rel diff {worst_p5:.1e}, limit 1e-12)", worst_p5 < 1e-12, worst_p5)

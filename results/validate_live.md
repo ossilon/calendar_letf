@@ -36,7 +36,7 @@ Script `scripts/run_validate_live.py`. Data: TradingView exports via the local l
 **Provenance of the model inputs.**
 - Fee timeline (SPYQ / MQQQ / QQQP): inception to 2025-03-31: N-CSR FY2025 (reference/nav_anchors.csv rows 10-12); 2025-04-01 to 2025-09-30: N-CSRS (reference/nav_anchors.csv rows 19-21); fiscal year 2026 realized ratio 1.26 / 1.21 / 1.24%: N-CSR EDGAR 0001398344-26-010562 R2 (reference/nav_anchors.csv rows 16-18); 2026 ratio 1.00 / 1.03 / 1.00%: prospectus 2026-07-31. Inception to 2025-03-31: 1.30 / 1.31 / 1.30% (FILED: N-CSR FY2025 financial highlights (MQQQ includes 0.01% excise tax)). 2025-04-01 to 2025-09-30: 1.30 / 1.30 / 1.30% (FILED: N-CSRS to 2025-09-30, expense ratio annualized). 2025-10-01 to 2026-03-31: 1.22 / 1.12 / 1.18% (DERIVED from two filed figures: 2 x FY2026 realized ratio - first-half ratio, that is (12 x FY2026 - 6 x first half) / 6; the N-CSR reports 1.26 / 1.21 / 1.24% for the whole fiscal year). From 2026-04-01: the prospectus 1.00 / 1.03 / 1.00% (ASSUMED start date (the first document that shows the 1.00 / 1.03 / 1.00% is the 2026-07-31 prospectus)). Sensitivity: the FY2026 average 1.26 / 1.21 / 1.24% held from 2025-10-01 to 2026-07-31, then the prospectus fee.
 - Balance sheet, window 1 (inception to 2025-09-30): no ETF held directly (semi-annual report 2024-09-30: 100% cash, swaps 1.90-2.01x; N-PORT 2025-03-31: swaps 2.21x, cash 111%; N-PORT 2025-06-30: swaps 1.75x, cash 88%). Window 2 (2025-09-30 on): ETF held directly about 0.4 x NAV (N-PORT 2025-09-30: 39.6%, swaps 1.32x, cash 41%; N-CSRS holdings SPYQ 48 / 20 / 32; 40-62% in the 2026 snapshots). The switch date is taken as 2025-09-30, the first snapshot with a direct holding.
-- BASE reading ('at a reset'): swaps s = 2 - d, cash k = 1 - d: 2 / 1 then 1.6 / 0.6 x NAV. This is the identity the kernel already assumes: it fixes the swap notional at each reset and lets it drift inside the period, so a period-end snapshot's notional / NAV (2.21x after a down quarter) must not be fed in again. SNAPSHOT reading (the N-PORT notionals as printed): 2.2 / 1 then 1.3 / 0.45, shown as the sensitivity. Note that at 2025-09-30, a reset date, printed notional 1.32 + direct 0.40 = 1.72 < 2: the swaps' unrealized appreciation carries the rest of the exposure, and whether the financing leg accrues on the printed notional or on the exposure is OPEN.
+- BASE reading ('at a reset'): swaps s = 2 - d, cash k = 1 - d: 2 / 1 then 1.6 / 0.6 x NAV. This is the identity the kernel already assumes: it fixes the swap notional at each reset and lets it drift inside the period, so a period-end snapshot's notional / NAV (2.21x after a down quarter) must not be fed in again. SNAPSHOT reading (the N-PORT notionals as printed): 2.21 / 1.11 then 1.32 / 0.41, shown as the sensitivity. Note that at 2025-09-30, a reset date, printed notional 1.32 + direct 0.40 = 1.72 < 2: the swaps' unrealized appreciation carries the rest of the exposure, and whether the financing leg accrues on the printed notional or on the exposure is OPEN.
 - Swap spread per turn: SPYQ 0.92%, MQQQ 0.99%, QQQP 0.93% (N-PORT 2026-06-30, notional-weighted 75/100 bp over OBFR, read from reference/nport_tradr_2026.json by validate.filed_spread); reference rate OBFR (lagged one row: the rate set on t-1 accrues over t-1 to t); financing legs ACT/360, fee ACT/365; underlying = the ETF's own total return (price + its dividends reinvested on ex-date, which is what the swaps receive); trigger on the ETF price close, level mode.
 - Cash yield c (fraction of OBFR the fund's cash earns): FITTED per fund per window; prior 0.8 derived from the N-CSR income ratios (net investment income after waivers 2.38 / 2.39 / 2.27% plus expenses 1.30 / 1.31 / 1.30% on a 100%-cash balance sheet while OBFR averaged about 4.5%).
 - Price vs NAV: N-CSR FY to 2025-03-31: market-price total returns -8.12 / -7.94 / -12.12% against NAV -8.08 / -7.90 / -12.04% (SPYQ / MQQQ / QQQP), so price and NAV differed by 0.04-0.08 pp over six to seven months. Fund PRICES stand in for NAVs in every fit; bid-ask noise inflates tracking error on thin funds.
@@ -48,8 +48,8 @@ Fee timeline used: 2024-09-30: 1.30%, 2025-10-01: 1.22%, 2026-04-01: 1.00%. Fund
 
 | window | c, BASE (at-reset s, k) | rate turns s - k c | BASE gap at c = 0.8 | BASE gap at c = 1.0 | c, BASE, FY2026 fee to 2026-07-31 | c, SNAPSHOT (s, k as printed) | SNAPSHOT gap at c = 0.8 | v1 filed (1.5 turns, registry fee 1.00 / 1.03 / 1.00%) | v1 fixed 2.6% | v1 rate 1.4% + 1.3 turns | DFF - OBFR (bp) | gap with DFF | ETF TR own - index basis (pp) |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1: 2024-09-30 to 2025-09-30 | 0.878 | 1.122 | -0.42 | +0.66 | 0.878 | 1.120 | -1.73 | +1.61 | +0.10 | -0.05 | +0.0 | +0.00 | -0.01 |
-| 2: 2025-09-30 to 2026-10-09 | 0.653 | 1.208 | +0.40 | +0.95 | 0.700 | 0.040 | +1.57 | +1.21 | -0.30 | -0.19 | +0.2 | -0.00 | -0.04 |
+| 1: 2024-09-30 to 2025-09-30 | 0.878 | 1.122 | -0.42 | +0.66 | 0.878 | 1.020 | -1.32 | +1.61 | +0.10 | -0.05 | +0.0 | +0.00 | -0.01 |
+| 2: 2025-09-30 to 2026-10-09 | 0.653 | 1.208 | +0.40 | +0.95 | 0.700 | 0.104 | +1.31 | +1.21 | -0.30 | -0.19 | +0.2 | -0.00 | -0.04 |
 | whole life (c per window) | - | 0.878 / 0.653 per window | - | - | - | - | - | +1.41 | -0.11 | -0.13 | +0.1 | -0.00 | -0.06 |
 
 Window 1's cash yield at the filed spread extremes (window 1's own counterparty mix is not in the extract): c = 0.802 at 0.75% and 0.915 at 1.00%, against 0.878 at the 2026-06-30 mix (0.92%).
@@ -76,8 +76,8 @@ Fee timeline used: 2024-08-30: 1.31%, 2025-04-01: 1.30%, 2025-10-01: 1.12%, 2026
 
 | window | c, BASE (at-reset s, k) | rate turns s - k c | BASE gap at c = 0.8 | BASE gap at c = 1.0 | c, BASE, FY2026 fee to 2026-07-31 | c, SNAPSHOT (s, k as printed) | SNAPSHOT gap at c = 0.8 | v1 filed (1.5 turns, registry fee 1.00 / 1.03 / 1.00%) | v1 fixed 2.6% | v1 rate 1.4% + 1.3 turns | DFF - OBFR (bp) | gap with DFF | ETF TR own - index basis (pp) |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1: 2024-08-30 to 2025-09-30 | 0.922 | 1.078 | -0.80 | +0.51 | 0.922 | 1.167 | -2.39 | +1.66 | +0.01 | -0.19 | +0.0 | +0.00 | +0.07 |
-| 2: 2025-09-30 to 2026-10-09 | 0.521 | 1.287 | +0.86 | +1.49 | 0.566 | -0.150 | +2.22 | +1.69 | +0.14 | +0.26 | +0.2 | -0.00 | -0.00 |
+| 1: 2024-08-30 to 2025-09-30 | 0.922 | 1.078 | -0.80 | +0.51 | 0.922 | 1.062 | -1.90 | +1.66 | +0.01 | -0.19 | +0.0 | +0.00 | +0.07 |
+| 2: 2025-09-30 to 2026-10-09 | 0.521 | 1.287 | +0.86 | +1.49 | 0.566 | -0.103 | +1.92 | +1.69 | +0.14 | +0.26 | +0.2 | -0.00 | -0.00 |
 | whole life (c per window) | - | 0.922 / 0.521 per window | - | - | - | - | - | +1.67 | +0.07 | +0.04 | +0.1 | -0.00 | +0.08 |
 
 Window 1's cash yield at the filed spread extremes (window 1's own counterparty mix is not in the extract): c = 0.813 at 0.75% and 0.925 at 1.00%, against 0.922 at the 2026-06-30 mix (0.99%).
@@ -105,8 +105,8 @@ Fee timeline used: 2024-09-30: 1.30%, 2025-10-01: 1.18%, 2026-04-01: 1.00%. Fund
 
 | window | c, BASE (at-reset s, k) | rate turns s - k c | BASE gap at c = 0.8 | BASE gap at c = 1.0 | c, BASE, FY2026 fee to 2026-07-31 | c, SNAPSHOT (s, k as printed) | SNAPSHOT gap at c = 0.8 | v1 filed (1.5 turns, registry fee 1.00 / 1.03 / 1.00%) | v1 fixed 2.6% | v1 rate 1.4% + 1.3 turns | DFF - OBFR (bp) | gap with DFF | ETF TR own - index basis (pp) |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1: 2024-09-30 to 2025-09-30 | 0.924 | 1.076 | -0.73 | +0.45 | 0.924 | 1.166 | -2.14 | +1.49 | -0.13 | -0.29 | +0.0 | -0.00 | -0.02 |
-| 2: 2025-09-30 to 2026-10-09 | 0.727 | 1.164 | +0.22 | +0.81 | 0.775 | 0.136 | +1.48 | +1.07 | -0.54 | -0.43 | +0.2 | -0.00 | -0.00 |
+| 1: 2024-09-30 to 2025-09-30 | 0.924 | 1.076 | -0.73 | +0.45 | 0.924 | 1.062 | -1.70 | +1.49 | -0.13 | -0.29 | +0.0 | -0.00 | -0.02 |
+| 2: 2025-09-30 to 2026-10-09 | 0.727 | 1.164 | +0.22 | +0.81 | 0.775 | 0.210 | +1.20 | +1.07 | -0.54 | -0.43 | +0.2 | -0.00 | -0.00 |
 | whole life (c per window) | - | 0.924 / 0.727 per window | - | - | - | - | - | +1.27 | -0.34 | -0.36 | +0.1 | -0.00 | -0.03 |
 
 Window 1's cash yield at the filed spread extremes (window 1's own counterparty mix is not in the extract): c = 0.842 at 0.75% and 0.956 at 1.00%, against 0.924 at the 2026-06-30 mix (0.93%).

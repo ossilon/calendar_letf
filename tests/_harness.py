@@ -35,6 +35,15 @@ def check(name, cond, detail=""):
         failures.append(name)
 
 
+def worst_of(a, b):
+    """The larger of two error sizes for a running 'worst error' check. A NaN or infinity in either gives infinity, so
+    a NaN error can never hide: the built-in max(0.0, nan) returns 0.0 and would let a NaN-writing kernel pass."""
+    a, b = float(a), float(b)
+    if a != a or b != b or a in (float("inf"), float("-inf")) or b in (float("inf"), float("-inf")):
+        return float("inf")
+    return a if a >= b else b
+
+
 def raises(name, fn, must_contain):
     """Record one test: fn() must raise an exception whose message contains `must_contain`."""
     try:

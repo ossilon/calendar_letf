@@ -20,8 +20,8 @@ What it does, in order, for each live fund:
         window 2  2025-10-01 to the end:    about 0.4 x NAV in the ETF itself, swaps and cash for the rest
      Two readings of each window's balance sheet are run. BASE, "at a reset": direct holding d, swaps s = 2 - d and
      cash k = 1 - d (d = 0 then 0.4), the identity the kernel already assumes (it fixes the notional at each reset and
-     lets it drift inside the period). SNAPSHOT: the N-PORT period-end notionals as printed (swaps 2.2 then 1.3 x
-     NAV, cash 1.0 then 0.45), which include the drift at the snapshot date. The one number nobody files, c = the
+     lets it drift inside the period). SNAPSHOT: the N-PORT period-end notionals as printed (swaps 2.21 then 1.32 x
+     NAV, cash 1.11 then 0.41), which include the drift at the snapshot date. The one number nobody files, c = the
      fraction of OBFR the fund's cash earns, is fitted per fund per window by bisection on the CAGR gap. The gaps at
      c = 0.8 (the estimate derived from the N-CSR income ratios) and c = 1.0 are the residual that remains without a
      fit. The v1 encodings (fixed 2.6% of NAV; filed 1.4% + 1.3 rate turns; the filed 1.5-turn structure, all at the
@@ -224,8 +224,8 @@ STRUCTURE_SPLIT = "2025-09-30"        # last day of window 1 (a quarter end and 
 DIRECT_1, DIRECT_2 = 0.0, 0.4         # ETF held directly, as a fraction of NAV: none (to 2025-06-30), 39.6% (2025-09-30)
 BASE_1 = dict(swap_turns=2.0 - DIRECT_1, cash_nav=1.0 - DIRECT_1)   # at a reset: s = 2 - d, k = 1 - d
 BASE_2 = dict(swap_turns=2.0 - DIRECT_2, cash_nav=1.0 - DIRECT_2)
-SNAP_1 = dict(swap_turns=2.2, cash_nav=1.0)       # N-PORT 2025-03-31 as printed: swaps 2.21x NAV, cash 111%, no direct ETF
-SNAP_2 = dict(swap_turns=1.3, cash_nav=0.45)      # N-PORT 2025-09-30 as printed: direct ETF 40%, swaps 1.32x, cash 41%
+SNAP_1 = dict(swap_turns=2.21, cash_nav=1.11)     # N-PORT 2025-03-31 as printed: swaps 2.21x NAV, cash 111%, no direct ETF
+SNAP_2 = dict(swap_turns=1.32, cash_nav=0.41)     # N-PORT 2025-09-30 as printed: direct ETF 40%, swaps 1.32x, cash 41%
 D_SENSITIVITY = (0.3, 0.4, 0.5, 0.6)  # window 2: the direct ETF holding d is only known to 40-62% of NAV in the filings
 CASH_YIELD_PRIOR = 0.8                # derived from the N-CSR income ratios (ASSUMPTIONS section 6): an estimate, not a fact
 CASH_YIELD_FULL = 1.0
@@ -744,7 +744,7 @@ def main():
     md.append("Out of scope (underlying not in this kit): SOXM, SOXW (SOXX), NVDW (NVDA, 1.75x), TSLW (TSLA, 1.5x), TLTM, TLTQ (TLT); "
               "their one-month anchors are in `reference/nav_anchors.csv`.\n")
 
-    (OUT / "validate_live.json").write_text(json.dumps(results, indent=2, default=str), encoding="utf-8")
+    (OUT / "validate_live.json").write_text(json.dumps(provenance.json_safe(results), indent=2, allow_nan=False), encoding="utf-8")
     (OUT / "validate_live.md").write_text("\n".join(md), encoding="utf-8")
     print(f"\nwrote {OUT / 'validate_live.json'} and validate_live.md")
 

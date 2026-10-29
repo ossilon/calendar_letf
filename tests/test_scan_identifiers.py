@@ -96,6 +96,10 @@ with tempfile.TemporaryDirectory() as tmp:
     check("lower-case plain words are not model names", hits("a.md", "a magnum opus, a fable and a haiku\n") == [])
     for w in british:
         check(f"British spelling '{w}' is caught", any("British spelling" in p for p in hits("a.md", f"the {w} here\n")))
+    for w in ("judge" + "ment", "honou" + "red", "math" + "s", "cance" + "lled"):          # added in the R4 review fix pass
+        check(f"British spelling '{w}' is caught (R4 review)", any("British spelling" in p for p in hits("a.md", f"the {w} here\n")))
+    check("'cancellation' and 'math' pass: they are American too (the old stem flagged 'cancellation')",
+          not any("British spelling" in p for p in hits("a.md", "the cancellation of the math here\n")))
     for w in american:
         check(f"American spelling '{w}' passes", hits("a.md", f"the {w} here\n") == [], w)
 

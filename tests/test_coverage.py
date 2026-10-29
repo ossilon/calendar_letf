@@ -81,8 +81,32 @@ with tempfile.TemporaryDirectory() as tmp:
     check("measured_persistence: a second product is grouped on its own (h = 24 from horizon 2; lags beyond the data give NaN)",
           zz["h"] == 24 and zz["n"] == 30 and math.isfinite(zz["acf_lag_1h"]) and math.isnan(zz["acf_lag_2h"]), zz)
 
+# ---- quantile_interval: the Monte Carlo error of a simulated 95th percentile ----
+# n = 400, q = 0.95: n q = 380, sd = sqrt(19) = 4.359, z sd = 8.54, so ranks floor(371.46) = 371 and ceil(388.54) = 389.
+check("quantile_interval: x = 1..400 (shuffled) gives the order statistics at ranks 371 and 389 (hand-computed)",
+      coverage.quantile_interval(np.random.default_rng(0).permutation(np.arange(1.0, 401.0))) == (371.0, 389.0))
+# Independent route 1: the exact binomial probability that the true quantile falls between those order statistics.
+log_pmf = lambda n, b, q: math.lgamma(n + 1) - math.lgamma(b + 1) - math.lgamma(n - b + 1) + b * math.log(q) + (n - b) * math.log(1 - q)
+exact400 = sum(math.exp(log_pmf(400, b, 0.95)) for b in range(371, 389))
+check("quantile_interval: exact binomial coverage at n = 400 is P(371 <= B <= 388) = 0.962, at or above the nominal 0.95",
+      0.95 <= exact400 < 0.97, exact400)
+# Independent route 2: simulate. Uniform(0, 1) draws have a 95th percentile of exactly 0.95.
+u = np.random.default_rng(21).random((4000, 400))
+hits = sum(lo <= 0.95 <= hi for lo, hi in (coverage.quantile_interval(row) for row in u))
+check("quantile_interval: 4,000 samples of 400 uniforms cover the true 0.95 quantile at the exact binomial rate (within 3 Monte Carlo SE)",
+      abs(hits / 4000 - exact400) < 3 * math.sqrt(exact400 * (1 - exact400) / 4000), (hits / 4000, exact400))
+check("quantile_interval: with 20 draws the 95th percentile has no upper bound (rank 21 > 20 gives +inf), and the 5th no lower bound",
+      coverage.quantile_interval(np.arange(20.0))[1] == math.inf and coverage.quantile_interval(np.arange(20.0), q=0.05)[0] == -math.inf)
+# Boundaries of the two guards: n = 100, q = 0.95 gives r = floor(95 - 4.27) = floor(90.73) = 90 (rounding outward, not
+# to 90.73's nearest 91) and s = ceil(95 + 4.27) = 100 = n exactly; n = 120, q = 0.05 gives r = floor(6 - 4.68) = 1 exactly.
+check("quantile_interval: ranks round outward and a rank equal to n or to 1 is still a draw (n = 100: (90, 100); n = 120, q = 0.05: lower end = smallest draw)",
+      coverage.quantile_interval(np.arange(1.0, 101.0)) == (90.0, 100.0) and coverage.quantile_interval(np.arange(1.0, 121.0), q=0.05)[0] == 1.0)
+raises("quantile_interval refuses an empty sample", lambda: coverage.quantile_interval([]), "empty")
+
 # ---- simulate: shape and the quantities it promises ----
 s1 = coverage.simulate(60, 12, seed=1, runs=20, n_boot=200)
+check("simulate: the needed multiplier lies inside its own Monte Carlo interval (20 runs: no upper bound)",
+      s1["t_needed_pooled_lo"] <= s1["t_needed_pooled"] <= s1["t_needed_pooled_hi"] and s1["t_needed_pooled_hi"] == math.inf, s1)
 check("simulate: k = n // block (5), df = smallest phase - 1 (4), t used = t(4) = 2.776, no regime",
       s1["k"] == 5 and s1["df"] == 4 and abs(s1["t_used_pooled"] - stats.t975(4)) < 1e-12 and s1["regime"] is None and s1["runs"] == 20 and s1["n_boot"] == 200, s1)
 check("simulate: coverages are shares in [0, 1], SE ratios and the needed multiplier are positive and finite",

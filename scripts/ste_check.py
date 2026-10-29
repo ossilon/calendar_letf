@@ -18,7 +18,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MAX_WORDS, MAX_INSTRUCTION, MAX_SENTENCES = 25, 20, 6
 
 # The public documents of this repository. Generated tables in results/ are not prose and are not checked.
-PUBLIC = ["README.md", "ASSUMPTIONS.md", "FINDINGS.md", "data/README.md"]
+PUBLIC = ["README.md", "ASSUMPTIONS.md", "FINDINGS.md", "data/README.md", "CHANGELOG.md"]
 IGNORE_FILE = re.compile(r"(_draft|_DRAFT)\.md$|^(PROMPT|DESIGN|BACKLOG)\.md$")
 
 IMPERATIVE = {"run", "read", "use", "open", "copy", "install", "start", "check", "do", "set", "pass", "call", "write",

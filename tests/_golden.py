@@ -158,12 +158,17 @@ def write_golden(path, rec):
     Path(path).write_bytes(text.encode("ascii"))
 
 
+class NothingChanged(ValueError):
+    """A re-freeze that would change nothing (refused, so the history never carries a no-op entry)."""
+
+
 def refreeze(study, reason, results_dir=RESULTS, golden_dir=GOLDEN, today=None):
     """Rewrite tests/golden/<study>.json from results/<study>.json. Returns (n_keys, keys_changed).
 
     Refuses an unknown study, an empty reason, a missing results file, and a re-freeze that would change nothing (so
-    the `refrozen` history never carries a no-op entry). An existing file keeps its `refrozen` history and gains
-    {date, reason, keys_changed}; keys_changed counts keys added, removed or different in value.
+    the `refrozen` history never carries a no-op entry; NothingChanged). An existing file keeps its `refrozen`
+    history and gains {date, reason, keys_changed, added, removed, moved}: keys_changed = added + removed + moved, so a
+    reason such as "no existing value moved" can be checked against `moved`.
     """
     if study not in STUDIES:
         raise ValueError(f"unknown study {study!r}; choose one of {', '.join(STUDIES)}")
@@ -182,13 +187,30 @@ def refreeze(study, reason, results_dir=RESULTS, golden_dir=GOLDEN, today=None):
         old = json.loads(target.read_text(encoding="utf-8"))
         history = list(old.get("refrozen", []))
         old_keys = old.get("keys", {})
-        changed = sum(1 for k in set(old_keys) | set(keys)
-                      if k not in old_keys or k not in keys or not same(old_keys[k], keys[k]))
+        added = sum(1 for k in keys if k not in old_keys)
+        removed = sum(1 for k in old_keys if k not in keys)
+        moved = sum(1 for k in keys if k in old_keys and not same(old_keys[k], keys[k]))
+        changed = added + removed + moved
         if changed == 0:
-            raise ValueError(f"{study}: nothing changed against the current golden file; a re-freeze would only add a no-op history entry")
-        history.append({"date": today, "reason": reason.strip(), "keys_changed": changed})
+            raise NothingChanged(f"{study}: nothing changed against the current golden file; a re-freeze would only add a no-op history entry")
+        history.append({"date": today, "reason": reason.strip(), "keys_changed": changed, "added": added, "removed": removed, "moved": moved})
     rec = {"study": study, "frozen_on": today, "reason": reason.strip(), "source_json_sha256": sha256_file(src),
            "n_keys": len(keys), "refrozen": history, "keys": keys}
     Path(golden_dir).mkdir(parents=True, exist_ok=True)
     write_golden(target, rec)
     return len(keys), changed
+
+
+def refreeze_all(reason, results_dir=RESULTS, golden_dir=GOLDEN, today=None, studies=STUDIES):
+    """Re-freeze every study that changed and skip the ones that did not (R4 review: the old loop stopped at the first
+    unchanged study, after rewriting the ones before it). Returns [(study, "refrozen" | "unchanged", n_keys, changed)].
+    Any other refusal (a missing results file, an empty selection) still raises, before nothing or after the earlier
+    studies, with the study named."""
+    out = []
+    for study in studies:
+        try:
+            n, changed = refreeze(study, reason, results_dir, golden_dir, today)
+            out.append((study, "refrozen", n, changed))
+        except NothingChanged:
+            out.append((study, "unchanged", None, 0))
+    return out

@@ -250,13 +250,14 @@ check("Structure: rate turns = s - k c = 2.0 - 0.8 = 1.2; spread turns = s = 2.0
       and "1.84%" in st1.describe(0.0092), st1.describe(0.0092))
 raises("Structure: swap turns above 3 NAV are refused", lambda: validate.Structure(4.0, 1.0, 0.8), "between 0 and 3")
 r_const = pd.Series(0.04, index=ix)
-sr = validate.structural_rate(r_const, 0.01, [("2017-12-29", st1), (None, validate.Structure(1.6, 0.6, 0.5, "w2"))])
+sr = validate.structural_rate(r_const, 0.01, [("2017-12-29", st1), (None, validate.Structure(1.0, 0.4, 0.5, "w2"))])
 w2 = ix > pd.Timestamp("2017-12-29")
-check("structural_rate: row = rate x (s - k c) + s x spread per window: 0.04 x 1.2 + 0.02 = 6.8% then 0.04 x 1.3 + 0.016 = 6.8%... "
-      "(window 2: 1.6 - 0.3 = 1.3 turns) and the windows are recorded",
-      np.allclose(sr[~w2], 0.04 * 1.2 + 0.02) and np.allclose(sr[w2], 0.04 * 1.3 + 0.016)
+# Two windows with DIFFERENT rates (R4 review: the earlier pair both gave 6.8%, so a window mix-up could not show).
+check("structural_rate: row = rate x (s - k c) + s x spread per window: 0.04 x 1.2 + 0.02 = 6.8% then 0.04 x 0.8 + 0.01 = 4.2% "
+      "(window 2: 1.0 - 0.2 = 0.8 turns), each on its own rows, and the windows are recorded",
+      np.allclose(sr[~w2], 0.04 * 1.2 + 0.02) and np.allclose(sr[w2], 0.04 * 0.8 + 0.01) and w2.any() and (~w2).any()
       and [w["last"] for w in sr.attrs["windows"]] == ["2017-12-29", str(ix[-1].date())]
-      and sr.attrs["windows"][0]["rate_turns"] == 1.2, sr.attrs["windows"])
+      and sr.attrs["windows"][0]["rate_turns"] == 1.2 and abs(sr.attrs["windows"][1]["rate_turns"] - 0.8) < 1e-12, sr.attrs["windows"])
 raises("structural_rate: a row no window covers is refused", lambda: validate.structural_rate(r_const, 0.01, [("2016-01-01", st1)]), "no Structure covers")
 raises("structural_rate: window ends must ascend", lambda: validate.structural_rate(r_const, 0.01, [("2017-12-29", st1), ("2016-12-30", st1), (None, st1)]), "ascending")
 raises("structural_rate: an open-ended window must be last", lambda: validate.structural_rate(r_const, 0.01, [(None, st1), ("2017-12-29", st1)]), "last window")
@@ -366,7 +367,7 @@ raises("run: a spec with an OPEN fee refuses to run (no silent default)", lambda
 check("run: early_mode and a price trigger pass through to the calendar kernel",
       k.run(spec, u, rate, early_mode="close", trigger=u.rename("PX")).attrs["model"]["trigger"] == "PX")
 
-# ---- 7b. reset "never": the buy-once margin position, via the public wrapper (step 3, judgement call 1) ----
+# ---- 7b. reset "never": the buy-once margin position, via the public wrapper (step 3, judgment call 1) ----
 nv = k.periodic_reset_series(u, rate, reset="never", L=2.0, spread_per_nav=0.02, fee=0.0, early_drop=None)
 # R2 E1 + E2: the loan (1 at the purchase) compounds daily on ACT/360 and the spread is borrowed too, so with a
 # constant 3% rate and day gaps g_t: loan_t = prod(1 + 0.03 g/360) + (0.02/0.03) x (prod(1 + 0.03 g/360) - 1) when

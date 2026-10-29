@@ -190,8 +190,10 @@ def spx_total_return(pre_yield="shiller", max_trailing_fill=MAX_TRAILING_FILL, d
             raise ValueError(f"SPXTR has a moving value on {d.date()}, a day SPX does not trade; check the files")
     pub = pub.drop(extra.union(after_end))
     if isinstance(pre_yield, str) and pre_yield == "shiller":
-        yld, label, status = shiller_yield_series(px.index[px.index < pub.index[0]]), "shiller", SHILLER_STATUS
-        yld = yld.reindex(px.index).fillna(0.0)             # only pre-splice rows are used by _splice
+        # _splice accrues the yield up to AND INCLUDING the splice day (the step into the first published row), so the
+        # splice day needs its month's yield too; rows after it are never used and carry 0.
+        yld, label, status = shiller_yield_series(px.index[px.index <= pub.index[0]]), "shiller", SHILLER_STATUS
+        yld = yld.reindex(px.index).fillna(0.0)
     elif pre_yield is None:
         yld, label, status = spx_yield_series(px.index), "decade_map", SPX_YIELD_STATUS
     else:
@@ -228,6 +230,10 @@ def ndx_total_return(pre_yield=NDX_PRE_YIELD, mid_yield=MID_YIELD, trust_from=XN
     if pd.Timestamp(trust_from) not in xn.index:
         raise ValueError(f"trust_from {trust_from} is not an XNDX trading day; use an exact date")
     xn = xn.loc[trust_from:]
+    # As for SPXTR: rows after the price file's last date mean the XNDX export is fresher than the NDX file. They carry
+    # nothing for a series on the price calendar, so they are dropped and listed, not refused.
+    after_end = xn.index[xn.index > px.index[-1]]
+    xn = xn.drop(after_end)
     y = pd.Series(pre_yield, index=px.index, dtype=float)
     y.loc[XNDX_LEVEL_FROM:] = mid_yield
     out, filled, trailing = _splice(px, xn, pre_yield, y, "NDX_TR", max_trailing_fill, "NASDAQ:XNDX")
@@ -236,6 +242,7 @@ def ndx_total_return(pre_yield=NDX_PRE_YIELD, mid_yield=MID_YIELD, trust_from=XN
                      splice_date=str(xn.index[0].date()),
                      days_filled_from_ndx=filled,
                      trailing_rows_filled_from_price=trailing,
+                     published_rows_after_price_end=[str(d.date()) for d in after_end],
                      pre_yield=pre_yield, pre_yield_status="ASSUMED", mid_yield=mid_yield,
                      mid_yield_status="MEASURED (level change of mis-dated XNDX block)",
                      mid_from=XNDX_LEVEL_FROM,

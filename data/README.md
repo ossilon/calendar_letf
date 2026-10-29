@@ -129,5 +129,6 @@ results table prints the same fields in its banner. The files in `tests/golden/`
 ## Licensing
 
 TradingView data is display-only. Do not commit, upload or share the exported files. The `.gitignore` of this
-repository excludes everything in this folder except this README. The repository publishes aggregates only
-(tables, medians, dated episode lists), never a daily series.
+repository excludes everything in this folder except this README. The repository publishes no data files and no
+daily series. Its tables hold aggregates (medians, dated episode lists), and some charts plot prices with
+"Data: TradingView".

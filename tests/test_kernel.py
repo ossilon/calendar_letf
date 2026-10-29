@@ -11,7 +11,7 @@ from dataclasses import replace
 import numpy as np
 import pandas as pd
 
-from _harness import check, raises  # noqa: I001  (must come first: puts the repo root on sys.path)
+from _harness import check, raises, worst_of  # noqa: I001  (must come first: puts the repo root on sys.path)
 from calendar_letf import periods as cal
 from calendar_letf import costs, nyse, products
 from calendar_letf import kernel as k
@@ -38,6 +38,11 @@ def max_rel_diff(a, b):
     """Largest |a - b| / |b| over all rows; rows where both are 0 count as equal."""
     a, b = np.asarray(a, dtype=float), np.asarray(b, dtype=float)
     return float(np.max(np.abs(a - b) / np.maximum(np.abs(b), 1e-300))) if len(a) else 0.0
+
+
+check("worst_of: the larger error, but a NaN error (one NaN NAV row) gives infinity instead of vanishing as max(0.0, nan) does",
+      worst_of(1e-13, 2e-13) == 2e-13 and worst_of(0.0, max_rel_diff([1.0, 0.9, np.nan], [1.0, 0.9, 0.0])) == float("inf")
+      and worst_of(float("nan"), 0.0) == float("inf") and max(0.0, float("nan")) == 0.0)
 
 
 def walk(start, n, seed, vol, drift=0.0003):
@@ -371,7 +376,7 @@ check(f"kernel: calendar kernel with a reset on every row == daily kernel, with 
       f"(max rel diff {diff_k:.1e})", diff_k < 1e-11)
 
 
-# l) numba kernels == a plain-Python loop written here (guards against a numba typing slip, e.g. integer maths)
+# l) numba kernels == a plain-Python loop written here (guards against a numba typing slip, e.g. integer math)
 LEVEL, CLOSE, NEXT_CLOSE = k.EARLY_LEVEL, k.EARLY_CLOSE, k.EARLY_NEXT_CLOSE
 
 
@@ -458,7 +463,7 @@ for path in (calm, wild):
                         nav_n, fl_n, te_n = k.periodic_reset_nav(uu, tt, lw, rate_l, acc_l, acc2_l, pe, 2.0, 0.022, fee_l,
                                                                  drop, mode)
                         nav_r, fl_r, te_r = ref_periodic(uu, tt, lw, rate_l, acc_l, acc2_l, pe, 2.0, 0.022, fee_l, drop, mode)
-                        worst = max(worst, max_rel_diff(nav_n, nav_r))
+                        worst = worst_of(worst, max_rel_diff(nav_n, nav_r))
                         n_cases += 1
                         same = np.array_equal(fl_n, fl_r) and te_n == te_r
                         if fl_n.any():
@@ -474,7 +479,7 @@ for path in (calm, wild):
                                   f"flags {fl_n.sum()} vs {fl_r.sum()}, terminated {te_n} vs {te_r}")
     nav_n, te_n = k.daily_reset_nav(uu, rate_l, acc_l, acc2_l, 2.0, 0.022, fee_l)
     nav_r, te_r = ref_daily(uu, rate_l, acc_l, acc2_l, 2.0, 0.022, fee_l)
-    worst = max(worst, max_rel_diff(nav_n, nav_r))
+    worst = worst_of(worst, max_rel_diff(nav_n, nav_r))
     n_cases += 1
     saw_dead |= te_n >= 0
     if te_n != te_r:
@@ -608,7 +613,7 @@ s_end_iso = str(u_o.index[s_end].date())
 for mode in ("level", "close", "next_close"):
     full = periodic(u_o, "quarterly", early_mode=mode, **o_cost)
     cut = periodic(u_o.iloc[s_end:], "quarterly", early_mode=mode, **{**o_cost, "rate": r_o.iloc[s_end:]})
-    o_worst = max(o_worst, max_rel_diff(cut.values, full.values[s_end:] / full.values[s_end]))
+    o_worst = worst_of(o_worst, max_rel_diff(cut.values, full.values[s_end:] / full.values[s_end]))
     after = [d_ for d_ in full.attrs["early_resets"] if d_ > s_end_iso]          # early resets after the slice start
     o_resets[mode] = (cut.attrs["early_resets"], after)
 check(f"row 0: slicing the underlying from a quarter end ({s_end_iso}) reproduces nav[t]/nav[s] of the full run in "

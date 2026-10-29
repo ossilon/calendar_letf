@@ -23,21 +23,25 @@ day in 2008.
 **None of the six ten-year gaps is distinguishable from zero on one history.** The 95% intervals built from windows
 that do not overlap all cover zero:
 
-- S&P monthly +0.38 [-0.59, +1.34]
-- Nasdaq-100 monthly +1.02 [-2.34, +4.37]
-- Nasdaq-100 weekly +1.16 [-0.26, +2.58]
+- S&P monthly +0.38 [-0.59, +1.35]
+- Nasdaq-100 monthly +1.04 [-2.23, +4.31]
+- Nasdaq-100 weekly +1.17 [-0.24, +2.58]
+
+The Nasdaq-100 weekly interval is wide because its 2 degrees of freedom give t = 4.30. A coverage simulation gives
+the multiplier that this structure needs. On it, the row would be clear under independent windows and too close to
+call under the mildest regime stress (FINDINGS F6).
 
 The only clear rows at any horizon are the Nasdaq-100 weekly design at 1, 3 and 5 years. Those rows are clear only
-if windows that do not overlap are independent. Under the mildest persistent-regime stress that the project ran,
-they are noisy too (FINDINGS F6).
+if windows that do not overlap are independent. Under the mildest persistent-regime stress run, they are noisy at 1
+year and too close to call at 3 and 5 years (FINDINGS F6).
 
 The edge exists only when daily returns tend to *reverse* from one day to the next. That has been the case since the
 1980s, and strongly since 2000. In the 1950s-70s, when daily returns tended to *follow through*, daily resets beat
-the monthly design in every decade. The often-quoted "+1.15 pp/yr since 1990" reproduces exactly here, but it is
-that regime, not a law.
+the monthly design in every decade. The often-quoted "+1.15 pp/yr since 1990" holds up here (base case +1.16), but it
+is that regime, not a law.
 
-The cost level does not change the answer. The cost encoding moves the monthly and weekly gaps by at most 0.06 pp and
-the quarterly ones by up to 0.15. The leverage, not the reset rule, sets the risk. On the S&P 500, every 2x series had
+The cost level does not change the answer. The cost encoding moves the monthly and weekly gaps by at most 0.07 pp and
+the quarterly ones by up to 0.14. The leverage, not the reset rule, sets the risk. On the S&P 500, every 2x series had
 an 89-93% maximum drawdown, and on the Nasdaq-100 the figure was about 99%.
 
 On the S&P, the monthly design wins a majority of its non-overlapping 10-year windows in 87% of start phases (median
@@ -52,17 +56,17 @@ F13-F16.
 
 ## Headline facts (every one computed here and audited; sources in FINDINGS.md)
 
-- **Monthly resets beat daily resets by +0.3 pp/yr on the S&P 500 over 801 ten-year windows since 1950. The
+- **Monthly resets beat daily resets by +0.3 pp/yr on the S&P 500 over 799 ten-year windows since 1950. The
   Nasdaq-100 gap since 1985 is +1.4 pp/yr. Quarterly resets do not beat daily: -0.5 pp/yr on the S&P, -2.1 on the
   Nasdaq-100. None of the six ten-year gaps is distinguishable from zero on one history.** (F6)
-- **The famous "+1.15 pp/yr since 1990" replicates exactly (321 of 321 windows) and was negative in every decade of
-  the 1950s, 60s and 70s.** Whether calendar resets help depends on whether daily returns follow through or
+- **The famous "+1.15 pp/yr since 1990" holds up: the base case gives +1.16 (rate encoding +1.15), ahead in 321 of
+  321 windows. The same edge was negative in every decade of the 1950s, 60s and 70s.** Whether calendar resets help depends on whether daily returns follow through or
   reverse, and that has flipped sign over decades. (F7, F8)
 - **The live funds deliver exactly 2.0x the ETF per period, less a constant cost.** The regression slopes are 2.015 /
   1.993 / 2.005 for SPYQ / MQQQ / QQQP. The intercepts are -1.3 pp per quarter, -0.55 pp per month and -1.6 pp per
   quarter. (F4)
 - **Costs do not change the reset answer.** Across the six cost encodings, the gap between calendar and daily resets
-  moves by at most 0.06 pp/yr for the monthly and weekly designs. The limit for the quarterly ones is 0.15. The
+  moves by at most 0.07 pp/yr for the monthly and weekly designs. The limit for the quarterly ones is 0.14. The
   leverage sets the risk. On the S&P 500, every 2x structure had an 89-93% maximum drawdown since 1950 and spent 94%
   of the time below its previous peak. The Nasdaq-100 2x series fell about 99% (F8, F12).
 - **Bought mid-period after a 30% fall, a calendar fund is a 3.5x position, not a 2x one.** At the 2020 bottom SPYQ
@@ -116,7 +120,7 @@ the label MODELED everywhere they appear (FINDINGS F1b).
 | `calendar_letf/backtest.py`, `strategies/` | the plugin contract, the wealth loop with fill delay and costs, seven example rules |
 | `scripts/` | the four studies: live-fund validation, calendar against daily, timing rules, entries from bottoms. `run_gfc_oracle.py` adds one hindsight entry at the 2007-2009 low. `run_coverage_sim.py` simulates the coverage of the interval conventions. `plot_guppy.py` draws candles with the Guppy ribbons for any symbol. `fresh_clone_check.py`, `scan_identifiers.py`, `ste_check.py` and `refreeze_golden.py` check and pin a release |
 | `tests/run_tests.py` | known-answer checks, plus the golden files in `tests/golden/` that pin the published numbers; must print `0 failure(s)` |
-| `results/` | the studies' tables (markdown + JSON) and charts; aggregates only, never daily series |
+| `results/` | the studies' tables (markdown + JSON; aggregates, never daily series) and charts |
 | `reference/` | SEC N-PORT extract of the funds' swaps, their payouts, Shiller's monthly S&P dividends (derived) |
 | `ASSUMPTIONS.md`, `FINDINGS.md` | every input with its status; every result with its provenance |
 
@@ -207,7 +211,7 @@ This reverses the passive ranking. Over any random 10-year hold, the quarterly f
 S&P 500, the quarterly fund entered the 1987 and 2020 bottoms at 3.7x. The monthly fund entered them at 2.1x and
 3.0x. The weekly fund (which resets every Friday) entered them at 2.0x and 2.1x.
 
-The 3-year dollar results follow that order (1987: $19,672 / $17,293 / $17,095 per $10,000; 2020: $31,391 /
+The 3-year dollar results follow that order (1987: $19,687 / $17,306 / $17,109 per $10,000; 2020: $31,391 /
 $29,291 / $26,511). Where a bottom fell just after a reset (2022-10-12, all three at 2.0x) the structures finished
 within $900 of each other. So for an entry after a drawdown, the question is not "monthly or quarterly" but "how far
 into its period is the fund today". That is observable: leverage = 2 x (U_t / U_0) / (NAV_t / NAV_0), with U_0 and
@@ -235,7 +239,7 @@ No price data ships with this repository (see below). You need:
    `NASDAQ:TQQQ`; the GFC oracle entry also needs `AMEX:SSO` and `AMEX:QLD`. The loader reads raw exports (a `time` column) and the clean `date` format. Details and symbols:
    [data/README.md](data/README.md).
 2. **FRED CSVs** in `data/rates/`: `DFF`, `DTB3`, `TB3MS`, `OBFR` (fred.stlouisfed.org, public).
-3. Python 3.10+, `numpy`, `pandas`, `numba` (`matplotlib` for charts). `pip install -e .`
+3. Python 3.10+, `numpy`, `pandas`, `numba` and `matplotlib`. `pip install -e .`
 
 ```
 set CALENDAR_LETF_DATA=path\to\your\exports        (defaults to data/)
@@ -282,12 +286,15 @@ testing, a delay sweep and an out-of-sample split matter.
 
 ![SPY weekly with the Clean Guppy ribbons](results/guppy_SPY_weekly.png)
 
+Data: TradingView.
+
 `py scripts\plot_guppy.py AMEX:SPY --weekly --years 10` draws this chart from your own export. The fast ribbon (EMAs
 3-21) shows cyan when both groups stack up. The slow ribbon (EMAs 24-66) shows green / red / gray by its stack. The
 200 EMA shows in blue, and triangles mark the fixed rule's buys and sells.
 
 The same `indicators.guppy` call gives the ribbon states for any series. So you can scan a whole universe in a
-second. The EMA matches TradingView's `ta.ema` to 12 decimal places.
+second. The EMA matched TradingView's `ta.ema` to within 3.2e-12 (daily) and 1.7e-12 (weekly) on the author's own chart
+exports, a local check that needs those exports. The public tests check the formula on made-up data.
 
 ## What this cannot tell you
 
@@ -309,9 +316,9 @@ second. The EMA matches TradingView's `ta.ema` to 12 decimal places.
 
 ## Data, licenses, attribution
 
-- **TradingView** market data comes with a display-only license. This repository ships no price data and no daily
-  synthetic series (a user could reverse them into prices). Charts and tables are aggregates and carry
-  "Data: TradingView". Reproduce with your own export.
+- **TradingView** market data comes with a display-only license. This repository ships no price data files and no
+  daily synthetic series (a user could reverse them into prices). Its tables hold aggregates. Some charts plot prices
+  or modeled paths from TradingView data, and they carry "Data: TradingView". Reproduce with your own export.
 - **FRED** (Federal Reserve Bank of St. Louis): public U.S. data.
 - **Robert J. Shiller**, Irrational Exuberance data (Yale): `reference/shiller_sp500_monthly.csv` derives from
   `ie_data.xls` (downloaded 2026-10-13; data to 2023-06). It carries his accuracy disclaimer; cite him if you use it.
@@ -320,7 +327,8 @@ second. The EMA matches TradingView's `ta.ema` to 12 decimal places.
   Guppy". `strategies/guppy.py` is a Python port, verified against TradingView's own EMA output.
 - **Fund names and tickers** (SPYQ, MQQQ, QQQP, UPRO, TQQQ, SSO, QLD, SPY, QQQ) belong to their issuers. This
   project uses them only to identify the products it models. This project has no affiliation with any of them, and
-  none of them endorses it. Every fund series here is a model, not the issuer's data.
+  none of them endorses it. The calendar funds, the daily twins and the 3x rows are models, not the issuer's data.
+  The SSO, QLD, UPRO and TQQQ rows are the real funds' market prices, price only.
 - **General information only.** Nothing here is financial product advice or a recommendation; past and modeled
   performance is not a reliable indicator of future performance. Leveraged funds can lose most or all of the money invested.
 - Code: MIT license (see LICENSE): provided "as is", without warranty or liability.

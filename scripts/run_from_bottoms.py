@@ -2,7 +2,7 @@
 
     py scripts\\run_from_bottoms.py        (from calendar_letf/, with CALENDAR_LETF_DATA / _RATES set)
 
-What it does, in order (the maths is in calendar_letf/bottoms.py):
+What it does, in order (the math is in calendar_letf/bottoms.py):
   1. per index (S&P 500, Nasdaq-100): find every drawdown deeper than 19% in the PRICE index and compare with the brief's list;
   2. entries: A hindsight bottoms (major = the brief's list, shallow = the other 19-30% troughs), B rule entries (first close at least
      X below the all-time high, once per fall), C Guppy-confirmed entries after each A / B entry (daily and weekly slow ribbon);
@@ -39,7 +39,8 @@ from calendar_letf import costs, kernel, loader, products, provenance, study  # 
 
 OUT = ROOT / "results"
 RAW = OUT / "raw"
-CAPTION = "Data: TradingView (via local export), FRED. Modeled / synthetic series, not live funds. Not investment advice."
+CAPTION = ("Data: TradingView (via local export), FRED. The fund series are models; the UPRO and TQQQ columns are the real "
+           "funds' market prices, price only. Not investment advice.")
 ENC = study.ALL_ENCODINGS
 BASE = study.BASE_ENCODING                                  # "fixed": the encoding the tables show; "rate" sits beside it
 NAMES = {"SPX": "S&P 500", "NDX": "Nasdaq-100"}
@@ -712,7 +713,7 @@ def main():
     # ---------------------------------------------------------------- markdown
     md = []
     md.append("# Entries from major bottoms: what a calendar-reset 2x fund is after a crash (B13)\n")
-    md.append(f"Run {R['meta']['run_date']}. Script `scripts/run_from_bottoms.py`, maths in `calendar_letf/bottoms.py`; numbers in `from_bottoms.json`; per-entry tables in "
+    md.append(f"Run {R['meta']['run_date']}. Script `scripts/run_from_bottoms.py`, math in `calendar_letf/bottoms.py`; numbers in `from_bottoms.json`; per-entry tables in "
               "`results/raw/` (git-ignored). **Every fund series is synthetic or a model: SPYQ, MQQQ and QQQP are modeled, HYP_* are MODELED designs (" + products.MODELED_NOTE + "), the 3x series are MODELS of "
               "UPRO / TQQQ at their filed terms, and the real UPRO / TQQQ are price-only overlays. Research tooling, not investment advice.**\n")
     md.append("## Inputs and conventions\n")
@@ -858,7 +859,7 @@ def main():
         md.append(dollar_md(name, md_world[name]["live"], md_world[name]["ev"], md_world[name]["dollars"]))
         md.append(dollar_products_md(worlds[name], md_world[name]["dollars_products"]))
 
-    md.append("## What could not be tested, and judgement calls\n")
+    md.append("## What could not be tested, and judgment calls\n")
     md.append("- No live calendar fund before 2024-08, so every calendar-fund number is a model with costs fitted on 2024-26 (F3-F5); the cost encodings diverge when rates move.\n"
               "- The -35% trigger is tested on the ETF's daily low (the index before the ETF existed); the fill price and a gap through the level are not known "
               "(mode `level` fills at the level), and the v1 close-only index trigger is table A4. The margin benchmark has no margin call (optimistic).\n"
@@ -868,7 +869,7 @@ def main():
               "- Index data start 1950 (S&P 500) and 1985 (Nasdaq-100), so earlier falls cannot be seen; the first drawdown in each file is measured from the first close, not a true earlier high.\n"
               "- Dividend yields before 1988 (S&P, Shiller measured) and before 2006 (Nasdaq-100, 0.3% ASSUMED) enter the total-return underlying (B7).\n"
               "- TQQQ_MODEL's 0.82% fee is as given in the brief; no TQQQ expense ratio is on file, so its status is ASSUMED. SOXL not used.\n"
-              "- Judgement calls: tiering (major = the brief's list, plus NDX 1987 / 1990, plus any trough deeper than 40% the list omits; shallow = the rest); troughs are found inside "
+              "- Judgment calls: tiering (major = the brief's list, plus NDX 1987 / 1990, plus any trough deeper than 40% the list omits; shallow = the rest); troughs are found inside "
               "long falls too; ties on the month-end for the timing shifts go to the earlier month-end; Guppy fills are at the next close; the 3x and margin comparators use "
               "the same entry close as the fund.\n")
 

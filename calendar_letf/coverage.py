@@ -86,6 +86,21 @@ def autocorr(x, lag):
     return float(np.dot(d[lag:], d[:-lag]) / den)
 
 
+def quantile_interval(x, q=0.95, z=1.959963984540054):
+    """Distribution-free 95 percent interval for the q-th quantile of the law that x was drawn from: the order
+    statistics x_(r) and x_(s) (1-based ranks) with r = floor(n q - z sd), s = ceil(n q + z sd), sd = sqrt(n q (1 - q)).
+    The count of draws below the true quantile is binomial(n, q); the ranks take its normal approximation, rounded
+    outward, so the exact coverage is P(r <= B <= s - 1) and sits at or above 0.95 at the sizes used here (0.962 at
+    n = 400). A rank outside 1 .. n means the data cannot bound that side: -inf or +inf."""
+    x = np.sort(np.asarray(x, dtype=np.float64).ravel())
+    n = len(x)
+    if n < 1:
+        raise ValueError("quantile_interval: x is empty")
+    sd = math.sqrt(n * q * (1.0 - q))
+    r, s = math.floor(n * q - z * sd), math.ceil(n * q + z * sd)
+    return (float(x[r - 1]) if r >= 1 else float("-inf"), float(x[s - 1]) if s <= n else float("inf"))
+
+
 def simulate(n, h, seed, runs=400, n_boot=1000, regime=None, block=None):
     """Coverage of the three conventions on `runs` synthetic series of n starts and h-month windows.
 
@@ -97,6 +112,8 @@ def simulate(n, h, seed, runs=400, n_boot=1000, regime=None, block=None):
       se_ratio_pooled    mean pooled SE / standard deviation over runs of the pooled mean
       t_needed_pooled    95th percentile over runs of |pooled mean - TRUE_GAP| / pooled SE: the multiplier that would
                          give 0.95 coverage; t_used_pooled is the t(df, 0.975) the convention uses
+      t_needed_pooled_lo, t_needed_pooled_hi   the 95 percent `quantile_interval` of t_needed_pooled (its Monte
+                         Carlo error over `runs` runs)
       acf_gap_h, acf_gap_2h   mean over runs of the gap series' autocorrelation at lags h and 2h (the dependence
                          between windows that do not overlap; about 0 under iid shocks)
       plus n, h, block, k (= n // block), df, runs, n_boot, seed and regime (phi, share, half_life_months) or None.
@@ -124,6 +141,7 @@ def simulate(n, h, seed, runs=400, n_boot=1000, regime=None, block=None):
         acf_2h.append(autocorr(g, 2 * h))
         df_used = p["df"]
     runs = int(runs)
+    t_lo, t_hi = quantile_interval(t_pool, 0.95)
     return dict(n=n, h=h, block=block, k=int(n // block), df=int(df_used), runs=runs, n_boot=int(n_boot), seed=int(seed),
                 regime=None if regime is None else dict(phi=float(regime[0]), share=float(regime[1]),
                                                         half_life_months=(0.0 if regime[0] <= 0.0 else float("inf") if regime[0] >= 1.0 else math.log(0.5) / math.log(regime[0]))),
@@ -131,6 +149,7 @@ def simulate(n, h, seed, runs=400, n_boot=1000, regime=None, block=None):
                 se_ratio_bb=float(np.mean(se_bb) / np.std(mean_all, ddof=1)),
                 se_ratio_pooled=float(np.mean(se_pool) / np.std(mean_pool, ddof=1)),
                 t_needed_pooled=float(np.quantile(t_pool, 0.95)),
+                t_needed_pooled_lo=t_lo, t_needed_pooled_hi=t_hi,
                 t_used_pooled=float(stats.t975(df_used)) if df_used >= 1 else float("nan"),
                 acf_gap_h=float(np.nanmean(acf_h)), acf_gap_2h=float(np.nanmean(acf_2h)))
 

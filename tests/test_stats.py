@@ -8,7 +8,7 @@ import math
 
 import numpy as np
 
-from _harness import ROOT, check, raises  # noqa: I001
+from _harness import ROOT, check, raises, worst_of  # noqa: I001
 from calendar_letf import coverage, stats
 
 # ---- the t quantile ----
@@ -31,7 +31,9 @@ check("t975 anchor test fails on a table with a wrong entry (df 5 holding the df
       not anchors_agree(lambda df: 2.776445 if df == 5 else stats.t975(df)))
 try:
     from scipy.stats import t as _t
-    worst = max(abs(stats.t975(d) - float(_t.ppf(0.975, d))) for d in list(range(1, 400)) + [500, 1000, 5000])
+    worst = 0.0
+    for d in list(range(1, 400)) + [500, 1000, 5000]:
+        worst = worst_of(worst, abs(stats.t975(d) - float(_t.ppf(0.975, d))))
     check("t975 equals scipy.stats.t.ppf(0.975, df) to 1e-5 for every df from 1 to 399 and at 500 / 1000 / 5000 (scipy used only here)",
           worst < 1e-5, worst)
 except ImportError:
@@ -209,12 +211,31 @@ check("phase-pooled coverage on simulated overlapping 120-month windows (400 run
 # scripts/run_coverage_sim.py runs every published configuration and a regime stress into results/coverage_sim.json; the three
 # entries recomputed here (same seeds, same resamples) must equal that file exactly, so the file cannot drift from the code.
 # With 400 runs the sampling error of a coverage near 0.95 is 0.011; the 1-year phase-pooled bound is therefore 0.92.
-HEADLINE_CONFIGS = ((801, 120, 3101, 0.95), (381, 120, 3102, 0.95), (909, 12, 3103, 0.92))   # n, h (= block), seed, pooled lower bound
 SIM_PATH = ROOT / "results" / "coverage_sim.json"
 sim = json.loads(SIM_PATH.read_text(encoding="utf-8")) if SIM_PATH.exists() else None
 if sim is None:
     print("     skip: results/coverage_sim.json is absent (py scripts\\run_coverage_sim.py writes it); the recomputed entries are checked against their bounds only")
-SIM_KEYS = ("coverage_bb_mean", "coverage_bb_median", "coverage_pooled", "se_ratio_bb", "se_ratio_pooled", "t_needed_pooled")
+# The configurations are the PUBLISHED ones: n = the passive study's start count, read from results/calendar_vs_daily.json
+# (R4 review: typed counts went stale when the start list changed). (world, horizon years, seed, pooled lower bound).
+CVD = json.loads((ROOT / "results" / "calendar_vs_daily.json").read_text(encoding="utf-8"))
+
+
+def _published_n(world, hy):
+    ns = {r["n_starts"] for r in CVD["worlds"][world]["multi_start"]["fixed"] if r["horizon_years"] == hy}
+    return ns.pop() if len(ns) == 1 else None
+
+
+HEADLINE_CONFIGS = tuple((_published_n(w, hy), 12 * hy, s, lb) for w, hy, s, lb in
+                         (("SPX", 10, 3101, 0.95), ("NDX", 10, 3102, 0.95), ("SPX", 1, 3103, 0.92)))
+check("coverage configurations: every published horizon has one start count shared by all products",
+      all(_published_n(w, hy) for w in ("SPX", "NDX") for hy in (1, 3, 5, 10)))
+if sim is not None:
+    _stale = {(e["world"], e["horizon_years"]): (e["n"], _published_n(e["world"], e["horizon_years"])) for e in sim["iid"]
+              if e["n"] != _published_n(e["world"], e["horizon_years"])}
+    check("coverage_sim.json simulates the start counts the passive study publishes (a mismatch: re-run py scripts\\run_coverage_sim.py)",
+          not _stale, _stale)
+SIM_KEYS = ("coverage_bb_mean", "coverage_bb_median", "coverage_pooled", "se_ratio_bb", "se_ratio_pooled", "t_needed_pooled",
+            "t_needed_pooled_lo", "t_needed_pooled_hi")
 for n_, h_, seed_, pp_lo_bound in HEADLINE_CONFIGS:
     r_ = coverage.simulate(n_, h_, seed_, runs=RUNS, n_boot=1000)
     print(f"     info: headline configuration n = {n_}, block {h_}, k = {r_['k']}, {RUNS} runs: coverage of the true gap: block-bootstrap mean "
@@ -256,6 +277,55 @@ if sim is not None:
     check("coverage_sim: every regime case reports a coverage in [0, 1] and a finite needed multiplier (the limit of the headline interval is measured, not assumed)",
           all(0.0 <= e["coverage_pooled"] <= 1.0 and e["t_needed_pooled"] is not None and math.isfinite(e["t_needed_pooled"]) for e in reg_))
     check("coverage_sim: the code fingerprint in the file names its script", sim["meta"]["code"]["script"] == "run_coverage_sim.py")
+    _thr = sim["summary"]["regime_persistent_acf"]
+    _pers = [e for e in reg_ if e["acf_gap_h"] is not None and e["acf_gap_h"] >= _thr]
+    _want = dict(regime_persistent_n=len(_pers), regime_persistent_acf_min=min(e["acf_gap_h"] for e in _pers),
+                 regime_persistent_acf_max=max(e["acf_gap_h"] for e in _pers), regime_persistent_pooled_min=min(e["coverage_pooled"] for e in _pers),
+                 regime_persistent_pooled_max=max(e["coverage_pooled"] for e in _pers))
+    check(f"coverage_sim: the persistent subset (lag-h autocorrelation >= {_thr}) in the summary equals its recomputation from the regime rows",
+          _thr == 0.08 and 0 < len(_pers) < len(reg_) and all(sim["summary"][k] == v for k, v in _want.items()),
+          {k: (sim["summary"].get(k), v) for k, v in _want.items()})
+
+    # The verdict words for the clear rows (Nasdaq-100 weekly at 1, 3 and 5 years), computed here and looked for in the
+    # prose (R4 review: a re-run moved the 5-year row past its needed multiplier and the words "noisy too" went stale,
+    # because the pins held the digits but not the verdict). A row is noisy when its t ratio is below the needed
+    # multiplier's 95% Monte Carlo interval, clear above it, and too close to call inside it.
+    def _stress_label(t, e):
+        return "noisy" if t < e["t_needed_pooled_lo"] else "clear" if t > e["t_needed_pooled_hi"] else "too close to call"
+
+    def _label_phrase(labels):
+        """{years: label} -> e.g. 'noisy at 1 and 3 years and too close to call at 5 years' (groups in order of first year)."""
+        groups = {}
+        for y in sorted(labels):
+            groups.setdefault(labels[y], []).append(y)
+        join = lambda ys: " and ".join(str(y) for y in ys) if len(ys) <= 2 else ", ".join(str(y) for y in ys[:-1]) + f" and {ys[-1]}"
+        return " and ".join(f"{lab} at {join(ys)} year{'' if ys == [1] else 's'}" for lab, ys in groups.items())
+
+    _t = {r["horizon_years"]: r["indep_t"] for r in CVD["worlds"]["NDX"]["multi_start"]["fixed"] if r["product"] == "HYP_NDX_W"}
+    _iid = {e["horizon_years"]: e for e in iid_ if e["world"] == "NDX"}
+    _mild = {e["horizon_years"]: e for e in reg_ if e["world"] == "NDX" and e["regime"]["phi"] == 0.98 and e["regime"]["share"] == 0.02}
+    check("verdicts: under independent windows the Nasdaq-100 weekly rows at 1, 3 and 5 years are clear (t ratio above the needed multiplier's 95% MC interval)",
+          all(_stress_label(_t[y], _iid[y]) == "clear" for y in (1, 3, 5)), {y: (_t[y], _iid[y]["t_needed_pooled_lo"], _iid[y]["t_needed_pooled_hi"]) for y in (1, 3, 5)})
+    _phrase = _label_phrase({y: _stress_label(_t[y], _mild[y]) for y in (1, 3, 5)})
+    for _doc in ("README.md", "FINDINGS.md", "ASSUMPTIONS.md"):
+        check(f"verdicts: {_doc} states the computed verdict under the mildest regime stress: '{_phrase}'",
+              _phrase in " ".join((ROOT / _doc).read_text(encoding="utf-8").split()))
+    # At 10 years the headline keeps t(2) = 4.30, so the row is noisy; F6 and the README disclose what the needed
+    # multiplier would say. The other five 10-year rows must be noisy on that rule too (|t| below the interval).
+    _t10 = {(w, r["product"]): r["indep_t"] for w in ("SPX", "NDX") for r in CVD["worlds"][w]["multi_start"]["fixed"] if r["horizon_years"] == 10}
+    _iid10 = {e["world"]: e for e in iid_ if e["horizon_years"] == 10}
+    _phrase10 = (f"would be {_stress_label(_t10[('NDX', 'HYP_NDX_W')], _iid10['NDX'])} under independent windows and "
+                 f"{_stress_label(_t10[('NDX', 'HYP_NDX_W')], _mild[10])} under the mildest regime stress")
+    for _doc in ("README.md", "FINDINGS.md"):
+        check(f"verdicts: {_doc} states the computed 10-year Nasdaq-100 weekly reading: '{_phrase10}'",
+              _phrase10 in " ".join((ROOT / _doc).read_text(encoding="utf-8").split()))
+    check("verdicts: the other five 10-year rows are noisy on the needed multiplier too (|t| below the interval's low end)",
+          all(_stress_label(abs(t), _iid10[w]) == "noisy" for (w, p), t in _t10.items() if p != "HYP_NDX_W"),
+          {k: round(t, 2) for k, t in _t10.items()})
+    check("verdicts: the label phrase groups horizons (planted)",
+          _label_phrase({1: "noisy", 3: "noisy", 5: "too close to call"}) == "noisy at 1 and 3 years and too close to call at 5 years"
+          and _label_phrase({1: "clear", 3: "clear", 5: "clear"}) == "clear at 1, 3 and 5 years"
+          and _label_phrase({1: "noisy", 3: "clear"}) == "noisy at 1 year and clear at 3 years")
 
 # ---- Newey-West long-run variance and the era-difference z (R2 step 12e) ----
 # x = 1, 2, 3, 4: mean 2.5, deviations -1.5, -0.5, 0.5, 1.5.  gamma_0 = (2.25 + 0.25 + 0.25 + 2.25) / 4 = 1.25.
@@ -532,6 +602,23 @@ def made_up_world(theta, seed, mu=0.0004, sig=0.01, start="1990-01-02", end="200
 ENC_ = study.ENCODINGS["fixed"]
 w_rev = made_up_world(-0.6, 21)
 w_con = made_up_world(+0.6, 22)
+
+# ---- the first start (R4 review): no start before every calendar product's first REAL reset ----
+# The made-up world starts 1990-01-02, inside a quarter, and holds the quarterly SPYQ. The kernel treats row 0 as a
+# reset, so a start on 1990-01-31 or 1990-02-28 would carry a base no quarterly fund held. The first start must be the
+# last session of March 1990, read here straight from the dates (a second route to periods.period_end_flags).
+_q1_last = w_rev.dates[(w_rev.dates.year == 1990) & (w_rev.dates.month == 3)].max()
+_s12, _e12 = w_rev.month_pairs(12)
+check("first start: a world holding a quarterly product starts at its first quarter end (1990-03-30), not at the first month end",
+      w_rev.dates[_s12[0]] == _q1_last and w_rev.me_start == 2 and len(_s12) == len(w_rev.me) - 2 - 12, (w_rev.dates[_s12[0]].date(), w_rev.me_start))
+_mg_rev = w_rev.margin_navs(ENC_, products.PRODUCTS["SPYQ"].fee, (12,))[12]
+_direct = w_rev.margin_slice(ENC_, products.PRODUCTS["SPYQ"].fee, _s12[0], _e12[0])[-1]
+check("first start: the margin benchmark's first value belongs to the same first start as month_pairs (1e-14)",
+      len(_mg_rev) == len(_s12) and abs(_mg_rev[0] - _direct) < 1e-14, (len(_mg_rev), len(_s12)))
+_specs_m = [products.PRODUCTS["HYP_SPX_M"]]
+_w_m = study.World("SPX", w_rev.u, w_rev.u, w_rev.rate, _specs_m, {s.name: products.twin_of(s) for s in _specs_m})
+check("first start: a monthly-only world keeps its first month end (1990-01-31): every month end is a real monthly reset",
+      _w_m.me_start == 0 and _w_m.dates[_w_m.month_pairs(12)[0][0]] == w_rev.dates[(w_rev.dates.year == 1990) & (w_rev.dates.month == 1)].max())
 for label_, w_, want in (("reversals (MA coefficient -0.6)", w_rev, +1), ("continuations (MA coefficient +0.6)", w_con, -1)):
     dec = study.decade_table(w_, ENC_)
     check(f"planted {label_}: two decades (1990s, 2000s) in the decade table", [d["decade"] for d in dec] == ["1990s", "2000s"], [d["decade"] for d in dec])
@@ -570,9 +657,12 @@ check("multi_start: every horizon (1 and 3 years) carries the phase-pooled inter
 
 # ---- World.variant: new trigger, new drop, empty caches ----
 nav0 = w_rev.nav("SPYQ", ENC_)
-wv = w_rev.variant(early_drop=0.20)
+wv = w_rev.variant(early_drop=0.05)
 check("World.variant: caches are empty and the drop replaces the calendar products' drop (twins keep none)",
-      wv.navs == {} and all(s.early_drop == 0.20 for s in wv.specs) and all(t.early_drop is None for t in wv.twins.values()) and w_rev.specs[0].early_drop == 0.35)
-nav20 = wv.nav("SPYQ", ENC_)
-check("World.variant: the 20% trigger fires on the planted path where the 35% one does not (the 35% world's cache is untouched)",
-      len(nav20.attrs["early_resets"]) >= len(nav0.attrs["early_resets"]) and w_rev.nav("SPYQ", ENC_) is nav0)
+      wv.navs == {} and all(s.early_drop == 0.05 for s in wv.specs) and all(t.early_drop is None for t in wv.twins.values()) and w_rev.specs[0].early_drop == 0.35)
+nav05 = wv.nav("SPYQ", ENC_)
+# R4 review: the old check compared 0 resets with 0 (the planted path's worst in-quarter fall is about 6%), so it could not
+# show that the variant's drop reaches the kernel. A 5% drop does fire here; the 35% one does not.
+check("World.variant: the 5% trigger fires on the planted path where the 35% one does not, so the NAVs differ (the 35% world's cache is untouched)",
+      len(nav05.attrs["early_resets"]) > 0 == len(nav0.attrs["early_resets"]) and not np.allclose(nav05.values, nav0.values)
+      and w_rev.nav("SPYQ", ENC_) is nav0, (len(nav05.attrs["early_resets"]), len(nav0.attrs["early_resets"])))

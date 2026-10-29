@@ -576,7 +576,8 @@ def prov(und, enc, window, note=""):
             f"Window: {window}. Encoding: {e.describe()}. Early-reset trigger: {p['trigger_text']}, drop 35%, mode level. "
             f"Cash: {und.cash.attrs['source']} ({und.cash.attrs['proxy_rows']} proxy rows). "
             f"Half-spread {live_hs:.2%} on SPYQ / MQQQ / QQQP, {mod_hs:.2%} on modeled products and twins "
-            f"[ASSUMED]; fees: the products' own (live VERIFIED, others 1.00% ASSUMED). Cost, spread and rate turns ASSUMED (fitted 2024-26)."
+            f"[ASSUMED]; fees: {'; '.join(f'{s.name} {s.fee:.2%} [{s.costs.fee_status}]' for s in und.world.specs)}; daily twins copy "
+            f"their fund's fee and status. Cost, spread and rate turns ASSUMED (fitted 2024-26)."
             f"{(' ' + note) if note else ''} All series synthetic; products other than SPYQ / MQQQ / QQQP are MODELED designs, twins are comparison series.*\n")
 
 

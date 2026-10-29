@@ -30,10 +30,11 @@ from calendar_letf import bottoms as B  # noqa: E402
 from calendar_letf import costs, loader, products, provenance, study  # noqa: E402
 
 OUT = ROOT / "results"
-CAPTION = "Data: TradingView (via local export), FRED. Modeled / synthetic series, not live funds. Not investment advice."
+CAPTION = ("Data: TradingView (via local export), FRED. The calendar funds, daily twins and 3x rows are models; the SSO, QLD, "
+           "UPRO and TQQQ rows are real funds' market prices, price only. Not investment advice.")
 START_DOLLARS = 10_000.0
 GFC_FROM, GFC_TO = "2007-01-01", "2009-12-31"     # the window searched for the crash low (a definition, ASSUMED)
-ENTRY_SHIFTS = tuple(range(-10, 22))               # every session from 10 before (-) to 21 after (+) the low
+ENTRY_SHIFTS = tuple(range(-400, 22))              # every session from 400 before (-) to 21 after (+) the low
 ENCODINGS = ("fixed", "rate")
 NAMES = {"SPX": "S&P 500", "NDX": "Nasdaq-100"}
 REAL_2X = {"SPX": ("AMEX:SSO", "SSO"), "NDX": ("AMEX:QLD", "QLD")}
@@ -218,11 +219,25 @@ def launch_md(L):
                             pct(r["max_dd"], 0)] for r in L["rows"]])
 
 
+def ranges_text(ks):
+    """Sorted integer shifts as runs, e.g. [-5, -4, -3, 7] -> '-5 to -3, +7'; 'none' when empty."""
+    if not ks:
+        return "none"
+    ks = sorted(ks)
+    runs, start, prev = [], ks[0], ks[0]
+    for k in ks[1:] + [None]:
+        if k is not None and k == prev + 1:
+            prev = k
+            continue
+        runs.append(f"{start:+d}" if start == prev else f"{start:+d} to {prev:+d}")
+        if k is not None:
+            start = prev = k
+    return ", ".join(runs)
+
+
 def shift_md(w, summary):
     """One row per calendar product: the lowest and highest lead over the shift range, and the shifts below 1."""
-    def shifts(ks):
-        return ", ".join(f"{k:+d}" for k in ks) if ks else "none"
-
+    shifts = ranges_text
     head = ["product", "lowest lead (shift)", "highest lead (shift)", "shifts below 1 (fixed)", "shifts below 1 (rate)"]
     out = []
     for sp in w.specs:
@@ -281,14 +296,15 @@ def render(R, banner, worlds):
                   "summary only: one lead per session would be a daily series (data/README, licensing).", "",
                   shift_md(w, W["shift"]),
                   f"**Sensitivity: the other index's low date ({W['alt']['date']}), fixed encoding.**", ""]
-        lines.append(md_table(["series", "$10,000 became", "CAGR"],
-                              [[r["series"] if r["series"] != INDEX_ROW else "1x index", money(r["dollars"]), pct(r["cagr"])]
+        lines.append(md_table(["series", "kind", "$10,000 became", "CAGR"],
+                              [[r["series"] if r["series"] != INDEX_ROW else "1x index", r["kind"], money(r["dollars"]), pct(r["cagr"])]
                                for r in W["alt"]["rows"] if r["encoding"] in ("fixed", "filed", "price", "tr")]))
     dd2, dd3 = drawdown_ranges(R)
     tv = twin_vs_real_range(R)
     losers = shift_losers(R)
-    loser_txt = ("; ".join(f"{p} ({NAMES[n]}) at shifts {', '.join(f'{k:+d}' for k in ks)}" for n, p, ks in losers)
-                 if losers else "none")
+    loser_txt = ("; ".join(f"{p} ({NAMES[n]}) at shifts {ranges_text(ks)}"
+                           + (" (the run reaches the grid's edge, so it may go on further)" if min(ks) == min(ENTRY_SHIFTS) else "")
+                           for n, p, ks in losers) if losers else "none")
     lines += ["## How to read it", "",
               "- A calendar fund bought at the low partway through its period holds more than 2x until the index regains the "
               "level of its last reset (see the leverage note above), so its start into the rebound carries extra exposure. "
@@ -351,7 +367,7 @@ def main():
             model_3x=ev.model_3x.name, rows=entry_rows(w, ev, real2, s, e), launch=launch_rows(w, ev, real2, real3, e),
             shift=shift_summary(shift_rows(w, s, e)), alt=dict(date=str(w.dates[s_alt].date()), rows=entry_rows(w, ev, real2, s_alt, e)))
     OUT.mkdir(exist_ok=True)
-    (OUT / "gfc_oracle.json").write_text(json.dumps(R, indent=1), encoding="utf-8", newline="\n")
+    (OUT / "gfc_oracle.json").write_text(json.dumps(provenance.json_safe(R), indent=1, allow_nan=False), encoding="utf-8", newline="\n")
     (OUT / "gfc_oracle.md").write_text(render(R, banner, worlds), encoding="utf-8", newline="\n")
     for name, W in R["worlds"].items():
         print(f"{name}: entry {W['entry']['date']} ({pct(W['entry']['fall'])}), end {W['end']}, {W['years']:.1f} years")
@@ -360,7 +376,7 @@ def main():
                 extra = f"  lev {r['leverage']:.2f}x  early {r['early_resets']} {r['first_early_reset'] or ''}" if "early_resets" in r else ""
                 print(f"  {r['series']:<16} {r['kind']:<36} {money(r['dollars']):>13} {pct(r['cagr'])}/yr{extra}")
         for n_, p_, ks in shift_losers(dict(worlds={name: W})):
-            print(f"  {p_} ends below its twin (fixed) at shifts {ks}")
+            print(f"  {p_} ends below its twin (fixed) at shifts {ranges_text(ks)}")
     print("wrote results/gfc_oracle.json and results/gfc_oracle.md")
 
 

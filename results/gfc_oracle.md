@@ -128,27 +128,27 @@ Entry: the close of 2009-03-09, after a fall of 56.8% from the highest close sin
 | SSO | REAL 2x fund (price only) | $432,012 | +24.4% | -59% |
 | 1x index | 1x total-return index | $115,481 | +15.2% | -34% |
 
-**Sensitivity: the entry moved around the low**, every session from -10 to +21. The lead is the calendar fund's end value divided by its daily twin's, both bought at the close of that session and held to the end; above 1 the calendar fund ends ahead. The table gives the summary only: one lead per session would be a daily series (data/README, licensing).
+**Sensitivity: the entry moved around the low**, every session from -400 to +21. The lead is the calendar fund's end value divided by its daily twin's, both bought at the close of that session and held to the end; above 1 the calendar fund ends ahead. The table gives the summary only: one lead per session would be a daily series (data/README, licensing).
 
 | product | lowest lead (shift) | highest lead (shift) | shifts below 1 (fixed) | shifts below 1 (rate) |
 |---|---|---|---|---|
-| SPYQ (quarterly) | 1.068 (+13) | 1.210 (+0) | none | none |
-| HYP_SPX_M (monthly) | 1.170 (+15) | 1.191 (+0) | none | none |
-| HYP_SPX_W (weekly) | 1.056 (-3) | 1.064 (+7) | none | none |
+| SPYQ (quarterly) | 0.792 (-84) | 1.210 (+0) | -400 to -73 | -400 to -73 |
+| HYP_SPX_M (monthly) | 1.170 (+15) | 1.408 (-90) | none | none |
+| HYP_SPX_W (weekly) | 1.055 (-22) | 1.122 (-101) | none | none |
 
 **Sensitivity: the other index's low date (2008-11-20), fixed encoding.**
 
-| series | $10,000 became | CAGR |
-|---|---|---|
-| SPYQ | $501,554 | +24.5% |
-| TWIN_SPYQ | $454,480 | +23.8% |
-| HYP_SPX_M | $601,404 | +25.8% |
-| TWIN_HYP_SPX_M | $454,480 | +23.8% |
-| HYP_SPX_W | $498,520 | +24.5% |
-| TWIN_HYP_SPX_W | $454,480 | +23.8% |
-| UPRO_MODEL | $1,621,093 | +33.0% |
-| SSO | $594,045 | +25.7% |
-| 1x index | $143,627 | +16.1% |
+| series | kind | $10,000 became | CAGR |
+|---|---|---|---|
+| SPYQ | MODELED calendar | $501,554 | +24.5% |
+| TWIN_SPYQ | MODELED 2x daily twin (same costs) | $454,480 | +23.8% |
+| HYP_SPX_M | MODELED calendar | $601,404 | +25.8% |
+| TWIN_HYP_SPX_M | MODELED 2x daily twin (same costs) | $454,480 | +23.8% |
+| HYP_SPX_W | MODELED calendar | $498,520 | +24.5% |
+| TWIN_HYP_SPX_W | MODELED 2x daily twin (same costs) | $454,480 | +23.8% |
+| UPRO_MODEL | MODEL 3x daily (filed terms) | $1,621,093 | +33.0% |
+| SSO | REAL 2x fund (price only) | $594,045 | +25.7% |
+| 1x index | 1x total-return index | $143,627 | +16.1% |
 
 ## Nasdaq-100
 
@@ -175,34 +175,34 @@ Entry: the close of 2008-11-20, after a fall of 53.7% from the highest close sin
 | QLD | REAL 2x fund (price only) | $1,171,667 | +33.1% | -64% |
 | 1x index | 1x total-return index | $205,477 | +19.9% | -35% |
 
-**Sensitivity: the entry moved around the low**, every session from -10 to +21. The lead is the calendar fund's end value divided by its daily twin's, both bought at the close of that session and held to the end; above 1 the calendar fund ends ahead. The table gives the summary only: one lead per session would be a daily series (data/README, licensing).
+**Sensitivity: the entry moved around the low**, every session from -400 to +21. The lead is the calendar fund's end value divided by its daily twin's, both bought at the close of that session and held to the end; above 1 the calendar fund ends ahead. The table gives the summary only: one lead per session would be a daily series (data/README, licensing).
 
 | product | lowest lead (shift) | highest lead (shift) | shifts below 1 (fixed) | shifts below 1 (rate) |
 |---|---|---|---|---|
-| MQQQ (monthly) | 1.268 (+21) | 1.400 (+0) | none | none |
-| QQQP (quarterly) | 0.865 (-9) | 1.175 (+4) | -10, -9, -8, -7, -6, -5, -4, -3, -2 | -10, -9, -8, -7, -6, -5, -4, -3, -2 |
-| HYP_NDX_W (weekly) | 1.129 (+21) | 1.164 (+0) | none | none |
+| MQQQ (monthly) | 1.268 (+21) | 1.474 (-18) | none | none |
+| QQQP (quarterly) | 0.834 (-12) | 1.175 (+4) | -400 to -2 | -400 to -2 |
+| HYP_NDX_W (weekly) | 1.129 (+21) | 1.199 (-397) | none | none |
 
 **Sensitivity: the other index's low date (2009-03-09), fixed encoding.**
 
-| series | $10,000 became | CAGR |
-|---|---|---|
-| MQQQ | $2,876,947 | +38.0% |
-| TWIN_MQQQ | $2,307,470 | +36.3% |
-| QQQP | $2,683,335 | +37.4% |
-| TWIN_QQQP | $2,319,672 | +36.3% |
-| HYP_NDX_W | $2,603,969 | +37.2% |
-| TWIN_HYP_NDX_W | $2,319,672 | +36.3% |
-| TQQQ_MODEL | $13,346,584 | +50.6% |
-| QLD | $3,213,221 | +38.9% |
-| 1x index | $351,842 | +22.4% |
+| series | kind | $10,000 became | CAGR |
+|---|---|---|---|
+| MQQQ | MODELED calendar | $2,876,947 | +38.0% |
+| TWIN_MQQQ | MODELED 2x daily twin (same costs) | $2,307,470 | +36.3% |
+| QQQP | MODELED calendar | $2,683,335 | +37.4% |
+| TWIN_QQQP | MODELED 2x daily twin (same costs) | $2,319,672 | +36.3% |
+| HYP_NDX_W | MODELED calendar | $2,603,969 | +37.2% |
+| TWIN_HYP_NDX_W | MODELED 2x daily twin (same costs) | $2,319,672 | +36.3% |
+| TQQQ_MODEL | MODEL 3x daily (filed terms) | $13,346,584 | +50.6% |
+| QLD | REAL 2x fund (price only) | $3,213,221 | +38.9% |
+| 1x index | 1x total-return index | $351,842 | +22.4% |
 
 ## How to read it
 
 - A calendar fund bought at the low partway through its period holds more than 2x until the index regains the level of its last reset (see the leverage note above), so its start into the rebound carries extra exposure. This study does not split each lead into its causes.
 - Each daily twin is a daily-reset fund like the real 2x fund, with the costs fitted to the live calendar funds (ASSUMPTIONS section 2, two ASSUMED encodings). The twins end at 0.72 to 0.87 times the real 2x fund's value (price only), so whether a calendar design ends above the real fund depends on the assumed costs: see the last column of each table.
-- Calendar products whose end value falls below their twin's at some entry shift (fixed encoding): QQQP (Nasdaq-100) at shifts -10, -9, -8, -7, -6, -5, -4, -3, -2.
+- Calendar products whose end value falls below their twin's at some entry shift (fixed encoding): SPYQ (S&P 500) at shifts -400 to -73 (the run reaches the grid's edge, so it may go on further); QQQP (Nasdaq-100) at shifts -400 to -2 (the run reaches the grid's edge, so it may go on further).
 - After the entry every 2x path fell -59% to -65% and the 3x models -77% to -82% from a high; the dollar figures assume a holder kept the position through those falls.
 - An entry three months early or late moves a 3-year result far more than the reset design does (results/from_bottoms.md, section D), so the exact low matters more than the design.
 
-Data: TradingView (via local export), FRED. Modeled / synthetic series, not live funds. Not investment advice.
+Data: TradingView (via local export), FRED. The calendar funds, daily twins and 3x rows are models; the SSO, QLD, UPRO and TQQQ rows are real funds' market prices, price only. Not investment advice.

@@ -67,7 +67,7 @@ raises("loader: unix time without a timezone is refused",
 
 # environment variable selects the folder
 os.environ[loader.ENV_DATA] = str(d1)
-check("loader: CALENDAR_LETF_DATA is honoured", len(loader.load_prices("SP:SPX")) == len(px))
+check("loader: CALENDAR_LETF_DATA is honored", len(loader.load_prices("SP:SPX")) == len(px))
 os.environ.pop(loader.ENV_DATA)
 
 # bad files
@@ -179,7 +179,7 @@ out = series.spx_total_return(pre_yield=0.03, data_dir=d2)
 post = out.loc[pub_start:].drop(gap_day)
 ratio = post / tr_pub
 check("SPX TR: equals the published series times a constant after the splice (1e-12)",
-      (ratio / ratio.iloc[0] - 1).abs().max() < 1e-12, f"{(ratio / ratio.iloc[0] - 1).abs().max():.2e}")
+      (ratio / ratio.iloc[0] - 1).abs().max(skipna=False) < 1e-12, f"{(ratio / ratio.iloc[0] - 1).abs().max():.2e}")
 check("SPX TR: on SPX's calendar, 1.0 on day one, no NaN", out.index.equals(spx.index) and out.iloc[0] == 1.0 and not out.isna().any())
 check("SPX TR: the missing SPXTR day is carried by SPX's move and listed in attrs",
       out.attrs["days_filled_from_price"] == [str(gap_day.date())]
@@ -194,7 +194,7 @@ write_clean(TMP / "spx_stale", "SP:SPXTR", stale)
 o_st = series.spx_total_return(pre_yield=0.03, data_dir=TMP / "spx_stale")      # same flat yield as `out`, to compare like with like
 check("SPX TR: a flat published row on a non-trading day is dropped and listed",
       o_st.index.equals(spx.index) and o_st.attrs["published_stale_days_dropped"] == ["1988-03-12"]
-      and (o_st - out).abs().max() < 1e-12)
+      and (o_st - out).abs().max(skipna=False) < 1e-12)
 moving = stale.copy()
 moving.loc[sat] *= 1.01
 write_clean(TMP / "spx_mov", "SP:SPX", spx)
@@ -204,7 +204,7 @@ zero = series.spx_total_return(pre_yield=0.0, data_dir=d2)
 pre = zero.loc[:pub_start]
 r2 = pre / spx.loc[:pub_start]
 check("SPX TR: zero yield -> pre-splice part is the price index times a constant (1e-12)",
-      (r2 / r2.iloc[0] - 1).abs().max() < 1e-12)
+      (r2 / r2.iloc[0] - 1).abs().max(skipna=False) < 1e-12)
 hi = series.spx_total_return(pre_yield=0.04, data_dir=d2)
 check("SPX TR: a higher assumed yield grows the level more by the splice date (1.0 on day one in both)",
       hi.iloc[0] == 1.0 and hi.loc[pub_start] > out.loc[pub_start] > zero.loc[pub_start])
@@ -224,12 +224,12 @@ write_clean(d3, "NASDAQ:NDX", ndx)
 write_clean(d3, "NASDAQ:XNDX", pd.concat([xn_early, xn]))
 nt = series.ndx_total_return(data_dir=d3)
 ratio = nt.loc[x_start:].drop(sandy) / xn
-check("NDX TR: equals the published XNDX times a constant from 2010-01-04 (1e-12)", (ratio / ratio.iloc[0] - 1).abs().max() < 1e-12)
+check("NDX TR: equals the published XNDX times a constant from 2010-01-04 (1e-12)", (ratio / ratio.iloc[0] - 1).abs().max(skipna=False) < 1e-12)
 check("NDX TR: Sandy-style missing day is filled and listed", nt.attrs["days_filled_from_ndx"] == [str(sandy.date())])
 check("NDX TR: on NDX's calendar and starts at 1.0", nt.index.equals(ndx.index) and nt.iloc[0] == 1.0)
 nz = series.ndx_total_return(pre_yield=0.0, mid_yield=0.0, data_dir=d3)
 rz = nz.loc[:x_start] / ndx.loc[:x_start]
-check("NDX TR: zero yields -> pre-splice part is the price index times a constant (1e-12)", (rz / rz.iloc[0] - 1).abs().max() < 1e-12)
+check("NDX TR: zero yields -> pre-splice part is the price index times a constant (1e-12)", (rz / rz.iloc[0] - 1).abs().max(skipna=False) < 1e-12)
 # one expected value by hand: between 2006-11-08 and the splice the growth is price x (1 + 0.73% x days/365)
 seg = nt.loc["2008-03-03":"2008-03-04"]
 expect = ndx.loc["2008-03-04"] / ndx.loc["2008-03-03"] * (1 + series.MID_YIELD * 1 / 365)
@@ -339,6 +339,29 @@ check("fresher published file: 2 rows after the price file's end are dropped and
       and np.allclose(ah.values, out.values, rtol=0, atol=1e-12), ah.attrs.get("published_rows_after_price_end"))
 check("fresher published file: the banner says so and tells the reader to top up the price file",
       "after the price file" in series.banner(ah) and "top up" in series.banner(ah))
+xn_ahead = pd.concat([xn_early, xn, pd.Series([xn.iloc[-1] * 1.01, xn.iloc[-1] * 1.02],
+                                              index=pd.bdate_range(ndx.index[-1] + pd.Timedelta(days=1), periods=2))])
+write_clean(TMP / "ndx_ahead", "NASDAQ:NDX", ndx)
+write_clean(TMP / "ndx_ahead", "NASDAQ:XNDX", xn_ahead)
+nah = series.ndx_total_return(data_dir=TMP / "ndx_ahead")
+check("fresher XNDX file: rows after the NDX file's end are dropped and listed (not refused), and the series equals the plain run",
+      len(nah.attrs["published_rows_after_price_end"]) == 2 and nah.index.equals(ndx.index)
+      and np.allclose(nah.values, nt.values, rtol=0, atol=1e-12), nah.attrs.get("published_rows_after_price_end"))
+
+# 9f. the splice day itself earns its month's dividend under the default (Shiller) yield. Flat price, flat published
+#     level: the step from the last pre-splice row (Friday 2000-02-04) into the splice day (Monday 2000-02-07) must grow
+#     by 1 + y(Feb 2000) x 3/365, with y read from the Shiller file by a second route (the csv module).
+import csv  # noqa: E402
+
+with open(series.SHILLER_FILE, newline="", encoding="utf-8") as _f:
+    _y_feb2000 = next(float(r["dividend_yield"]) for r in csv.DictReader(_f) if r["month"] == "2000-02")
+sd_ix = pd.bdate_range("2000-01-03", "2000-03-31")
+write_clean(TMP / "spx_spliceday", "SP:SPX", pd.Series(100.0, index=sd_ix))
+write_clean(TMP / "spx_spliceday", "SP:SPXTR", pd.Series(400.0, index=sd_ix[sd_ix >= "2000-02-07"]))
+sdl = series.spx_total_return(data_dir=TMP / "spx_spliceday")
+check("Shiller splice day: the step into the first published row earns that month's yield x days/365 (it earned 0 before the fix)",
+      abs(sdl.loc["2000-02-07"] / sdl.loc["2000-02-04"] - (1 + _y_feb2000 * 3 / 365)) < 1e-12 and _y_feb2000 > 0,
+      (sdl.loc["2000-02-07"] / sdl.loc["2000-02-04"], 1 + _y_feb2000 * 3 / 365))
 
 # 9d. stale rates (published series ends before the price data)
 idx_s = pd.bdate_range("2000-04-03", "2000-06-09")                          # DFF last date is 2000-05-31: 7 rows after

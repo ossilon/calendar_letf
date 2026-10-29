@@ -31,6 +31,30 @@ DATE_COLUMNS = ("date", "time", "observation_date", "ex_date")      # ex_date: t
 CHUNK = 1 << 20
 
 
+def json_safe(o):
+    """A nested result made safe for strict JSON: numpy numbers to Python numbers, NaN and infinity to null, dates to
+    ISO text. Write it with json.dumps(..., allow_nan=False), so a value this misses raises instead of becoming a
+    bare NaN (which strict JSON readers reject) or a silent string."""
+    import datetime as _dt
+    import math
+
+    if isinstance(o, dict):
+        return {str(k): json_safe(v) for k, v in o.items()}
+    if isinstance(o, (list, tuple)):
+        return [json_safe(v) for v in o]
+    if hasattr(o, "dtype") and hasattr(o, "item") and getattr(o, "ndim", 0) == 0:      # a numpy scalar
+        o = o.item()
+    if isinstance(o, bool) or o is None or isinstance(o, str):
+        return o
+    if isinstance(o, int):
+        return o
+    if isinstance(o, float):
+        return o if math.isfinite(o) else None
+    if isinstance(o, (_dt.datetime, _dt.date)):                                       # pandas Timestamp included
+        return o.date().isoformat() if isinstance(o, _dt.datetime) else o.isoformat()
+    raise TypeError(f"json_safe: no JSON form for {type(o).__name__}: {o!r}")
+
+
 def sha256_of(path):
     """SHA-256 of the file's bytes, as 64 hex characters."""
     h = hashlib.sha256()

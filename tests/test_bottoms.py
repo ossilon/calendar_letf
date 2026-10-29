@@ -6,7 +6,7 @@ from dataclasses import replace
 import numpy as np
 import pandas as pd
 
-from _harness import check, raises  # noqa: I001
+from _harness import check, raises, worst_of  # noqa: I001
 from calendar_letf import bottoms as b
 from calendar_letf import costs, kernel, periods, products, study
 
@@ -124,7 +124,7 @@ for row in (40, 41, 77, 100, 250, 333, 580):
     r0 = int(np.flatnonzero(pe2[:row])[-1])
     a = b.effective_leverage(rw.to_numpy(), rw.to_numpy(), np.full(600, 0.04), acc2_fin, acc2_fee, pe2, row, 2.0, 0.026, 0.01, None)
     c = b.effective_leverage_nav_ratio(rw.to_numpy(), nav.to_numpy(), r0, row)
-    worst_diff = max(worst_diff, abs(a - c))
+    worst_diff = worst_of(worst_diff, abs(a - c))          # NaN-safe: a NaN gives inf, so the check fails
 check("effective_leverage: with costs, the kernel-state method equals the NAV-ratio formula 2 x (U_t/U_0) / (NAV_t/NAV_0) to 1e-7", worst_diff < 1e-7, worst_diff)
 
 # ---------------------------------------------------------------- Guppy confirmations
@@ -196,7 +196,9 @@ nav_m = 1.01 ** months_elapsed.to_numpy()
 steps = (0.5, 1.0, 1.5, 2.0, 2.5, 3.0)
 got = b.dollar_values(nav_m, dd, 0, steps)
 want = {f"{h:g}y": 10_000.0 * 1.01 ** (12 * h) for h in steps}
-err_cal = max(abs(got[k] - want[k]) for k in want)
+err_cal = 0.0
+for k in want:
+    err_cal = worst_of(err_cal, abs(got[k] - want[k]))
 old = {f"{h:g}y": 10_000.0 * nav_m[int(round(h * 252))] / nav_m[0] for h in steps}
 err_252 = min(abs(old[k] - want[k]) for k in want)
 check("dollar layer: 1%/month NAV gives $10,000 x 1.01^(12 h) at h = 0.5, 1, 1.5, 2, 2.5, 3 within 1e-9", err_cal < 1e-9, (err_cal, got))

@@ -1,11 +1,11 @@
 {
   "meta": {
     "title": "Live-fund validation (step 2, R2 refit)",
-    "run_date": "2026-10-27",
+    "run_date": "2026-10-29",
     "code": {
       "script": "run_validate_live.py",
       "files": 23,
-      "sha256": "159bf8054d3aebb0d20a8d4b01d10c7efad3c4db343dc4eb624fc97c2a7fb450"
+      "sha256": "da6f7f680256f748f6901aa0681e42709d3515f6d44b971a4a9e6ede943931f4"
     }
   },
   "provenance": {
@@ -234,12 +234,12 @@
       "cash_nav": 0.6
     },
     "snapshot_1": {
-      "swap_turns": 2.2,
-      "cash_nav": 1.0
+      "swap_turns": 2.21,
+      "cash_nav": 1.11
     },
     "snapshot_2": {
-      "swap_turns": 1.3,
-      "cash_nav": 0.45
+      "swap_turns": 1.32,
+      "cash_nav": 0.41
     },
     "cash_yield_prior": 0.8,
     "filed_spread": {
@@ -329,11 +329,11 @@
             "source": "every filed swap in reference/nport_tradr_2026.json is at 75 or 100 bp (validate.filed_spread_range); window 1's terms: N-CSR fiscal year to 2025-03-31 (EDGAR fp0093842), Cowen OBFR01 + 75 bp, Clear Street and Wells Fargo OBFR01 + 100 bp"
           },
           "snapshot": {
-            "swap_turns": 2.2,
-            "cash_nav": 1.0,
-            "cash_yield": 1.1196746826171875,
-            "gap_at_prior_0_8": -0.017254801059193747,
-            "rate_turns": 1.0803253173828127
+            "swap_turns": 2.21,
+            "cash_nav": 1.11,
+            "cash_yield": 1.0196037292480469,
+            "gap_at_prior_0_8": -0.01317291951640076,
+            "rate_turns": 1.078239860534668
           },
           "dff_minus_obfr_bp_mean": 0.0,
           "gap_with_dff": 7.529311529808069e-08,
@@ -384,11 +384,11 @@
           "cash_yield_fy2026_fee_sensitivity": 0.699981689453125,
           "cash_yield_bounds_at_filed_spread_extremes": null,
           "snapshot": {
-            "swap_turns": 1.3,
-            "cash_nav": 0.45,
-            "cash_yield": 0.03960418701171875,
-            "gap_at_prior_0_8": 0.015690507545384147,
-            "rate_turns": 1.2821781158447265
+            "swap_turns": 1.32,
+            "cash_nav": 0.41,
+            "cash_yield": 0.10430908203125,
+            "gap_at_prior_0_8": 0.013069295480867105,
+            "rate_turns": 1.2772332763671876
           },
           "dff_minus_obfr_bp_mean": 0.2286821705426387,
           "gap_with_dff": -3.8728119380104786e-05,
@@ -593,7 +593,7 @@
             "period_end": "2025-12-31",
             "fund_return": 0.033828759356727245,
             "etf_return": 0.02362724789096049,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.013425736425193735
           },
           {
@@ -617,7 +617,7 @@
             "period_end": "2026-09-30",
             "fund_return": 0.03016902689422163,
             "etf_return": 0.02123813222277282,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.012307237551324013
           }
         ]
@@ -668,7 +668,7 @@
             "period_end": "2025-12-31",
             "fund_return": 0.033828759356727245,
             "etf_return": 0.026625334620309804,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.019421909883892363
           },
           {
@@ -692,7 +692,7 @@
             "period_end": "2026-09-30",
             "fund_return": 0.03016902689422163,
             "etf_return": 0.023770586661306048,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.017372146428390467
           }
         ]
@@ -764,11 +764,11 @@
             "source": "every filed swap in reference/nport_tradr_2026.json is at 75 or 100 bp (validate.filed_spread_range); window 1's terms: N-CSR fiscal year to 2025-03-31 (EDGAR fp0093842), Cowen OBFR01 + 75 bp, Clear Street and Wells Fargo OBFR01 + 100 bp"
           },
           "snapshot": {
-            "swap_turns": 2.2,
-            "cash_nav": 1.0,
-            "cash_yield": 1.1669197082519531,
-            "gap_at_prior_0_8": -0.023883850534392792,
-            "rate_turns": 1.033080291748047
+            "swap_turns": 2.21,
+            "cash_nav": 1.11,
+            "cash_yield": 1.0622978210449219,
+            "gap_at_prior_0_8": -0.018980660157044138,
+            "rate_turns": 1.0308494186401367
           },
           "dff_minus_obfr_bp_mean": 0.003703703703703553,
           "gap_with_dff": 1.647943674853991e-07,
@@ -819,11 +819,11 @@
           "cash_yield_fy2026_fee_sensitivity": 0.56646728515625,
           "cash_yield_bounds_at_filed_spread_extremes": null,
           "snapshot": {
-            "swap_turns": 1.3,
-            "cash_nav": 0.45,
-            "cash_yield": -0.15021514892578125,
-            "gap_at_prior_0_8": 0.022183642311147223,
-            "rate_turns": 1.3675968170166015
+            "swap_turns": 1.32,
+            "cash_nav": 0.41,
+            "cash_yield": -0.10303497314453125,
+            "gap_at_prior_0_8": 0.01918948573647339,
+            "rate_turns": 1.3622443389892578
           },
           "dff_minus_obfr_bp_mean": 0.2286821705426387,
           "gap_with_dff": -4.606625499059547e-05,
@@ -1034,7 +1034,7 @@
             "period_end": "2024-10-31",
             "fund_return": -0.02407336645013336,
             "etf_return": -0.008646300735550172,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.006780764979033016
           },
           {
@@ -1050,7 +1050,7 @@
             "period_end": "2024-12-31",
             "fund_return": 0.0018699299345994458,
             "etf_return": 0.002923058814297441,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.003976187693995437
           },
           {
@@ -1114,7 +1114,7 @@
             "period_end": "2025-08-29",
             "fund_return": 0.010898971509868183,
             "etf_return": 0.009539654165412914,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.008180336820957645
           },
           {
@@ -1146,7 +1146,7 @@
             "period_end": "2025-12-31",
             "fund_return": -0.01875917252577941,
             "etf_return": -0.007977392006459527,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.0028043885128603563
           },
           {
@@ -1194,7 +1194,7 @@
             "period_end": "2026-06-30",
             "fund_return": -0.008351077168217258,
             "etf_return": -0.0025869892050763843,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.0031770987580644894
           },
           {
@@ -1245,7 +1245,7 @@
             "period_end": "2024-10-31",
             "fund_return": -0.02407336645013336,
             "etf_return": -0.008646300735550172,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.006780764979033016
           },
           {
@@ -1261,7 +1261,7 @@
             "period_end": "2024-12-31",
             "fund_return": 0.0018699299345994458,
             "etf_return": 0.004524029916617822,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.0071781298986361985
           },
           {
@@ -1325,7 +1325,7 @@
             "period_end": "2025-08-29",
             "fund_return": 0.010898971509868183,
             "etf_return": 0.00953965416541247,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.008180336820956757
           },
           {
@@ -1357,7 +1357,7 @@
             "period_end": "2025-12-31",
             "fund_return": -0.01875917252577941,
             "etf_return": -0.006705214049780306,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.005348744426218799
           },
           {
@@ -1405,7 +1405,7 @@
             "period_end": "2026-06-30",
             "fund_return": -0.008351077168217258,
             "etf_return": -0.0014874763516966594,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.005376124464823939
           },
           {
@@ -1493,11 +1493,11 @@
             "source": "every filed swap in reference/nport_tradr_2026.json is at 75 or 100 bp (validate.filed_spread_range); window 1's terms: N-CSR fiscal year to 2025-03-31 (EDGAR fp0093842), Cowen OBFR01 + 75 bp, Clear Street and Wells Fargo OBFR01 + 100 bp"
           },
           "snapshot": {
-            "swap_turns": 2.2,
-            "cash_nav": 1.0,
-            "cash_yield": 1.16632080078125,
-            "gap_at_prior_0_8": -0.02142910572947776,
-            "rate_turns": 1.0336791992187502
+            "swap_turns": 2.21,
+            "cash_nav": 1.11,
+            "cash_yield": 1.0616493225097656,
+            "gap_at_prior_0_8": -0.0170098120740656,
+            "rate_turns": 1.03156925201416
           },
           "dff_minus_obfr_bp_mean": 0.0,
           "gap_with_dff": -5.353826226794922e-08,
@@ -1548,11 +1548,11 @@
           "cash_yield_fy2026_fee_sensitivity": 0.774505615234375,
           "cash_yield_bounds_at_filed_spread_extremes": null,
           "snapshot": {
-            "swap_turns": 1.3,
-            "cash_nav": 0.45,
-            "cash_yield": 0.136016845703125,
-            "gap_at_prior_0_8": 0.014845417761534252,
-            "rate_turns": 1.2387924194335938
+            "swap_turns": 1.32,
+            "cash_nav": 0.41,
+            "cash_yield": 0.21027374267578125,
+            "gap_at_prior_0_8": 0.012004010181172697,
+            "rate_turns": 1.2337877655029297
           },
           "dff_minus_obfr_bp_mean": 0.2286821705426387,
           "gap_with_dff": -4.000798295944463e-05,
@@ -1757,7 +1757,7 @@
             "period_end": "2025-12-31",
             "fund_return": 0.02921107652251642,
             "etf_return": 0.023219014940786487,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.01722695335905655
           },
           {
@@ -1781,7 +1781,7 @@
             "period_end": "2026-09-30",
             "fund_return": -0.00511694309553179,
             "etf_return": 0.004576317218902837,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.014269577533337463
           }
         ]
@@ -1832,7 +1832,7 @@
             "period_end": "2025-12-31",
             "fund_return": 0.02921107652251642,
             "etf_return": 0.024531199426476302,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.019851322330436183
           },
           {
@@ -1856,7 +1856,7 @@
             "period_end": "2026-09-30",
             "fund_return": -0.00511694309553179,
             "etf_return": 0.005594387784196186,
-            "multiple": NaN,
+            "multiple": null,
             "fund_minus_2x_etf": -0.016305718663924162
           }
         ]

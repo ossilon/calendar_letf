@@ -121,7 +121,7 @@ separate EMA task, because a hand check had already verified the EMA. New files:
 - `indicators.py` (`pine_ema` = TradingView's ta.ema, `guppy` ribbon states, `week_end_rows`) and
   `tests/test_indicators.py`.
 - `tests/guppy_ema_local.py` (git-ignored): all 23 EMA columns of the daily and weekly QQQ exports reproduced to
-  3e-12. The weekly export's 1,440 closes equal the daily file's week-end closes.
+  3.2e-12 (daily) and 1.7e-12 (weekly). The weekly export's 1,440 closes equal the daily file's week-end closes.
 - `backtest.py` (numba wealth loop, delay, costs).
 - `strategies/` (base contract, registry, `discover`, generic look-ahead check; 7 plugins, 12 variants).
 - `scripts/run_strategies.py` and `tests/test_strategies.py` (103 checks).
@@ -427,19 +427,20 @@ synthetic overlap structure. The coverage tests shipped in step 3 used 12 blocks
 Suite 1,156 checks, 0 failures (160 prose pins); fresh clone 1,117 checks, PASS.
 
 **R2 step 11, 2026-10-24 and 2026-10-25 (the gate re-grade after step 10 read EXACT A, PROVEN A-, UNCERTAINTY A-,
-TRACEABLE A-).** Done on the first evening:
+TRACEABLE A-).** Prose pins tie the numbers in this entry to the current results. So they show the run of 2026-10-29,
+not the values that step 11 measured. Done first:
 1. PROVEN: `phase_pooled_mean` has a plain-loop second implementation and a planted case with unequal phases (k = 3
    and 2), the shape the real data takes.
 2. UNCERTAINTY: a coverage simulation at every published configuration (`scripts/run_coverage_sim.py`,
    `results/coverage_sim.md`). The suite recomputes three entries, bit for bit.
    - Under independent months the pooled interval covers 0.94-1.00. It is conservative at ten years (multiplier
-     needed 2.23 / 2.34 against 2.57 / 4.30 used).
+     needed 2.12 / 2.21 against 2.57 / 4.30 used).
    - The block bootstrap's bias is a block-length effect (SE 0.83 of the truth with 201 blocks), not a few-blocks
      effect alone. The register now says so.
    - The limit of the headline interval is now a measurement, not an assumption. The measurement found the real gap series
      autocorrelated across non-overlapping windows for the S&P monthly design (+0.48 at 3 years, +0.54 at 10). The
      same holds for the S&P weekly design and MQQQ at 1-3 years. Under regime stresses of that size the pooled
-     interval covers 0.42-0.91.
+     interval covers 0.45-0.86.
    - The register states that no noisy verdict can change. It also states that the only clear rows belong to the
      series with no measured persistence.
 3. TRACEABLE:
@@ -516,7 +517,7 @@ Left as text, not pinnable:
 - the "$900" and the "4 of 6 and 3 of 5" in the README's crash section (differences and counts of pinned values,
   checked by hand).
 
-*Step 12b, the same evening.* The review of step 12 caught a defect in the new helper:
+*Step 12b, the same day.* The review of step 12 caught a defect in the new helper:
 - For the next-close fill, the window opened on the fill day, one session after the trigger, when the level path had
   already reset. So three of the six next-close effects had the wrong sign, and the helper understated the maximum
   (+15% where +27% is right). The planted test could not see it, because it retyped the same formula.
@@ -531,7 +532,7 @@ Left as text, not pinnable:
 - The typed "10-14%" clause in ASSUMPTIONS section 2 and the stale "Could not test" line at the end of this file are
   gone.
 
-*Step 12c, 2026-10-25, later the same day.* The re-grade after 12b read EXACT A, PROVEN A, UNCERTAINTY A, TRACEABLE A-
+*Step 12c, 2026-10-25.* The re-grade after 12b read EXACT A, PROVEN A, UNCERTAINTY A, TRACEABLE A-
 on prose alone. Changes:
 - The coverage script now computes the Monte Carlo error of the bootstrap bounds for all 24 rows over seeds 0-3
   (`bb_seed_spread`). The largest is 0.16 pp, the Nasdaq-100 quarterly median at 3 years; every row outside that fund
@@ -544,7 +545,7 @@ on prose alone. Changes:
 - The fill-effect docstring says that the two paths carry different leverage until the next ordinary period end. It
   also says that the 70-session window is long enough, by design, to reach past it.
 
-*Step 12d, 2026-10-25, evening.* A reviewer from a different model line re-graded after 12c (EXACT A, PROVEN A,
+*Step 12d, 2026-10-25.* A second independent reviewer re-graded after 12c (EXACT A, PROVEN A,
 UNCERTAINTY A-, TRACEABLE A-). It found what the earlier passes had not looked at: the timing-rule study carried no
 interval, noisy flag or mean.
 - Now every multi-start row of `results/strategies.json` has the mean and the headline interval with its noisy flag.
@@ -568,7 +569,7 @@ Other corrections from that review:
 
 Suite 1,336 checks, 0 failures; 253 prose pins; fresh clone PASS.
 
-*Step 12e, 2026-10-25, late evening (in progress).* The re-grade after 12d (A- on all four) found an input error:
+*Step 12e, 2026-10-25.* The re-grade after 12d (A- on all four) found an input error:
 - MQQQ's filed swap spread had the typed value 0.97% and the label VERIFIED. The shipped N-PORT extract gives
   0.9930% notional-weighted at 2026-06-30 (Clear Street 78.1m at 100 bp, Cowen 10.1m at 75, Wells Fargo 274.8m at
   100). SPYQ (0.9175%) and QQQP (0.9296%) were right to the second decimal.
@@ -611,7 +612,7 @@ The build log's steps 6-8 record fits made with the typed MQQQ spread; they stan
 - ASSUMPTIONS section 5 now precedes section 6. The validate_live golden's duplicated history reason says what its
   second pass changed.
 
-*Step 12f, 2026-10-26, evening.* A scoped re-grade after 12e checked the named gaps, a fresh sample and the new code.
+*Step 12f, 2026-10-26.* A scoped re-grade after 12e checked the named gaps, a fresh sample and the new code.
 It gave A- on all four; every gap was in prose or tests. Findings and fixes:
 - Two register lines still carried the typed MQQQ spread. Fixed and pinned: 91.75 / 99.30 / 92.96 bp, range
   0.92-0.99%.
@@ -634,7 +635,7 @@ It gave A- on all four; every gap was in prose or tests. Findings and fixes:
 
 Suite 1,387 checks, 0 failures; 266 prose pins; fresh clone PASS.
 
-*Step 12g, 2026-10-26, evening.* The scoped re-grade after 12f (EXACT A-, PROVEN A-, UNCERTAINTY A, TRACEABLE A-) found
+*Step 12g, 2026-10-26.* The scoped re-grade after 12f (EXACT A-, PROVEN A-, UNCERTAINTY A, TRACEABLE A-) found
 two faults in 12f's SPYQ "bracket" of window 1's cash yield. It was not a bound: a 2025-06-30 snapshot with Wells
 Fargo as a third counterparty falls outside it. And it rested on typed 2025-03-31 notionals. Both are gone.
 - Re-fits at the smallest and largest spread that any filed swap carries now bound window 1's c for all three funds.
@@ -648,7 +649,7 @@ Fargo as a third counterparty falls outside it. And it rested on typed 2025-03-3
 - Open, not blocking: the window-1 N-PORTs of the three funds would narrow the bounds. They are public; R2 step 2
   read them for notionals, not for spreads.
 
-*Step 12h, the same evening.* The scoped re-grade after 12g gave EXACT A-, PROVEN A-, UNCERTAINTY A, TRACEABLE A-. The
+*Step 12h, the same day.* The scoped re-grade after 12g gave EXACT A-, PROVEN A-, UNCERTAINTY A, TRACEABLE A-. The
 reviewer re-derived all six bounds by a second route to 1e-5. The re-grade named four small items, now closed:
 - The window-1 bound cites its own source for window 1, the N-CSR to 2025-03-31. That report lists Cowen at OBFR01
   + 75 bp and Clear Street and Wells Fargo at + 100 bp. The docstring and comments say the bound holds if every swap
@@ -662,7 +663,7 @@ reviewer re-derived all six bounds by a second route to 1e-5. The re-grade named
 Still open, a note not a gap: F3 (ii), F5 and ASSUMPTIONS section 2 quote window-1 c 0.88-0.92 without its bound.
 F3 (vi) and ASSUMPTIONS section 6 carry it.
 
-*Steps 12i-12j and the code review (R3), 2026-10-26, late evening.* Two scoped re-grades closed the last items:
+*Steps 12i-12j and the code review (R3), 2026-10-26.* Two scoped re-grades closed the last items:
 - The spread-range test now kills a latest-snapshot-only version (a middle-snapshot extreme).
 - ASSUMPTIONS section 6 cites the window-1 source.
 - The episode guard in `fill_effects` became a pure function, `study.match_fills`. Its tests use planted row numbers:
@@ -730,6 +731,61 @@ from the raw files. They match the published rows.
 
 **Grade of the GFC oracle study after a confirming check (2026-10-27): EXACT A, PROVEN A, UNCERTAINTY A, TRACEABLE A.**
 The real funds stay price only by decision; the results label them and state the bias.
+
+*R4 code review, 2026-10-29.* An independent code review of the full tree named 32 findings. This pass fixed each
+finding about correctness, privacy or licensing, and recorded the rest. Fixed in the engine and the studies:
+- The S&P total-return splice day now gets its Shiller dividend. Before, the yield on that day was zero.
+- The Nasdaq-100 total-return series drops index rows after the last price row. A fresher XNDX file no longer fails.
+- Each world now starts at its first valid month end (`World.me_start`). Earlier starts had used an invented reset
+  base on the first row.
+- Every results file is strict JSON: NaN and infinity become null. A test reads each file with a strict parser.
+- The balance-sheet snapshots in the live validation use the N-PORT values as printed (cash 111% and 41% of NAV).
+- The coverage simulation reads its start counts from the passive study's results, and a test compares the two.
+- The passive study's report reads its window counts and its twin fee labels from the run.
+- S&P results that use Shiller yields name the Shiller file in their input manifest. The stale-render test checks it.
+
+Fixed in the prose:
+- The README's +1.15 claim now gives the base case (+1.16) and the rate encoding (+1.15).
+- The coverage claim in ASSUMPTIONS now says "at or near nominal (within Monte Carlo error)".
+- The captions name the real-fund rows (SSO, QLD, UPRO and TQQQ: market prices, price only). The GFC tables for other
+  entry dates have a kind column.
+- F21: the entry-shift grid now runs from -400 to +21 sessions. QQQP and SPYQ trail their twins for runs of at least
+  400 sessions before the low. The results publish the grid's summary only.
+- The README's EMA sentence states the measured match (3.2e-12 daily, 1.7e-12 weekly) and that the check is local.
+- The build log has no words for a time of day.
+- The regime-stress labels. The multiplier that a stress needs is the 95th percentile of 400 runs, so it carries
+  Monte Carlo error. `coverage.quantile_interval` gives its 95% interval from order statistics (exact binomial
+  coverage 0.962 at 400 runs). Under the mildest stress, F6 now reads noisy at 1 year and too close to call at 3 and
+  5 years. A test computes these words and finds them in README, FINDINGS and ASSUMPTIONS.
+
+Fixed in the tests and tools:
+- `worst_of` replaces `max` at seven sites in the kernel and canon tests, so a NaN fails the check.
+- `tests/test_canon.py` skips only when a file is missing. A corrupt file fails.
+- The variant early-drop test uses a 5% drop. The structural-rate test uses two different windows. Both had passed on
+  equal values.
+- `refreeze_golden.py --study all` re-freezes every changed study and skips the unchanged ones by name.
+- The STE lint is part of the release gate and covers CHANGELOG. The identifier scan finds four more British forms.
+- matplotlib is a dependency.
+
+A scoped re-grade after this pass read EXACT A, PROVEN A-, UNCERTAINTY A, TRACEABLE A-. The fixes:
+- PROVEN: three more sites collected a worst error with `max` (`tests/test_bottoms.py` twice, the t975 check). They
+  use `worst_of` now, and five pandas checks in `tests/test_data.py` no longer skip NaN. A planted NaN in
+  `effective_leverage` now fails the suite.
+- TRACEABLE: ASSUMPTIONS section 2 printed the old snapshot inputs, and section 7 an old coverage (0.980). Both now
+  read the results through pins.
+- The regime subset quoted in ASSUMPTIONS section 7 (lag-h autocorrelation at or above 0.08) had been a frozen list of
+  seeds. The coverage script now computes it, and a test recomputes it.
+- F6 and the README now say what the needed multiplier gives for the 10-year Nasdaq-100 weekly row. A test computes
+  those words too.
+- Smaller items: the dated step-11 entry says that its numbers are current. The README states the EMA match per
+  export, and a planted test value carries no clock time.
+
+**Engine grade after a confirming check (2026-10-29): EXACT A, PROVEN A, UNCERTAINTY A, TRACEABLE A.** Suite 1,602
+checks, 0 failures; 284 prose pins; fresh clone PASS.
+
+Recorded, not fixed: the Guppy chart and the reference dividend rows stay by decision. The other items are the
+scanner's blind spots, the fresh-clone check from HEAD and the `early_drop=None` switch. Also the loader's cell
+coercion, typed filing figures and labels, the unpinned README era edges and untracked files in the code fingerprint.
 
 ## Results
 
@@ -853,8 +909,8 @@ Reading:
   that (equivalently, more rate turns: 1.08-1.12 then 1.16-1.29). So the financing beyond 1.0 x OBFR fell only from
   about 2.36% to 2.24% of NAV for SPYQ. The fee itself fell from 1.30% to 1.22-1.00% in window 2, which is most of the
   -0.30 pp the fixed encoding shows there.
-- (iv) The N-PORT period-end notionals as printed are swaps 2.2 then 1.3 x NAV and cash 1.0 then 0.45. With these
-  inputs fed in, the fit gives c = 1.12-1.17 in window 1 (cash earning more than OBFR) and -0.15 to 0.14 in window 2.
+- (iv) The N-PORT period-end notionals as printed are swaps 2.21 then 1.32 x NAV and cash 1.11 then 0.41. With these
+  inputs fed in, the fit gives c = 1.02-1.06 in window 1 (cash earning more than OBFR) and -0.10 to 0.21 in window 2.
   These values are not credible. The kernel already fixes the notional at each reset and lets it drift, so a run
   must not feed in a snapshot's drifted notional twice. Also, at 2025-09-30, a reset date, printed notional 1.32 +
   direct 0.40 = 1.72 < 2; the swaps' unrealized appreciation is the rest. Whether the financing leg accrues on the
@@ -933,66 +989,74 @@ Each study's JSON carries the sha256 of every input file.
 on the Nasdaq-100. But on one history none of the six ten-year gaps is distinguishable from zero. Quarterly does not
 beat daily on the S&P, and on the Nasdaq-100 its sign depends on one day in 2008.** Median 10-year gap (fixed | rate
 encoding; share of starts the calendar fund wins):
-- SPYQ **-0.54 | -0.59 pp (44%)**, SPX monthly +0.29 | +0.29 (58%), SPX weekly +0.28 | +0.28 (68%), over 801 starts
+- SPYQ **-0.54 | -0.60 pp (44%)**, SPX monthly +0.29 | +0.29 (58%), SPX weekly +0.29 | +0.29 (68%), over 799 starts
   1950-2016;
-- MQQQ **+1.36 | +1.35 (91%)**, QQQP **-2.10 | -2.13 (30%)**, NDX weekly +1.13 | +1.14 (96%), over 381 starts
+- MQQQ **+1.36 | +1.35 (92%)**, QQQP **-2.09 | -2.12 (30%)**, NDX weekly +1.13 | +1.14 (96%), over 379 starts
   1985-2016.
 
 Mean and 95% interval (phase-pooled from independent windows, the headline; ASSUMPTIONS section 7), fixed encoding:
-- SPYQ -0.68 [-1.90, +0.54]; SPX monthly +0.38 [-0.59, +1.34]; SPX weekly +0.19 [-0.36, +0.74];
-- MQQQ +1.02 [-2.34, +4.37]; QQQP -2.44 [-10.77, +5.89]; NDX weekly +1.16 [-0.26, +2.58].
+- SPYQ -0.68 [-1.90, +0.54]; SPX monthly +0.38 [-0.59, +1.35]; SPX weekly +0.19 [-0.36, +0.74];
+- MQQQ +1.04 [-2.23, +4.31]; QQQP -2.43 [-10.79, +5.94]; NDX weekly +1.17 [-0.24, +2.58].
 
 **All six cover zero.** The interval uses t with 5 degrees of freedom on the S&P and 2 on the Nasdaq-100 (3-7
 independent windows per phase). Its simulated coverage on this overlap structure is 0.98 on the S&P and 1.00 on the
 Nasdaq-100, so it is wide rather than short. That coverage takes windows that do not overlap as independent.
 
 The S&P monthly gap series contradicts that at 3, 5 and 10 years (autocorrelation across such windows +0.48 / +0.58 /
-+0.54). That is 3.4 / 3.5 / 3.2 standard deviations above what independent months give. The one-sided Monte Carlo p
-is 0.0005 at 3 years, and no draw of 4,000 is as high at 5 and 10 years. So its intervals are too short by an amount
++0.54). That is 3.4 / 3.6 / 3.2 standard deviations above what independent months give. The one-sided Monte Carlo p
+is 0.0003 at 3 years, and no draw of 4,000 is as high at 5 and 10 years. So its intervals are too short by an amount
 one history cannot fix. That error cannot turn a noisy row clear.
 
-MQQQ at 10 years is borderline (p 0.01 on three windows per phase). Everywhere else p runs from 0.0485 to 0.76. The
+MQQQ at 10 years is borderline (p 0.01 on three windows per phase). Everywhere else p runs from 0.0517 to 0.76. The
 low end is the S&P weekly design at 5 years: one of 24 rows screened, and noisy on the headline interval regardless.
 SPYQ and the Nasdaq-100 weekly series sit on the independent value (ASSUMPTIONS section 7, R2 steps 11-12).
 
+One 10-year row depends on the width of the Nasdaq-100 interval. NDX weekly's t ratio is 3.57 on 2 degrees of
+freedom, below t(2) = 4.30. Independent windows need a multiplier of 2.21 [2.05, 2.59], and the mildest regime stress
+needs 3.09 [2.76, 3.70] (95% Monte Carlo intervals). So on the needed multiplier the row would be clear under
+independent windows and too close to call under the mildest regime stress. The headline keeps t(df) for every row, so
+the row stays noisy. The other five 10-year t ratios run from -1.43 to +1.37, below every interval.
+
 Block-bootstrap intervals (10,000 draws, block = horizon) are secondary, because with block = window length their
-standard error runs 0.57-0.84 of the truth at the published configurations. The ratio is 0.83 even with 201 blocks,
-and their coverage is 0.86-0.94 (results/coverage_sim.md). Their intervals read:
-- mean SPYQ [-1.49, +0.14], SPX monthly [-0.42, +1.18], SPX weekly [-0.24, +0.62], MQQQ [-0.55, +2.50], QQQP [-7.03,
-  +2.10], NDX weekly [+0.38, +1.93];
-- median SPYQ [-2.21, +1.14], SPX monthly [-0.85, +1.42], SPX weekly [-0.28, +0.83], MQQQ [+0.21, +2.50], QQQP
-  [-9.90, +5.71], NDX weekly [+0.35, +1.91].
+standard error runs 0.52-0.86 of the truth at the published configurations. The ratio is 0.83 even with 201 blocks,
+and their coverage is 0.85-0.93 (results/coverage_sim.md). Their intervals read:
+- mean SPYQ [-1.50, +0.14], SPX monthly [-0.42, +1.18], SPX weekly [-0.24, +0.62], MQQQ [-0.46, +2.46], QQQP [-7.07,
+  +2.17], NDX weekly [+0.40, +1.93];
+- median SPYQ [-2.23, +1.15], SPX monthly [-0.85, +1.42], SPX weekly [-0.27, +0.85], MQQQ [+0.23, +2.49], QQQP
+  [-9.95, +5.76], NDX weekly [+0.35, +1.92].
 
 On those secondary intervals NDX weekly (mean and median) and MQQQ (median) would read as clear at 10 years. The
 headline interval does not support that. With three blocks on the Nasdaq-100, a reader should not take a bootstrap
 clearance as a finding.
 
-MQQQ's mean (+0.98 over all starts, +1.02 phase-pooled) sits well below its median (+1.36). The gaps have a skew, so
-the median flatters the calendar side. At shorter horizons, NDX weekly at 1, 3 and 5 years (+1.05 [+0.14, +1.95];
-+1.06 [+0.21, +1.91]; +1.10 [+0.18, +2.02]) are the only clear rows. That holds on the headline interval, and these
+MQQQ's mean (+1.00 over all starts, +1.04 phase-pooled) sits well below its median (+1.36). The gaps have a skew, so
+the median flatters the calendar side. At shorter horizons, NDX weekly at 1, 3 and 5 years (+1.05 [+0.14, +1.96];
++1.07 [+0.22, +1.92]; +1.11 [+0.19, +2.04]) are the only clear rows. That holds on the headline interval, and these
 rows carry two labels:
-- clear under independent windows (t ratios 2.34 / 2.75 / 2.93, where independent windows need 2.07 / 2.13 / 2.25);
-- noisy under the mildest regime stress the project ran (a 2% persistent share with a 34-month half-life needs 3.07 /
-  2.92 / 2.95). This history cannot rule out that stress: the series' autocorrelation across non-overlapping windows
-  sits within 0.2 se of the independent case.
+- clear under independent windows (t ratios 2.35 / 2.77 / 2.94, where independent windows need 2.06 / 2.15 / 2.05);
+- under the mildest regime stress the project ran: noisy at 1 year and too close to call at 3 and 5 years. That
+  stress is a 2% persistent share with a 34-month half-life. It needs 3.01 / 2.88 / 2.84. Each needed multiplier is
+  the 95th percentile of 400 simulated runs, so it carries Monte Carlo error. Its 95% Monte Carlo interval at 3 and 5
+  years ([2.60, 3.48] and [2.63, 3.08]) holds the t ratio. This history cannot rule out that stress: the series'
+  autocorrelation across non-overlapping windows sits within 0.2 se of the independent case.
 
 SPX monthly at 1 year (+0.30 [-0.03, +0.63]) is noisy by a hair, where the block bootstrap had read [+0.03, +0.57].
 Independent-window phases (120 phases of 6-7 windows on the S&P, 3-4 on the Nasdaq-100) give this picture:
 - S&P monthly wins a majority of its windows in 87% of phases, median win share 57%, no phase all-positive;
 - weekly 90% / 71%; SPYQ 11% / 43%;
-- MQQQ every phase a majority, 72% all-positive; NDX weekly 100% / 86%;
+- MQQQ every phase a majority, 74% all-positive; NDX weekly 100% / 88%;
 - QQQP 15% / 33% (48% / 50% in the v1 run with the index-close trigger, not re-run).
 
 The cost encoding and its sensitivities (1.4% / 3.5%; 1.0 / 1.5 turns) move the monthly and weekly gaps on the S&P by
-at most 0.02 pp. They move the Nasdaq-100 weekly design by 0.02, MQQQ by 0.06, SPYQ by 0.15 and QQQP by 0.05. These
+at most 0.02 pp. They move the Nasdaq-100 weekly design by 0.02, MQQQ by 0.07, SPYQ by 0.14 and QQQP by 0.05. These
 are the spans of the six 10-year medians in the sensitivity table. Also, the fill mode moves SPYQ by 0.3 pp
-(next_close -0.29), and the trigger basis moves QQQP by 2.4 pp (F9). So:
+(next_close -0.28), and the trigger basis moves QQQP by 2.4 pp (F9). So:
 - the S&P +0.3 pp is a modest edge that a coin could mimic;
 - the Nasdaq-100 monthly and weekly medians are large and consistent across phases, but their means are not
   distinguishable from zero on 3-4 independent decades;
-- the Nasdaq-100 quarterly gap is negative on the prospectus-faithful reading (the ETF's price, intraday, 35%: -2.10
+- the Nasdaq-100 quarterly gap is negative on the prospectus-faithful reading (the ETF's price, intraday, 35%: -2.09
   pp, 30% of starts). It is not distinguishable from zero on one history, and it is reversible by the fill
-  assumption (next_close +0.09) and by one 2008 day.
+  assumption (next_close +0.14) and by one 2008 day.
 
 **F7. For monthly and weekly resets the sign follows the index's day-to-day autocorrelation (C2 confirmed, with
 corrections). The formula behind it is Bessembinder's second-order expansion. The decade regime is weaker as evidence
@@ -1051,16 +1115,16 @@ the index close. Episodes in level mode:
 
 At a 34% drop QQQP also fires on 2000-05-24 and 2001-03-29; at 36% the 2008 episode vanishes for both quarterly
 funds. `results/calendar_vs_daily.md` section 6b: the 120 S&P 10-year windows that contain 2008-11-20 have median gap
-**-2.10 pp and 0% wins**. The other 681 have **+0.06 pp, 52%**. With the trigger switched off (a sensitivity, not the
+**-2.10 pp and 0% wins**. The other 679 have **+0.07 pp, 52%**. With the trigger switched off (a sensitivity, not the
 product), SPYQ is **+0.27 pp, 59%**, the same as monthly.
 
-On the Nasdaq-100, MQQQ's single 1987 episode costs -3.35 pp inside its 33 windows but +1.55 outside and +1.36 with
-the trigger off. QQQP is **-5.07 pp over the 248 windows that contain an episode (1% wins), +0.97 over the other
-133**. With the trigger off it is **+0.35**, against MQQQ's +1.36. The quarter's leverage drift does damage with or
+On the Nasdaq-100, MQQQ's single 1987 episode costs -3.33 pp inside its 31 windows but +1.55 outside and +1.36 with
+the trigger off. QQQP is **-5.09 pp over the 246 windows that contain an episode (1% wins), +0.97 over the other
+133**. With the trigger off it is **+0.38**, against MQQQ's +1.36. The quarter's leverage drift does damage with or
 without the trigger, and the trigger decides the sign of the headline.
 
 Trigger-basis table (section 9b; 10-year median, fixed):
-- QQQP: -2.10 with the ETF low at 35% and -1.78 with the index low. It is +0.32 with the ETF close, the index close
+- QQQP: -2.09 with the ETF low at 35% and -1.78 with the index low. It is +0.34 with the ETF close, the index close
   or the ETF low at 36%.
 - SPYQ: -0.54 in every cell except four. It is +0.27 with the ETF close at 35% or 36%, the index close at 36%, or the
   ETF low at 36%. The index low at 36% still fires, on 2008-11-21, index only.
@@ -1071,13 +1135,13 @@ No fund of any kind hit zero 1950-2026; the daily twin's worst day was 1987-10-1
 **F10. The monthly advantage is flat for a year and grows after three. (C8: Trainor's "dissipates beyond six
 months" is what the annualized curve shows over 1-12 months. What he did not see is the rise after 3 years).**
 
-SPX monthly median gap by holding period, annualized: +0.41 / +0.17 / +0.11 / +0.04 / +0.11 / +0.18 / +0.29 pp at
+SPX monthly median gap by holding period, annualized: +0.41 / +0.17 / +0.10 / +0.03 / +0.11 / +0.18 / +0.29 pp at
 1 / 3 / 6 / 12 / 36 / 60 / 120 months. In total-return terms (auditor scratch 2026-10-12, not re-run) these
 medians are about +0.04% at 1-12 months, +0.27% at 36, +0.73% at 60, +2.5% at 120. The "dip" is 0.035% x 12. The
 median hides a heavy left tail at short horizons: the mean 1-month gap is negative for every product. October 1987
-alone makes MQQQ's 1-month mean -20 pp (annualized, scratch). Weekly +0.01 to +0.28, rising.
+alone makes MQQQ's 1-month mean -20 pp (annualized, scratch). Weekly +0.01 to +0.29, rising.
 
-QQQP by horizon under the base trigger: +1.04 / +0.77 / +0.38 / -2.10 at 12 / 36 / 60 / 120 months. The v1 run with
+QQQP by horizon under the base trigger: +1.06 / +0.78 / +0.40 / -2.09 at 12 / 36 / 60 / 120 months. The v1 run with
 the index-close trigger (not re-run) gave +1.14 / +0.96 / +0.96 / +0.31.
 
 **F11. A buy-once margin position beats every 2x fund on the S&P 500 at the median only among the windows it
@@ -1086,23 +1150,23 @@ those where its equity goes to zero, the S&P medians are about zero. No fund-min
 or over the survivors, excludes zero.**
 
 The loan now compounds in the R2 re-run. The v1 run charged simple interest over the window. That flattered the margin side by 0.1-0.2 pp/yr at the median and up to 0.8 in high-rate windows.
-Now the margin position finishes (equity zero) in **24% of S&P 10-year windows (190 of 801) and 16% of Nasdaq-100
-windows (60 of 381)**.
+Now the margin position finishes (equity zero) in **24% of S&P 10-year windows (190 of 799) and 16% of Nasdaq-100
+windows (60 of 379)**.
 
 Fund minus margin at 10 years (pp/yr). A finished window counts as -100% CAGR, that is, as an automatic fund win.
-- Median over all windows: SPYQ -0.45, monthly +0.08, weekly -0.12 pp/yr (fund wins 48-50%).
-- Median among surviving windows: **-2.07 / -1.78 / -1.52 pp (fund wins 32-35%)**.
+- Median over all windows: SPYQ -0.48, monthly +0.08, weekly -0.15 pp/yr (fund wins 48-50%).
+- Median among surviving windows: **-2.09 / -1.79 / -1.52 pp (fund wins 32-35%)**.
 - The all-window MEAN is +21.7 to +22.8 pp because of the finished windows.
-- Phase-pooled intervals of the mean (R2 step 12e: SPYQ +22.01 [-22.37, +66.40], monthly +23.07 [-22.38, +68.52],
-  weekly +22.88 [-22.32, +68.08]). All are noisy; a finished window counts as -100% here.
-- Intervals over the survivors only, with finished windows left out of their phases (R2 step 12f: -1.32 [-5.39,
-  +2.75], -0.83 [-4.72, +3.07], -0.89 [-4.66, +2.89]). All are noisy.
+- Phase-pooled intervals of the mean (R2 step 12e: SPYQ +22.03 [-22.42, +66.49], monthly +23.09 [-22.43, +68.62],
+  weekly +22.90 [-22.37, +68.17]). All are noisy; a finished window counts as -100% here.
+- Intervals over the survivors only, with finished windows left out of their phases (R2 step 12f: -1.34 [-5.39,
+  +2.72], -0.84 [-4.73, +3.04], -0.91 [-4.67, +2.85]). All are noisy.
 
-Nasdaq-100: MQQQ +2.61, QQQP +1.06, weekly +2.28 over all windows (52-54%), and **-1.17 / -4.71 / -1.71 among
-survivors (43-45%)**. The pooled means over all windows are +14.41 / +10.97 / +14.58 and over the survivors +0.06 /
--2.60 / +0.17. They rest on one or two degrees of freedom and are all noisy (for example, MQQQ over the survivors
-[-52.73, +52.86]). Over all windows, the monthly fund beats the margin position by +0.97 / +1.26 / +2.61 pp at 3 / 5 /
-10 years. The daily twin beats it by -0.62 / -0.45 / +1.35.
+Nasdaq-100: MQQQ +2.61, QQQP +1.12, weekly +2.31 over all windows (52-54%), and **-1.14 / -4.70 / -1.71 among
+survivors (43-45%)**. The pooled means over all windows are +14.43 / +10.99 / +14.58 and over the survivors +0.08 /
+-2.59 / +0.18. They rest on one or two degrees of freedom and are all noisy (for example, MQQQ over the survivors
+[-52.89, +53.06]). Over all windows, the monthly fund beats the margin position by +1.01 / +1.27 / +2.61 pp at 3 / 5 /
+10 years. The daily twin beats it by -0.61 / -0.38 / +1.37.
 
 The study did not re-run the 30% maintenance-call variants. In the S3 audit scratch of 2026-10-12, a call came in 39%
 of S&P 10-year windows. Liquidate-to-cash turned the comparison in the funds' favor; deleverage-to-1x did not.
@@ -1147,7 +1211,7 @@ the passive fund (pp/yr; share of starts the rule wins), delay 1, fixed encoding
 - guppy +0.1 (53%) | -3.6; guppy_f200 +1.8 (59%) | -5.4;
 - guppy_weekly 0.0 (wins 39%, ties 17%, losses 44%) | -4.2; guppy_weekly_f200 -2.1 | -0.4;
 - vol_threshold +0.6 (57%) | +2.3 (59%);
-- drawdown_stop -4.7 | -9.3 **with re-entry at a new all-time NAV high**. PROMPT.md never fixed the re-entry. That
+- drawdown_stop -4.7 | -9.2 **with re-entry at a new all-time NAV high**. PROMPT.md never fixed the re-entry. That
   choice kept SPYQ in cash 17 years from 2000 and MQQQ 21 years. In the v1 run, the auditor's scratch variant
   re-entering on a 25% rebound from the trough gave SPYQ +1.0 pp, 59% wins, and MQQQ -3.4. So the drawdown-stop
   number is a property of the re-entry rule, recorded in ASSUMPTIONS section 4.
@@ -1155,13 +1219,13 @@ the passive fund (pp/yr; share of starts the rule wins), delay 1, fixed encoding
 Means and the headline interval (phase-pooled over non-overlapping 10-year windows, ASSUMPTIONS section 7; R2 step
 12d): **every rule's 10-year edge is NOISY on both funds**. SPYQ (t with 5 degrees of freedom): trend_200d_sma +3.32
 [-4.13, +10.76]; trend_200d_ema +1.66 [-5.62, +8.94]; guppy_f200 +1.16 [-7.15, +9.47]. Two more rules: vol_threshold
-+0.01 [-5.12, +5.13]; drawdown_stop -2.92 [-11.07, +5.24]. MQQQ has 3-4 windows per phase, so t has 2 degrees of
++0.00 [-5.13, +5.13]; drawdown_stop -2.91 [-11.10, +5.28]. MQQQ has 3-4 windows per phase, so t has 2 degrees of
 freedom. There the means of the 200-day rules have the opposite sign to their medians:
 - trend_200d_sma +1.21 [-46.10, +48.52] against a median of -5.25;
 - trend_200d_ema +2.38 [-49.72, +54.48] against -5.73.
 
 The windows that contain the 2000-02 crash carry the mean. The other two: vol_threshold +2.25 [-32.56, +37.07];
-drawdown_stop -3.24 [-56.65, +50.18]. The rate encoding moves the medians by at most 0.55 pp (SPYQ trend_50d_sma:
+drawdown_stop -3.17 [-56.71, +50.37]. The rate encoding moves the medians by at most 0.55 pp (SPYQ trend_50d_sma:
 -1.01 fixed, -0.46 rate). On QQQP the edges depend on the trigger basis as much as on the rule, because the passive
 benchmark moved by 2.4 pp (F9). The rules show it (trend_200d_sma -5.0 under the v1 trigger, -2.3 under the base;
 vol_threshold +3.0 and +5.9).
@@ -1203,7 +1267,7 @@ negative out-of-sample on both indexes (SPYQ ema +4.8 / -10.2): whipsaw cost. On
 
 **F15. Delay matters, and delay 1 is the sweep's best case.** For trend_200d_sma on SPYQ: +4.0 / +2.1 / +1.0 pp at
 delays 1 / 2 / 3. All three are noisy on the pooled interval, R2 step 12e: +3.32 [-4.13, +10.76], +0.97 [-7.24,
-+9.17], +1.22 [-5.81, +8.24]. Over delays 0-10 (v1 auditor scratch, not re-run) the edge is +3.0, +4.0, +2.0, +1.4,
++9.17], +1.21 [-5.81, +8.24]. Over delays 0-10 (v1 auditor scratch, not re-run) the edge is +3.0, +4.0, +2.0, +1.4,
 +3.1, +1.6, +1.7, +0.8, +0.7, +0.7, +1.0. So the headline is the maximum, and a typical fill is nearer +1.5.
 
 Delay 0 is LOWER than delay 1, so no rule depends on a same-close fill (the good news). Two rules, guppy_f200 (+1.8 /
@@ -1281,7 +1345,7 @@ Caveats from the B13 audit:
 - Real UPRO is within 7 points of the model at 3 and 5 years for 2020 and 2022 (v1 audit scratch).
 
 **F18. Drawdown-threshold entries: the first close X below the prior high, 3-year median return of the fund.**
-- S&P 500 (SPYQ): -20% fired 11 times 1957-2022, median +75%; -30% six times, +38%; -40% three times (1974-08-23,
+- S&P 500 (SPYQ): -20% fired 11 times 1957-2022, median +76%; -30% six times, +38%; -40% three times (1974-08-23,
   2002-07-16, 2008-10-09), +46%; -50% once (2008-11-20), +127%.
 - Nasdaq-100 (MQQQ): -20% eight times, +66%; -30% four times, +74%. The -40% / -50% / -60% / -70% levels fired once
   each, all in 2000-01 and all 3-year LOSSES (-89 / -79 / -65 / -30%). Then -80% once (2002-07-22), +121%.
@@ -1313,7 +1377,7 @@ right.
 **F20. Timing beats costs.** An entry three months early changed the 3-year return by a median 113 points (S&P) and
 136 points (Nasdaq-100) across the bottoms. The six cost encodings of F5 span 18 and 25 points. Crisis financing is
 outside that range: an earlier private kit found it understated by 2-3 pp/yr in 2008, a figure not re-derived here.
-An entry three months late changed it by 43 and 86 points.
+An entry three months late changed it by 44 and 86 points.
 
 The design builds part of this in (the hindsight bottom is the best possible entry), but the order of magnitude is the
 point. For a drawdown-conditioned entry, when matters about six times more than which cost encoding is right (6.2x on
@@ -1351,9 +1415,12 @@ funds measures the assumed costs, not the reset design. The real funds are price
 twins is larger.
 
 Bought at the low, a calendar fund holds more than 2x until the index regains its last reset level. At the entry
-close MQQQ held 2.82x and the S&P monthly design 2.19x. QQQP held 4.40x, but its 35% early reset fired on the next session, 2008-11-21, and set
-it back to 2x. With an entry 2 to 10 sessions before the low, QQQP ends below its twin. The other five designs end
-above their twins at every entry shift from -10 to +21 sessions. This study does not split each lead into its causes.
+close MQQQ held 2.82x and the S&P monthly design 2.19x. QQQP held 4.40x, but its 35% early reset fired on the next
+session, 2008-11-21, and set it back to 2x.
+
+The two quarterly designs trail their twins for most entries before the low. The runs: QQQP from at least 400 up to 2
+sessions before it, SPYQ from at least 400 up to 73. The monthly and weekly designs end above their twins at every
+entry shift from -400 to +21 sessions. This study does not split each lead into its causes.
 
 The real UPRO and TQQQ (price only) started after the low. From their first closes they ended above their 3x models:
 $1,251,553 and $3,758,161, with models at $1,126,404 and $3,191,084. One hindsight path has no interval, so F21 is an

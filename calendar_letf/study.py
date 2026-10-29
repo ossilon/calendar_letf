@@ -1,7 +1,7 @@
 """Step 3, the passive study: does a 2x fund that resets weekly / monthly / quarterly lose less to volatility than a
 2x fund that resets daily, on the same index with the same costs?  (DESIGN sections 1, 7-9; BACKLOG C1-C8, B3.)
 
-This module holds the maths and the bookkeeping; `scripts/run_calendar_vs_daily.py` runs it and writes the report.
+This module holds the math and the bookkeeping; `scripts/run_calendar_vs_daily.py` runs it and writes the report.
 
 Plain-English map
   * A "world" is one underlying index (S&P 500 or Nasdaq-100) with its total-return level, its price index (the
@@ -164,6 +164,15 @@ class World:
             raise ValueError("month-end rows are not one per consecutive month (a missing month in the data): "
                              "a horizon of h month-ends would not be h months")
         self.me = ends
+        # The first month-end START on which every calendar product of this world has had a REAL reset at or before it.
+        # The kernel treats row 0 as a reset, so a start before a product's first period end would inherit a base no
+        # fund held (e.g. QQQP from 1985-01-31, a month before the first quarter end). All products share one start list.
+        first_real = 0
+        for sp in self.specs:
+            if sp.reset in ("weekly", "monthly", "quarterly"):
+                pe = np.flatnonzero(periods.period_end_flags(self.dates, sp.reset))
+                first_real = max(first_real, int(pe[0]) if len(pe) else len(self.dates))
+        self.me_start = int(np.searchsorted(self.me, first_real))      # index into self.me of the first valid start
 
     # --- runs
     def nav(self, product, enc, mode=BASE_MODE):
@@ -191,10 +200,12 @@ class World:
 
     # --- windows
     def month_pairs(self, months):
-        """(start rows, end rows) for every month-end start with `months` more month-ends ahead."""
-        if months >= len(self.me):
+        """(start rows, end rows) for every month-end start with `months` more month-ends ahead, from the first start
+        on which every calendar product has a real reset (`me_start`, set in __post_init__)."""
+        me = self.me[self.me_start:]
+        if months >= len(me):
             return np.array([], dtype=np.int64), np.array([], dtype=np.int64)
-        return self.me[:-months], self.me[months:]
+        return me[:-months], me[months:]
 
     def stats(self, product, enc, mode, months):
         """window_stats of a NAV over all month-end windows of `months` months (cached)."""
@@ -232,25 +243,26 @@ class World:
         (ACT/360) + spread and pays the same fee as the fund it is compared with, all borrowed. It is finished (NAV 0)
         when its equity reaches 0 (the index about 50% below the purchase, a little less after costs). A real margin
         account is called well before that, so this benchmark is OPTIMISTIC.
-        Returns {months: array of terminal NAV, one per start (NaN where the horizon is not covered)}.
+        Returns {months: array of terminal NAV, one per start of month_pairs(months) (the same starts, same order)}.
         """
         key = (enc.name, fee if enc.fee is None else enc.fee, tuple(months_list))
         if key in self._margin:
             return self._margin[key]
         fee_arr = np.full(len(self.dates), float(fee if enc.fee is None else enc.fee))
         rate = self.rate_arr * enc.rate_turns
-        nme, hmax = len(self.me), max(months_list)
+        me = self.me[self.me_start:]                                   # the same starts as month_pairs
+        nme, hmax = len(me), max(months_list)
         out = {h: np.full(max(nme - h, 0), np.nan) for h in months_list}
         t0 = time.perf_counter()
         for i in range(nme - min(months_list)):
-            s = self.me[i]
-            last = self.me[min(i + hmax, nme - 1)]
+            s = me[i]
+            last = me[min(i + hmax, nme - 1)]
             seg = slice(s, last + 1)
             nav, _ = kernel.margin_position_nav(self.u_arr[seg], rate[seg], self.accrual_fin[seg], self.accrual_fee[seg],
                                                 2.0, enc.spread_per_nav, fee_arr[seg])
             for h in months_list:
                 if i + h < nme:
-                    out[h][i] = nav[self.me[i + h] - s]
+                    out[h][i] = nav[me[i + h] - s]
         self.kernel_seconds += time.perf_counter() - t0
         self.kernel_runs += nme - min(months_list)
         self._margin[key] = out
@@ -407,8 +419,14 @@ def inputs_for(worlds, provs, extra_symbols=(), extra_rates=()):
         s, r = world_inputs(w, provs[name])
         symbols += s
         rates += r
-    return provenance.inputs_manifest(list(dict.fromkeys(symbols + list(extra_symbols))),
-                                      list(dict.fromkeys(rates + list(extra_rates))))
+    m = provenance.inputs_manifest(list(dict.fromkeys(symbols + list(extra_symbols))),
+                                   list(dict.fromkeys(rates + list(extra_rates))))
+    # Files inside the repository that a world reads (R4 review): the Shiller yields behind every S&P total return
+    # before 1988. They ship with the repo, so tests/test_provenance.py fails a result whose copy no longer matches.
+    if any(w.u.attrs.get("pre_yield") == "shiller" for w in worlds.values()):
+        m["reference_dir"] = "reference"
+        m["reference_files"] = provenance.manifest([series.SHILLER_FILE])
+    return m
 
 
 def conventions_lines(world, mode=BASE_MODE):
@@ -464,7 +482,7 @@ def gap_interval(g, months, n_boot=N_BOOT):
     the headline flag `noisy` (True when that interval covers zero) is taken from it; `noisy_indep` is the same flag
     under its older name.  Its simulated coverage on gap series with the overlap of rolling windows, at every
     published configuration, is in results/coverage_sim.md (scripts/run_coverage_sim.py; tests/test_stats.py
-    recomputes three entries): at or above nominal under independent months, so conservative rather than short;
+    recomputes three entries): at or near nominal (within Monte Carlo error) under independent months, so not short;
     the same file shows the limit of that claim when windows that do not overlap are themselves persistent.
     SECONDARY intervals: the circular block bootstrap with block = horizon (starts one month apart share months - 1 of
     their `months` months, so a block of `months` consecutive starts is roughly ONE independent window).  Its mean

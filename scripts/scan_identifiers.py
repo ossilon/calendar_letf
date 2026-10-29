@@ -50,8 +50,9 @@ GENERIC = {
     # public style rule: plain American English. "analyses" passes (it is also the American plural of "analysis");
     # the verb forms analyse, analysed, analysing and analyser still fail.
     # The -is- verbs count only with a verb or -ation ending, so "optimistic", "realistic", "organism" and "analysis" pass.
-    "British spelling": re.compile(r"(?i)\b\w*(behaviour|licence|centre|neighbour|favour|colour|programme|labell|modell"
-                                   r"|cancell|catalogue|whilst|towards|artefact"
+    # "cancell" counts only as cancelled / cancelling: "cancellation" is American too (R4 review).
+    "British spelling": re.compile(r"(?i)\b\w*(behaviour|licence|centre|neighbour|favour|colour|honour|programme|labell|modell"
+                                   r"|cancell(?:ed|ing)|catalogue|whilst|towards|artefact|judgement|\bmaths\b"
                                    r"|(?:organis|recognis|summaris|realis|vectoris|itemis|minimis|maximis|optimis|prioritis"
                                    r"|parallelis|normalis|standardis|annualis|initialis|characteris|utilis|generalis"
                                    r"|categoris|visualis|emphasis)(?:e|ed|es|er|ers|ing|ation|ations|able)(?![a-z])"

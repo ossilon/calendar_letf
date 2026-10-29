@@ -51,6 +51,17 @@ def coverage_note():
 BB_NOTE = coverage_note()
 
 
+def coverage_10y_text():
+    """The simulated coverage of the phase-pooled interval at the 10-year configurations, read from
+    results/coverage_sim.json (iid rows), as 'a-b' text; a pointer when that file is absent."""
+    path = OUT / "coverage_sim.json"
+    if not path.exists():
+        return "in results/coverage_sim.md"
+    iid = [r for r in json.loads(path.read_text(encoding="utf-8"))["iid"] if r["horizon_years"] == 10]
+    lo, hi = min(r["coverage_pooled"] for r in iid), max(r["coverage_pooled"] for r in iid)
+    return f"{lo:.2f}-{hi:.2f}"
+
+
 def encoding_gap_text(R):
     """'fixed minus rate CAGR +1.2 to +1.3 pp a year in 1966-82 and -1.6 to -1.4 in 2009-15' over every product of both underlyings."""
     parts = []
@@ -313,7 +324,7 @@ def main():
                        [["fixed", "2.6% a year", "1.0 x DFF", "ASSUMED", "spread 1.4% / 3.5%"],
                         ["rate", "1.4% a year", "1.3 x DFF", "ASSUMED", "rate turns 1.0 / 1.5"]]))
     md.append("- **Early reset.** Base mode `level` (resets at exactly -35% of the trigger); `close` and `next_close` are sensitivities "
-              "(table 9). Fees: live funds VERIFIED (prospectus 2026-07-31), modeled products and the twins' copies 1.00% ASSUMED.")
+              f"(table 9). Fees: {'; '.join(fee_text(w) for w in worlds.values())}.")
     md.append("- **Multi-start.** Each NAV is computed once over the full history; a result for \"buy at month-end s, hold h\" is nav[e]/nav[s]. "
               "A month-end start is MID-PERIOD for a quarterly or weekly fund (a real investor's situation): the fund's leverage on the day of "
               "purchase is whatever it has floated to since its last reset. Starts: every month-end with a full horizon ahead.")
@@ -351,8 +362,8 @@ def main():
     md.append("Every headline above is one number from one history. Two intervals say how far it could move. (1) **HEADLINE: non-overlapping windows, "
               "pooled over start phases.** Every 120th start forms one set of independent windows; the 120 sets (phases) are pooled (SE^2 = average "
               "of each phase's s^2/k; df = smallest k - 1; interval = mean +/- t(df) x SE). It uses only independent windows and is wide because "
-              "there are 3-7 of them. Simulated coverage on gap series with the overlap of rolling 120-month windows is 0.97-1.00 (conservative; "
-              "tests/test_stats.py). A headline is **NOISY** when this interval covers zero: the data cannot separate it from no effect; \"clear\" "
+              f"there are 3-7 of them. Simulated coverage on gap series with the overlap of rolling 120-month windows is {coverage_10y_text()} "
+              "at 10 years under independent months (results/coverage_sim.md). A headline is **NOISY** when this interval covers zero: the data cannot separate it from no effect; \"clear\" "
               "is defined on this interval only. (2) **SECONDARY: block bootstrap over all month-end starts.** Windows that start a month apart "
               "share all but one month, so the bootstrap resamples blocks of consecutive starts, one block = the horizon in months; interval = "
               f"mean +/- t(k-1) x SE, k = starts // block, {study.N_BOOT:,} resamples, seed 0. " + BB_NOTE + " The median has its own block-bootstrap "
@@ -427,7 +438,8 @@ def main():
 
         # 2b independent windows (audit S3 finding 5)
         md.append(f"## {un} 2b. The same 10-year gap over NON-overlapping windows (how many independent samples there really are)\n")
-        md.append("The month-end starts above overlap, so 801 windows are far fewer independent observations. Taking every 120th month-end gives "
+        n10 = next(x for x in W["multi_start"]["fixed"] if x["horizon_years"] == 10)["n_starts"]
+        md.append(f"The month-end starts above overlap, so {n10} windows are far fewer independent observations. Taking every 120th month-end gives "
                   "one set of non-overlapping 10-year windows; there are 120 such sets (phases). Cells: windows per phase, the share of phases in "
                   "which the calendar fund won a majority of its windows, and the median (min to max) win share across phases.\n")
         for en in ("fixed", "rate"):
@@ -673,7 +685,9 @@ def main():
               "design at 1-5 years, results/coverage_sim.md section 4) the interval is too short, and the register states by how much. Both describe "
               "the sampling error of ONE history; they do not cover a different market regime, a different cost level or the model's own assumptions.\n"
               "- **Autocorrelation regime.** The variance ratios and z in section 3 test whether each decade's returns reverse or continue; the predicted sign "
-              "is a second-order formula that leaves out costs and the trigger. Eight decades are too few for a correlation to carry weight.\n"
+              "is a second-order formula that leaves out costs and the trigger. "
+              + " and ".join(f"{len(R['worlds'][n]['decades']['fixed'])} decades ({UNDERLYING_NAME[n]})" for n in worlds)
+              + " are too few for a correlation to carry weight.\n"
               "- **One history.** 1950-2026 on one market; the daily-versus-calendar answer depends on the order of days, which a single path cannot vary (the Monte Carlo item B11 "
               "is not built). Entry on every trading day with the leverage at entry (B10) is not done here.\n"
               "- **Margin benchmark is optimistic** (no margin call before equity is zero, no financing spread widening) and starts at exactly 2.0x.\n"

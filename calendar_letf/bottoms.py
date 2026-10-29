@@ -1,4 +1,4 @@
-"""B13: drawdown-conditioned entries (entries after major market drawdowns). The maths and the bookkeeping; `scripts/run_from_bottoms.py`
+"""B13: drawdown-conditioned entries (entries after major market drawdowns). The math and the bookkeeping; `scripts/run_from_bottoms.py`
 runs it and writes the report.
 
 The question: someone buys a calendar-reset 2x fund (SPYQ, MQQQ, ...) after a crash. What do they actually own, and how

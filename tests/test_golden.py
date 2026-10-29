@@ -64,13 +64,23 @@ with tempfile.TemporaryDirectory() as tmp:
     n, ch = G.refreeze("validate_live", "slope refit", res, gold, today="2026-11-24")
     rec = json.loads((gold / "validate_live.json").read_text(encoding="utf-8"))
     check("re-freeze counts keys changed (one value moved, one key added, one removed)", ch == 3, ch)
-    check("re-freeze appends {date, reason, keys_changed} to refrozen",
-          rec["refrozen"] == [{"date": "2026-11-24", "reason": "slope refit", "keys_changed": 3}], rec["refrozen"])
+    check("re-freeze appends {date, reason, keys_changed} and the split added / removed / moved to refrozen",
+          rec["refrozen"] == [{"date": "2026-11-24", "reason": "slope refit", "keys_changed": 3, "added": 1, "removed": 1, "moved": 1}],
+          rec["refrozen"])
     raises("re-freeze refuses when nothing changed (no no-op entry in the history)",
            lambda: G.refreeze("validate_live", "no change", res, gold, today="2026-12-01"), "nothing changed")
     rec = json.loads((gold / "validate_live.json").read_text(encoding="utf-8"))
     check("a refused re-freeze leaves the golden file and its history as they were",
           len(rec["refrozen"]) == 1 and rec["refrozen"][0]["keys_changed"] == 3 and rec["frozen_on"] == "2026-11-24", rec["refrozen"])
+    # refreeze_all (R4 review): an unchanged study is skipped and the run goes on to the changed one after it
+    (res / "coverage_sim.json").write_text(json.dumps({"summary": {"pooled_min": 0.94}}), encoding="utf-8")
+    G.refreeze("coverage_sim", "first", res, gold, today="2026-10-24")
+    (res / "coverage_sim.json").write_text(json.dumps({"summary": {"pooled_min": 0.95}}), encoding="utf-8")
+    out_all = G.refreeze_all("coverage moved", res, gold, today="2026-12-02", studies=("validate_live", "coverage_sim"))
+    rec_c = json.loads((gold / "coverage_sim.json").read_text(encoding="utf-8"))
+    check("refreeze_all: the unchanged study (validate_live) is skipped and the changed one after it (coverage_sim) is re-frozen",
+          [(s, st) for s, st, _n, _c in out_all] == [("validate_live", "unchanged"), ("coverage_sim", "refrozen")]
+          and rec_c["refrozen"][-1]["moved"] == 1 and rec_c["keys"]["summary.pooled_min"] == 0.95, out_all)
 
     spec = importlib.util.spec_from_file_location("refreeze_golden", ROOT / "scripts" / "refreeze_golden.py")
     cli = importlib.util.module_from_spec(spec)
@@ -104,8 +114,11 @@ for study in G.STUDIES:
           and gold["study"] == study and gold["reason"].strip() != "" and len(gold["source_json_sha256"]) == 64,
           list(gold)[:8])
     check(f"{study}: n_keys matches the keys held", gold["n_keys"] == len(gold["keys"]), (gold["n_keys"], len(gold["keys"])))
-    check(f"{study}: every re-freeze entry has date, reason and keys_changed",
-          all(set(e) == {"date", "reason", "keys_changed"} and e["reason"].strip() for e in gold["refrozen"]))
+    # Entries before the R4 review carry {date, reason, keys_changed}; later ones add the split, which must sum to it.
+    _base, _split = {"date", "reason", "keys_changed"}, {"added", "removed", "moved"}
+    check(f"{study}: every re-freeze entry has date, reason and keys_changed (and, where present, added + removed + moved = keys_changed)",
+          all(e["reason"].strip() and (set(e) == _base or (set(e) == _base | _split and e["added"] + e["removed"] + e["moved"] == e["keys_changed"]))
+              for e in gold["refrozen"]), [sorted(e) for e in gold["refrozen"]][-1:])
     src = G.RESULTS / f"{study}.json"
     if not src.exists():
         print(f"skip {study}: results/{study}.json is absent, golden comparison not run")

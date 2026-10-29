@@ -9,7 +9,7 @@ from pathlib import Path
 
 from _harness import ROOT, check
 
-RELEASE_GATE = False
+RELEASE_GATE = True        # flipped in the R4 review fix pass (2026-10-29): the public documents lint at 0, now enforced
 
 spec = importlib.util.spec_from_file_location("ste_check", ROOT / "scripts" / "ste_check.py")
 ste = importlib.util.module_from_spec(spec)

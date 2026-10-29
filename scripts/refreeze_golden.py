@@ -26,14 +26,17 @@ def main(argv=None):
     if not args.reason.strip():
         print("refused: --reason is required (say what changed and why)")
         return 2
-    studies = _golden.STUDIES if args.study == "all" else (args.study,)
-    for study in studies:
-        try:
-            n, changed = _golden.refreeze(study, args.reason)
-        except (ValueError, FileNotFoundError) as err:
-            print(f"refused: {err}")
-            return 2
-        print(f"{study}: {n} keys written, {changed} changed against the previous golden file")
+    try:
+        if args.study == "all":                      # re-freeze the studies that changed, skip the unchanged ones
+            for study, status, n, changed in _golden.refreeze_all(args.reason):
+                print(f"{study}: {n} keys written, {changed} changed against the previous golden file" if status == "refrozen"
+                      else f"{study}: unchanged, skipped")
+        else:
+            n, changed = _golden.refreeze(args.study, args.reason)
+            print(f"{args.study}: {n} keys written, {changed} changed against the previous golden file")
+    except (ValueError, FileNotFoundError) as err:
+        print(f"refused: {err}")
+        return 2
     return 0
 
 

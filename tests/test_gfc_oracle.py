@@ -101,6 +101,8 @@ raises("shift_rows: a shift onto the end row raises (no hold left)", lambda: go.
 grid = [dict(series="A", encoding="fixed", shift=k, date="", lead=v) for k, v in ((-2, 0.9), (-1, 0.95), (0, 1.3), (1, 1.1))]
 grid += [dict(series="A", encoding="rate", shift=k, date="", lead=v) for k, v in ((-2, 1.2), (-1, 1.0), (0, 1.4), (1, 1.1))]
 ss = {r["encoding"]: r for r in go.shift_summary(grid)}
+check("ranges_text: shifts print as runs ('-5 to -3, +7'), a single shift alone, and an empty list as 'none'",
+      go.ranges_text([-3, -5, -4, 7]) == "-5 to -3, +7" and go.ranges_text([2]) == "+2" and go.ranges_text([]) == "none")
 check("shift_summary: fixed: range -2..+1 over 4 shifts, lowest 0.9 at -2, highest 1.3 at 0, below 1 at -2 and -1",
       (ss["fixed"]["shift_first"], ss["fixed"]["shift_last"], ss["fixed"]["n_shifts"], ss["fixed"]["lead_min"], ss["fixed"]["lead_min_shift"],
        ss["fixed"]["lead_max"], ss["fixed"]["lead_max_shift"], ss["fixed"]["below_one"]) == (-2, 1, 4, 0.9, -2, 1.3, 0, [-2, -1]), ss["fixed"])
@@ -141,13 +143,17 @@ for name, W in res["worlds"].items():
         check(f"F21 claim {name}/{en}: every daily twin ends below the real 2x fund", all(t["vs_real_2x"] < 1 for t in twins.values()),
               {s: round(t["vs_real_2x"], 3) for s, t in twins.items()})
         summ = {r["series"]: r for r in W["shift"] if r["encoding"] == en}
-        check(f"F21 claim {name}/{en}: the entry-shift grid held every session from -10 to +21 (32 shifts) for each design",
-              set(summ) == set(cal) and all((r["shift_first"], r["shift_last"], r["n_shifts"]) == (-10, 21, 32) for r in summ.values()))
-        losers = {s: summ[s]["below_one"] for s in cal}
-        q_lost = losers.pop("QQQP", [])
-        check(f"F21 claim {name}/{en}: no design other than QQQP ends below its twin at any entry shift", all(not v for v in losers.values()), losers)
-        check(f"F21 claim {name}/{en}: QQQP's shifts below its twin form one unbroken run before the low (so 'n to m sessions' is exact)",
-              not q_lost or (q_lost == list(range(min(q_lost), max(q_lost) + 1)) and max(q_lost) < 0), q_lost)
+        _grid = (min(go.ENTRY_SHIFTS), max(go.ENTRY_SHIFTS), len(go.ENTRY_SHIFTS))
+        check(f"F21 claim {name}/{en}: the entry-shift grid held every session of ENTRY_SHIFTS {_grid} for each design",
+              set(summ) == set(cal) and all((r["shift_first"], r["shift_last"], r["n_shifts"]) == _grid for r in summ.values())
+              and _grid[2] == _grid[1] - _grid[0] + 1)
+        for s_, ks_ in {s: summ[s]["below_one"] for s in cal}.items():
+            if cal[s_]["reset"] == "quarterly":
+                check(f"F21 claim {name}/{en}: {s_} (quarterly) trails its twin only in one unbroken run of shifts that ends before the low "
+                      "(F21 states each run, with 'at least' where it reaches the grid's edge; checked below)",
+                      not ks_ or (ks_ == list(range(min(ks_), max(ks_) + 1)) and max(ks_) < 0), (min(ks_, default=None), max(ks_, default=None)))
+            else:
+                check(f"F21 claim {name}/{en}: {s_} ({cal[s_]['reset']}) never ends below its twin at any entry shift", not ks_, ks_)
     by = {(r["series"], r["encoding"]): r for r in W["rows"]}
     mono = "HYP_SPX_M" if name == "SPX" else "MQQQ"
     check(f"F21 claim {name}: under the rate encoding the monthly design ends above the real 2x fund",
@@ -168,12 +174,19 @@ f21 = (ROOT / "FINDINGS.md").read_text(encoding="utf-8")
 f21 = f21[f21.index("**F21."):f21.index("Could not test (B13):")]
 spx, ndx = res["worlds"]["SPX"], res["worlds"]["NDX"]
 qqqp = next(r for r in ndx["rows"] if r["series"] == "QQQP" and r["encoding"] == "fixed")
-lost = next(r["below_one"] for r in ndx["shift"] if r["series"] == "QQQP" and r["encoding"] == "fixed")
+quarter_runs = []                       # "QQQP from at least 400 up to 2": each quarterly design's losing run, as F21 prints it
+for W_ in (ndx, spx):
+    resets_ = {r["series"]: r["reset"] for r in W_["rows"] if r["kind"] == "MODELED calendar"}
+    for r in W_["shift"]:
+        if r["encoding"] == "fixed" and r["below_one"] and resets_[r["series"]] == "quarterly":
+            ks_ = r["below_one"]
+            quarter_runs.append(f"{r['series']} from {'at least ' if min(ks_) == min(go.ENTRY_SHIFTS) else ''}{-min(ks_)} up to {-max(ks_)}")
 for text in (f"{spx['entry']['date']} on the S&P 500", f"{ndx['entry']['date']} on the Nasdaq-100",
              f"S&P 500 (to {spx['end']})", f"Nasdaq-100 (to {ndx['end']})",
              f"its 35% early reset fired on the next session, {qqqp['first_early_reset']}",
-             f"With an entry {min(-k for k in lost)} to {max(-k for k in lost)} sessions before the low, QQQP ends below its twin",
-             f"every entry shift from {min(go.ENTRY_SHIFTS)} to +{max(go.ENTRY_SHIFTS)} sessions"):
+             *quarter_runs,
+             f"The monthly and weekly designs end above their twins at every entry shift from {min(go.ENTRY_SHIFTS)} to "
+             f"+{max(go.ENTRY_SHIFTS)} sessions"):
     check(f"FINDINGS F21 prints the published value: {text!r}", " ".join(text.split()) in " ".join(f21.split()))
 
 

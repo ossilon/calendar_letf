@@ -4,8 +4,8 @@
     py scripts\\run_coverage_sim.py          writes results/coverage_sim.json and results/coverage_sim.md (about a minute)
 
 What it does, in plain English
-  1. For each (starts n, window h) the passive study publishes (S&P 500: 909/12, 885/36, 861/60, 801/120 for 1, 3, 5
-     and 10 years; Nasdaq-100: 489/12, 465/36, 441/60, 381/120) it builds 400 synthetic gap series with the study's
+  1. For each (starts n, window h) the passive study publishes (S&P 500 and Nasdaq-100 at 1, 3, 5 and 10 years; n is
+     READ from results/calendar_vs_daily.json, so a data top-up cannot leave it stale) it builds 400 synthetic gap series with the study's
      own overlap structure and independent monthly shocks (calendar_letf/coverage.py), applies the block-bootstrap
      mean and median intervals and the phase-pooled interval, and records how often each contains the true constant
      (the coverage), how far each standard error sits from the true one, and the t multiplier the pooled statistic
@@ -40,14 +40,32 @@ from calendar_letf import coverage, provenance, stats, study  # noqa: E402
 OUT = HERE.parent / "results"
 RAW = OUT / "raw"
 RUNS, N_BOOT = 400, 1000
-# (world, horizon years, starts n, window h in months, seed). Seeds 3101-3103 are the three cases tests/test_stats.py has
-# recomputed since R2 step 10; the suite compares its recomputation with this file's entries.
-IID_CONFIGS = (("SPX", 10, 801, 120, 3101), ("NDX", 10, 381, 120, 3102), ("SPX", 1, 909, 12, 3103),
-               ("SPX", 3, 885, 36, 3104), ("SPX", 5, 861, 60, 3105),
-               ("NDX", 1, 489, 12, 3106), ("NDX", 3, 465, 36, 3107), ("NDX", 5, 441, 60, 3108))
+# (world, horizon years, seed). Seeds 3101-3103 are the three cases tests/test_stats.py has recomputed since R2 step 10;
+# the suite compares its recomputation with this file's entries. The starts n come from the passive study (iid_configs).
+IID_SEEDS = (("SPX", 10, 3101), ("NDX", 10, 3102), ("SPX", 1, 3103), ("SPX", 3, 3104), ("SPX", 5, 3105),
+             ("NDX", 1, 3106), ("NDX", 3, 3107), ("NDX", 5, 3108))
+CVD_JSON = OUT / "calendar_vs_daily.json"
+
+
+def published_starts(cvd, world, hy):
+    """The number of month-end starts the passive study published for (world, horizon); every product shares it."""
+    ns = {r["n_starts"] for r in cvd["worlds"][world]["multi_start"]["fixed"] if r["horizon_years"] == hy}
+    if len(ns) != 1:
+        raise ValueError(f"{world} {hy}y: products disagree on n_starts {sorted(ns)}")
+    return ns.pop()
+
+
+def iid_configs():
+    """(world, horizon years, starts n, window h in months, seed) for every published configuration, n read from
+    results/calendar_vs_daily.json (run scripts/run_calendar_vs_daily.py first)."""
+    if not CVD_JSON.exists():
+        raise SystemExit("results/calendar_vs_daily.json is absent: run py scripts\\run_calendar_vs_daily.py first")
+    cvd = json.loads(CVD_JSON.read_text(encoding="utf-8"))
+    return tuple((w, hy, published_starts(cvd, w, hy), 12 * hy, s) for w, hy, s in IID_SEEDS)
 MECHANISM = ("large k", 0, 2412, 12, 3109)                               # 201 blocks of 12: the block-length cause alone
 REGIMES = ((0.98, 0.02), (0.98, 0.05), (0.995, 0.02), (0.995, 0.05))     # (phi of the slow component, share of the shock variance)
 REGIME_SEED0 = 4000
+PERSISTENT_ACF = 0.08                                                    # a regime case at or above this lag-h autocorrelation counts as persistent
 NULL_RUNS, NULL_SEED0 = 4000, 5000                                       # the iid null distribution of the lag-h autocorrelation
 RAW_FILES = {"SPX": "multi_start_SPX_fixed.csv", "NDX": "multi_start_NDX_fixed.csv"}
 
@@ -116,6 +134,7 @@ def _fmt(x, nd=3):
 def main():
     wall0 = time.perf_counter()
     OUT.mkdir(exist_ok=True)
+    IID_CONFIGS = iid_configs()
     tasks = [("iid", w, hy, n, h, s, None) for w, hy, n, h, s in IID_CONFIGS]
     tasks.append(("mechanism", MECHANISM[0], MECHANISM[1], MECHANISM[2], MECHANISM[3], MECHANISM[4], None))
     for j, reg in enumerate(REGIMES):
@@ -186,7 +205,13 @@ def main():
                                 coverage_pooled=best["coverage_pooled"], coverage_bb_mean=best["coverage_bb_mean"],
                                 t_needed_pooled=best["t_needed_pooled"], t_used_pooled=best["t_used_pooled"]))
 
+    # The regime cases that carry real persistence: lag-h autocorrelation at or above PERSISTENT_ACF. ASSUMPTIONS section 7
+    # quotes this subset's range; it is computed here from its definition, not frozen as a list of seeds (R4 re-grade).
+    persistent = [r for r in regime if r["acf_gap_h"] is not None and math.isfinite(r["acf_gap_h"]) and r["acf_gap_h"] >= PERSISTENT_ACF]
     summary = dict(
+        regime_persistent_acf=PERSISTENT_ACF, regime_persistent_n=len(persistent),
+        regime_persistent_acf_min=min(r["acf_gap_h"] for r in persistent), regime_persistent_acf_max=max(r["acf_gap_h"] for r in persistent),
+        regime_persistent_pooled_min=min(r["coverage_pooled"] for r in persistent), regime_persistent_pooled_max=max(r["coverage_pooled"] for r in persistent),
         bb_mean_min=min(r["coverage_bb_mean"] for r in iid), bb_mean_max=max(r["coverage_bb_mean"] for r in iid),
         bb_median_min=min(r["coverage_bb_median"] for r in iid), bb_median_max=max(r["coverage_bb_median"] for r in iid),
         pooled_min=min(r["coverage_pooled"] for r in iid), pooled_max=max(r["coverage_pooled"] for r in iid),
@@ -223,12 +248,14 @@ def main():
     md.append("A block bootstrap sees only the dependence inside one block. For a gap that is the mean of h shocks, blocks of length h lose about a third of "
               "the variance of the series mean at ANY block count (the Bartlett-type truncation at one window), and the few-block cases lose more on top.\n")
     md.append("## 3. Regime stress: a slow AR(1) component in the monthly shocks\n")
-    md.append("| world | horizon | phi | share | half-life (months) | acf of gaps at lag h | at lag 2h | coverage: bb mean | phase-pooled | t needed (pooled) | t used |")
+    md.append(f"'t needed' is the 95th percentile of {RUNS} runs, so it carries Monte Carlo error; the bracket is its distribution-free 95% "
+              "interval (order statistics, `coverage.quantile_interval`). A t ratio inside the bracket cannot be called clear or noisy under that case.\n")
+    md.append("| world | horizon | phi | share | half-life (months) | acf of gaps at lag h | at lag 2h | coverage: bb mean | phase-pooled | t needed (pooled) [95% MC] | t used |")
     md.append("|---|---|---|---|---|---|---|---|---|---|---|")
     for r in sorted(regime, key=lambda r: (r["world"], r["horizon_years"], r["regime"]["phi"], r["regime"]["share"])):
         g = r["regime"]
         md.append(f"| {r['world']} | {r['horizon_years']}y | {g['phi']:g} | {g['share']:g} | {g['half_life_months']:.0f} | {_fmt(r['acf_gap_h'], 2)} | {_fmt(r['acf_gap_2h'], 2)} | "
-                  f"{r['coverage_bb_mean']:.3f} | {r['coverage_pooled']:.3f} | {r['t_needed_pooled']:.2f} | {r['t_used_pooled']:.2f} |")
+                  f"{r['coverage_bb_mean']:.3f} | {r['coverage_pooled']:.3f} | {r['t_needed_pooled']:.2f} [{_fmt(r['t_needed_pooled_lo'], 2)}, {_fmt(r['t_needed_pooled_hi'], 2)}] | {r['t_used_pooled']:.2f} |")
     md.append("\n## 4. Persistence measured in the real gap series (results/raw), and the nearest simulated case\n")
     if not measured:
         md.append("results/raw/multi_start_*_fixed.csv absent: run scripts/run_calendar_vs_daily.py first.\n")
