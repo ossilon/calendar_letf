@@ -756,8 +756,9 @@ document's own test checks that each row resolves.
 
 ## 15. What cannot be known
 
-- No calendar-reset fund existed before August 2024. Every earlier number is a model, and its costs come from two
-  years of live data.
+- No calendar-reset ETF existed before August 2024. Monthly-reset mutual funds have existed since October 2009
+  (FINDINGS F22). Every other earlier number is a model. Its costs come from two years of live ETF data and from the
+  mutual funds since 2009.
 - The 35% early reset has never fired in a live fund. The fill rule is an assumption; the engine brackets it with three
   fills and reports each.
 - The cash yield, the swap spreads of the past and the spreads in a crisis are not in any filing. The engine fits or

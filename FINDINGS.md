@@ -1885,7 +1885,7 @@ Could not test (B7b):
 
 Could not test (B13):
 - the trigger's fill (the model assumes the level; the basis and the drop are sensitivities, F9);
-- no live calendar fund before 2024;
+- no live calendar ETF before 2024 (monthly-reset mutual funds from 2009-10-01: F22);
 - the margin benchmark has no margin call;
 - in the bottoms tables, UPRO / TQQQ real prices exist only for the 2020 and 2022 entries and exclude dividends;
 - F21's real funds are price only: the issuer's distribution table (fund pages, read 2026-10-26) starts in 2017, and

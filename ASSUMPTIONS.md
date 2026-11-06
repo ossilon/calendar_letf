@@ -136,7 +136,8 @@ Calendar quirks in the exports (MEASURED 2026-10-12, re-checked by hand; `series
   +27% at the next close.
 - The liquidated weekly and SPY-monthly funds (section 1) left one published month of NAV. Their daily prices are
   not available. So the project checks the weekly and SPY-monthly designs on one month only (FINDINGS F1b).
-- No live calendar-reset fund existed before 2024-08; every earlier number is a model.
+- No calendar-reset ETF existed before 2024-08. Monthly-reset mutual funds have existed since 2009-10-01 (FINDINGS
+  F22). Every other earlier number is a model.
 - The 35% early reset has never fired in a live fund.
 - Financing spreads in a crisis. An earlier private kit found that the model understates them by 2-3%/yr for a 2x
   fund in 2008. This project has not re-derived that figure, so it is unverified here.

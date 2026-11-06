@@ -2,6 +2,19 @@
 
 All notable changes to this project. Dates are release dates (UTC).
 
+## 0.1.1, documentation fixes (2026-11-06)
+
+No code, input or result changed.
+
+- README.md now features the 0.1.1 results. A summary table opens it. New sections cover the best leverage (on
+  history and on simulated decades), the semiconductors and the real monthly-reset mutual funds. Two charts show
+  them. Prose pins cover every new number.
+- data/README.md lists all 25 symbols that the studies read. Its fingerprint table now shows the copy of each file
+  that the published results read.
+- Correction: no calendar-reset ETF existed before August 2024, but monthly-reset mutual funds have existed since
+  October 2009 (F22). README.md, ASSUMPTIONS.md, FINDINGS.md and THEORY.md had said that no calendar-reset fund
+  existed.
+
 ## 0.1.1 (2026-11-06)
 
 The final release. It closes the backlog; nobody maintains the repository after it.

@@ -21,7 +21,8 @@ $env:CALENDAR_LETF_RATES = "C:\path\to\your\rates"
 
 ## Prices: what to export from TradingView
 
-Export daily bars, full history, for exactly these 13 symbols. Choose the data as **split-adjusted and NOT
+Export daily bars, full history, for these 25 symbols. The 0.1.0 studies need the first 13, and
+the 0.1.1 studies need the rest. Choose the data as **split-adjusted and NOT
 dividend-adjusted**. The package adds dividends itself, and every banner says so. Use ISO dates (`2024-08-15`) if the
 export dialog offers a choice.
 
@@ -42,6 +43,18 @@ File name rule: the symbol with `:` replaced by `_`, then `_daily.csv`.
 | NASDAQ:TQQQ | `NASDAQ_TQQQ_daily.csv` | real 3x daily fund, Nasdaq-100 (bottom-entry study) |
 | AMEX:SSO | `AMEX_SSO_daily.csv` | real 2x daily fund, S&P 500 (GFC oracle entry) |
 | AMEX:QLD | `AMEX_QLD_daily.csv` | real 2x daily fund, Nasdaq-100 (GFC oracle entry) |
+| NASDAQ:DXSLX | `NASDAQ_DXSLX_daily.csv` | real monthly-reset mutual fund, S&P 500 (live monthly check) |
+| NASDAQ:DXQLX | `NASDAQ_DXQLX_daily.csv` | real monthly-reset mutual fund, Nasdaq-100 (live monthly check) |
+| NASDAQ:RMQHX | `NASDAQ_RMQHX_daily.csv` | real monthly-reset mutual fund, Nasdaq-100 (live monthly check) |
+| NASDAQ:ULPIX | `NASDAQ_ULPIX_daily.csv` | real 2x daily mutual fund, S&P 500 (live monthly check) |
+| NASDAQ:UOPIX | `NASDAQ_UOPIX_daily.csv` | real 2x daily mutual fund, Nasdaq-100 (live monthly check) |
+| NASDAQ:RYVYX | `NASDAQ_RYVYX_daily.csv` | real 2x daily mutual fund, Nasdaq-100 (live monthly check) |
+| NASDAQ:RYNVX | `NASDAQ_RYNVX_daily.csv` | real 1.5x daily mutual fund, S&P 500 (live monthly check) |
+| NASDAQ:SOX | `NASDAQ_SOX_daily.csv` | PHLX Semiconductor index, price only (semiconductor study) |
+| NASDAQ:SOXX | `NASDAQ_SOXX_daily.csv` | semiconductor ETF (the SOXM / SOXW check) |
+| AMEX:SOXL | `AMEX_SOXL_daily.csv` | real 3x daily semiconductor fund, price only (semiconductor study) |
+| AMEX:USD | `AMEX_USD_daily.csv` | real 2x daily semiconductor fund, price only (semiconductor study) |
+| CBOE:VIX | `CBOE_VIX_daily.csv` | implied volatility (LEAP comparator) |
 
 The package accepts two layouts and detects them from the header row:
 
@@ -70,11 +83,13 @@ Download these four series as CSV from <https://fred.stlouisfed.org> (series pag
 
 ## Compare your files with ours
 
-The table lists the author's copy of each file on 2026-10-24 (the SSO and QLD rows: 2026-10-26). Rows count data rows that
-carry a date and a value. The fingerprint is the first 12 characters of the file's SHA-256. Your export will have
-the same first date and similar row counts. It will end on a later date, and its fingerprint will differ, because a
-later export has later bars. A different first date or a much lower row count means a different symbol or a
-partial export.
+The table lists the copy of each file that the published results read. The `inputs` block of each results JSON
+names it. Rows count data rows that carry a date and a value. The fingerprint is the first 12 characters of the
+file's SHA-256, with line endings folded to LF first.
+
+Your export will have the same first date and similar row counts. It will end on a later date, and its fingerprint
+will differ, because a later export has later bars. A different first date or a much lower row count means a
+different symbol or a partial export.
 
 To print the same table for your own files, run this from the repository folder:
 
@@ -86,23 +101,35 @@ Name any symbols and rate files in the two lists.
 
 | File | Rows | First date | Last date | Fingerprint |
 |---|---:|---|---|---|
-| `SP_SPX_daily.csv` | 19326 | 1950-01-03 | 2026-10-22 | 8b0c1596b57e |
-| `SP_SPXTR_daily.csv` | 9780 | 1988-01-04 | 2026-10-23 | ac309a0b90f5 |
-| `NASDAQ_NDX_daily.csv` | 10504 | 1985-01-31 | 2026-10-09 | 4c3219bda720 |
-| `NASDAQ_XNDX_daily.csv` | 5004 | 2006-11-08 | 2026-10-09 | a10dab98993e |
-| `AMEX_SPY_daily.csv` | 8482 | 1993-01-29 | 2026-10-09 | 38bb2ae821ff |
-| `NASDAQ_QQQ_daily.csv` | 6940 | 1999-03-10 | 2026-10-09 | 1bf106f83579 |
-| `NASDAQ_SPYQ_daily.csv` | 508 | 2024-10-01 | 2026-10-09 | 9e29f3f4a7f6 |
-| `NASDAQ_MQQQ_daily.csv` | 528 | 2024-09-03 | 2026-10-09 | f800ff51d54d |
-| `NASDAQ_QQQP_daily.csv` | 508 | 2024-10-01 | 2026-10-09 | 916e98537ab4 |
-| `AMEX_UPRO_daily.csv` | 4345 | 2009-06-25 | 2026-10-02 | 2462a547956a |
-| `NASDAQ_TQQQ_daily.csv` | 4191 | 2010-02-11 | 2026-10-09 | d3dc0fa8dc69 |
-| `AMEX_SSO_daily.csv` | 5103 | 2006-06-21 | 2026-10-02 | 9f248b1bedac |
-| `AMEX_QLD_daily.csv` | 5108 | 2006-06-21 | 2026-10-09 | 298046184b2f |
-| `rates/DFF.csv` | 26398 | 1954-07-01 | 2026-10-08 | a93504210b53 |
-| `rates/DTB3.csv` | 18184 | 1954-01-04 | 2026-10-08 | 5ea29eadd254 |
+| `SP_SPX_daily.csv` | 19333 | 1950-01-03 | 2026-11-02 | b146c9af89cc |
+| `SP_SPXTR_daily.csv` | 9787 | 1988-01-04 | 2026-11-03 | edab5090825e |
+| `NASDAQ_NDX_daily.csv` | 10519 | 1985-01-31 | 2026-10-30 | 79d8e8688fa3 |
+| `NASDAQ_XNDX_daily.csv` | 5019 | 2006-11-08 | 2026-10-30 | d7dcc6dffa24 |
+| `AMEX_SPY_daily.csv` | 8498 | 1993-01-29 | 2026-11-02 | 643d6ef08b88 |
+| `NASDAQ_QQQ_daily.csv` | 6955 | 1999-03-10 | 2026-10-30 | f096cd6c6b75 |
+| `NASDAQ_SPYQ_daily.csv` | 508 | 2024-10-01 | 2026-10-09 | 124564fb1a3b |
+| `NASDAQ_MQQQ_daily.csv` | 542 | 2024-09-03 | 2026-10-29 | b71324843b8a |
+| `NASDAQ_QQQP_daily.csv` | 522 | 2024-10-01 | 2026-10-29 | 233444f2dcc7 |
+| `AMEX_UPRO_daily.csv` | 4345 | 2009-06-25 | 2026-10-02 | 17d862355823 |
+| `NASDAQ_TQQQ_daily.csv` | 4206 | 2010-02-11 | 2026-10-30 | ae88fcb39ab3 |
+| `AMEX_SSO_daily.csv` | 5103 | 2006-06-21 | 2026-10-02 | 0df3e43a82db |
+| `AMEX_QLD_daily.csv` | 5123 | 2006-06-21 | 2026-10-30 | 9e5453cb02e0 |
+| `NASDAQ_DXSLX_daily.csv` | 5162 | 2006-05-01 | 2026-11-03 | a6e3afa93793 |
+| `NASDAQ_DXQLX_daily.csv` | 5162 | 2006-05-01 | 2026-11-03 | 38ab92c0e8a7 |
+| `NASDAQ_RMQHX_daily.csv` | 2998 | 2014-11-28 | 2026-11-03 | d7c2dea8de9e |
+| `NASDAQ_ULPIX_daily.csv` | 7214 | 1998-03-30 | 2026-11-03 | f2384904a6ef |
+| `NASDAQ_UOPIX_daily.csv` | 7227 | 1998-03-11 | 2026-11-03 | d5d37b3e6fc5 |
+| `NASDAQ_RYVYX_daily.csv` | 6639 | 2000-06-16 | 2026-11-03 | 7b5c44ec408d |
+| `NASDAQ_RYNVX_daily.csv` | 8285 | 1994-01-04 | 2026-11-03 | 279fad5006a8 |
+| `NASDAQ_SOX_daily.csv` | 8159 | 1994-05-04 | 2026-10-02 | 0f8d336a1666 |
+| `NASDAQ_SOXX_daily.csv` | 6367 | 2001-07-13 | 2026-11-05 | 661618bb2798 |
+| `AMEX_SOXL_daily.csv` | 4167 | 2010-03-11 | 2026-10-02 | 1a134c80a653 |
+| `AMEX_USD_daily.csv` | 4967 | 2007-02-01 | 2026-11-05 | 434a39d64efa |
+| `CBOE_VIX_daily.csv` | 9275 | 1990-01-03 | 2026-10-02 | 4dd8691f8a9f |
+| `rates/DFF.csv` | 26424 | 1954-07-01 | 2026-11-03 | e84a934a5014 |
+| `rates/DTB3.csv` | 18201 | 1954-01-04 | 2026-11-03 | e5fa1cb67237 |
 | `rates/TB3MS.csv` | 1112 | 1934-01-01 | 2026-08-01 | ebf04b1ae5bc |
-| `rates/OBFR.csv` | 2666 | 2016-03-01 | 2026-10-08 | c84cb6b91ac3 |
+| `rates/OBFR.csv` | 2683 | 2016-03-01 | 2026-11-03 | bbef2a371e62 |
 
 From v0.1.0 on, each results JSON holds an `inputs` block with these fields for the files that run read. Each
 results table prints the same fields in its banner. The files in `tests/golden/` pin the published numbers.
