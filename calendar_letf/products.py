@@ -31,14 +31,14 @@ the weekly or monthly return of SPY / QQQ; one-month NAV returns on pp.47, 50, 5
 from dataclasses import dataclass, replace
 
 from .costs import (SPREAD_BASE, SPREAD_BASE_SOURCE, SPREAD_BASE_STATUS, SPREAD_SENSITIVITY, TURNS_2X,
-                    TURNS_SOURCE, TURNS_STATUS, CostSpec, check_status, check_turns, describe)
+                    TURNS_SOURCE, TURNS_STATUS, CostSpec, check_status, check_turns, describe, expected_turns)
 
 KINDS = ("LIVE", "MODELED", "DAILY_TWIN", "REAL_FUND")
 MODELED_NOTE = "MODELED: a live fund of this design traded 2024-08-30 to 2025-02-28; no live fund exists today"
 LIQUIDATED_SOURCE = ("semi-annual financial report to 2024-09-30 (Investment Managers Series Trust II), note 1 and "
                      "financial highlights; 497 supplements 2025-01-27 / 2025-01-31: last trade 2025-02-21, "
                      "liquidation on or about 2025-02-28")
-UNDERLYINGS = ("SPX", "NDX")
+UNDERLYINGS = ("SPX", "NDX", "SOX")          # SOX: the PHLX Semiconductor Sector Index (BACKLOG B16; price only)
 RESETS = ("daily", "weekly", "monthly", "quarterly")
 
 PROSPECTUS = "Tradr calendar-reset ETFs prospectus dated 2026-07-31"
@@ -168,6 +168,77 @@ def twin_of(spec):
         name=name, kind="DAILY_TWIN", underlying=spec.underlying, reset="daily", costs=twin_costs,
         early_drop=None, early_drop_status="NOT_APPLICABLE", early_drop_source="resets every day", L=spec.L,
         note=f"daily-reset twin of {spec.name}: same index, L and costs; only the reset rule differs")
+
+
+# ---------------------------------------------------------------- the same design at another leverage (BACKLOG B17)
+TRIGGER_RULES = ("none", "scaled", "fixed35")
+SCALED_FUND_LOSS = 0.70       # "scaled": reset early at the index fall that costs the fund 70%, as 35% does at 2x
+
+
+def trigger_for(L, rule):
+    """(early_drop, source) for a calendar fund at leverage L under one of TRIGGER_RULES.
+
+    none     no intra-period reset, so an in-period index fall of 1/L wipes the fund out (-83.3% at 1.2x, -33.3% at 3x)
+    scaled   early reset at an index fall of 0.70 / L: the same 70% fund loss as the 35% trigger at 2x (23.3% at 3x)
+    fixed35  the 35% trigger of the live 2x funds at any L; at L >= 1 / 0.35 = 2.857 a 35% fall has already wiped the
+             fund out, so this rule can never fire first (the 3x case, BACKLOG B1)
+    """
+    if rule == "none":
+        return None, "no intra-period reset: an in-period index fall of 1/L wipes the fund out"
+    if rule == "scaled":
+        drop = SCALED_FUND_LOSS / float(L)
+        return drop, f"early reset at a {drop:.2%} index fall: the same {SCALED_FUND_LOSS:.0%} fund loss as 35% at 2x"
+    if rule == "fixed35":
+        return 0.35, "the -35% trigger of the live 2x funds, kept at this L"
+    raise ValueError(f"trigger rule must be one of {TRIGGER_RULES}, got {rule!r}")
+
+
+def at_leverage(base, L, trigger="scaled", basis="notional"):
+    """The design of the calendar product `base` (underlying, reset, fee) at leverage L: a HYPOTHETICAL product.
+
+    trigger  one of TRIGGER_RULES (trigger_for). basis: the balance-sheet structure that sets the swap turns that pay
+    the spread: "notional" (all swap, turns = L) or "borrowed" (the index held directly, a swap for the excess,
+    turns = L - 1). Both are modeling choices (ASSUMED). The fee is base's; a caller sets another with
+    dataclasses.replace. The daily twin at the same L and costs is twin_of(at_leverage(...)).
+    """
+    if base.kind == "REAL_FUND":
+        raise ValueError(f"{base.name} models a real fund at its filed terms; it cannot be moved to another leverage")
+    if base.reset == "daily":
+        raise ValueError(f"{base.name} resets daily; build the calendar design at L, then take twin_of() of it")
+    L = float(L)
+    turns = expected_turns(L, basis)
+    if turns is None:
+        raise ValueError("basis 'swaps' has no rule for turns at another leverage; use 'notional' or 'borrowed'")
+    drop, drop_source = trigger_for(L, trigger)
+    name = f"{base.name}_L{L:.2f}_{trigger}" + ("" if basis == "notional" else f"_{basis}")
+    costs_at_L = replace(base.costs, turns=turns, spread_basis=basis, turns_status="ASSUMED", label=name,
+                         turns_source=f"{basis} basis at L = {L:g}: the balance-sheet structure is a modeling choice (B17)")
+    return ProductSpec(
+        name=name, kind="MODELED", underlying=base.underlying, reset=base.reset, costs=costs_at_L,
+        early_drop=drop, early_drop_status="ASSUMED", early_drop_source=drop_source, L=L,
+        note=f"HYPOTHETICAL: the {base.reset} design of {base.name} at L = {L:g}; trigger rule '{trigger}'; "
+             f"spread on the {basis} basis")
+
+
+def at_leverage_filed(base, L, model, drop, drop_source, name):
+    """The calendar design of `base` (underlying, reset, fee) at leverage L with the swap terms of `model`, a model of a
+    real fund at its FILED terms (spread per turn and swap turns from SEC N-PORT, "swaps" basis; MODELS_3X). A
+    HYPOTHETICAL product (BACKLOG B1: no 3x calendar fund exists). drop is the early-reset index fall (None: no early
+    reset; at L = 3 a fall of 1/3 wipes the fund out, so a drop at or above 1/3 can never fire first)."""
+    if base.reset == "daily":
+        raise ValueError(f"{base.name} resets daily; build the calendar design, then take twin_of() of it")
+    if model.kind != "REAL_FUND" or model.costs.spread_basis != "swaps":
+        raise ValueError(f"{model.name} is not a model of a real fund at its filed swap terms")
+    if model.underlying != base.underlying:
+        raise ValueError(f"{model.name} is on {model.underlying}, the design on {base.underlying}")
+    c = model.costs
+    costs = replace(base.costs, spread=c.spread, spread_status=c.spread_status, spread_source=f"{model.name}: {c.spread_source}",
+                    turns=c.turns, turns_status=c.turns_status, turns_source=f"{model.name}: {c.turns_source}",
+                    spread_basis="swaps", label=name)
+    return ProductSpec(
+        name=name, kind="MODELED", underlying=base.underlying, reset=base.reset, costs=costs, early_drop=drop,
+        early_drop_status="ASSUMED", early_drop_source=drop_source, L=float(L),
+        note=f"HYPOTHETICAL: the {base.reset} design of {base.name} at L = {L:g} with {model.name}'s filed swap terms")
 
 
 # ---------------------------------------------------------------- 3x daily MODELS of real funds (BACKLOG B13)

@@ -36,6 +36,12 @@ What it does, in order, for each live fund:
      registry carries as MODELED) over their only published month, 2024-08-30 to 2024-09-30, at the live funds'
      terms, as an out-of-sample check (nothing was fitted on them).
   6. Measures the realized multiple: fund return / ETF return over every full calendar period (unchanged, F4).
+  7. REAL vs REAL (BACKLOG B19): each live calendar fund against the real 2x DAILY fund on the same index over the
+     same dates (SPYQ vs SSO; MQQQ and QQQP vs QLD), both on market prices plus payouts, split into the fee difference
+     and the rest, next to the model's design gap at equal costs. The daily funds' total returns must first pass a
+     HARD TEST against their own N-CSR (reference/daily_etf_highlights.csv): each fiscal year's market-price total
+     return within PEER_TR_TOL_PP and each year's payouts within PEER_DIST_TOL of the filed per-share total; a
+     failure exits 1.
 Writes results/validate_live.json and results/validate_live.md. Prints provenance banners first.
 Model series are never presented as the funds; the funds' PRICES stand in for their NAVs except where an anchor is
 the issuer's own NAV figure (then the table says so).
@@ -240,19 +246,34 @@ PRICE_VS_NAV_BOUND = ("N-CSR FY to 2025-03-31: market-price total returns -8.12 
                       "six to seven months")
 
 
-REFERENCE_FILES = ("distributions.csv", "etf_distributions.csv", "nav_anchors.csv")     # the CSV tables main() reads
+# The last day of every fit and table: the common data end of the three funds at v0.1.0. Without it the windows would
+# follow whatever the library holds (in v0.1.1 the MQQQ and QQQP files ran 20 sessions further than SPYQ's, which
+# moved the published window-2 figures), and a stranger with newer data could not reproduce them.
+VALIDATE_END = "2026-10-09"
+
+# ---- real vs real (section 7, BACKLOG B19) ----
+DAILY_PEER = {"SPYQ": "AMEX:SSO", "MQQQ": "AMEX:QLD", "QQQP": "AMEX:QLD"}   # the real 2x daily fund on the same index
+RVR_END = "2026-09-30"        # a quarter end (a reset for all three funds) inside every data file on hand
+PEER_TR_TOL_PP = 0.02         # the N-CSR prints total returns to 0.01 points: rounding plus one more
+PEER_DIST_TOL = 0.005         # the N-CSR prints per-share distributions to the cent: half a cent per fiscal year
+PEER_FEE_NOTE = ("the N-CSR net expense ratio of each fiscal year (to May 31); the FY2026 ratio held after 2026-05-31 "
+                 "(ASSUMED: no later filing yet)")
+
+REFERENCE_FILES = ("distributions.csv", "etf_distributions.csv", "nav_anchors.csv",      # the CSV tables main() reads
+                   "daily_etf_distributions.csv", "daily_etf_highlights.csv")
 
 
 def build_inputs():
     """The input manifest: every price file and FRED file this script loads (fund, ETF, index price and total-return
     index for each fund; OBFR and DFF), plus the CSV tables in reference/ (fingerprints only; no absolute paths)."""
-    symbols = list(dict.fromkeys(s for cfg in FUNDS.values() for s in (cfg["symbol"], cfg["etf"], cfg["index_px"], cfg["index_tr"])))
+    symbols = list(dict.fromkeys([s for cfg in FUNDS.values() for s in (cfg["symbol"], cfg["etf"], cfg["index_px"], cfg["index_tr"])]
+                                 + list(DAILY_PEER.values())))
     m = provenance.inputs_manifest(symbols, ["OBFR", "DFF"])
     m["reference_dir"] = REFERENCE.name
     m["reference_files"] = provenance.manifest([REFERENCE / n for n in REFERENCE_FILES])
     # the N-PORT extract (JSON, not a CSV table): the source of FILED_SPREAD and SPREAD_BOUNDS, fingerprinted by its bytes
     nport = REFERENCE / "nport_tradr_2026.json"
-    m["reference_json"] = [{"file": nport.name, "sha256": provenance.sha256_of(nport), "bytes": nport.stat().st_size}]
+    m["reference_json"] = [{"file": nport.name, "sha256": provenance.sha256_of(nport), "bytes": provenance.byte_count(nport)}]
     return m
 
 
@@ -306,6 +327,109 @@ def etf_inputs(etf_symbol, index_px, index_tr, start):
     own = validate.fund_total_return(etf_px, etf_dividends(name, start)).rename(name + "_TR")
     idx = validate.etf_total_return(etf_px, loader.close(index_px), loader.close(index_tr), etf_fee=ETF_FEE[etf_symbol])
     return etf_px, etf_low, own, idx
+
+
+def peer_dividends(ticker):
+    """A daily fund's cash payouts by ex-date (reference/daily_etf_distributions.csv, SECONDARY, split-adjusted)."""
+    d = pd.read_csv(REFERENCE / "daily_etf_distributions.csv", parse_dates=["ex_date"])
+    d = d[d["ticker"] == ticker]
+    return pd.Series(d["amount_per_share"].astype(float).values, index=pd.DatetimeIndex(d["ex_date"].values))
+
+
+def peer_highlights(ticker):
+    h = pd.read_csv(REFERENCE / "daily_etf_highlights.csv", parse_dates=["fiscal_year_end"])
+    return h[h["ticker"] == ticker].sort_values("fiscal_year_end")
+
+
+def peer_checks(symbol, px, divs, hl):
+    """The daily fund's HARD TEST, one row per N-CSR fiscal year: the market-price total return rebuilt from the
+    library closes plus the payouts (reinvested on the ex-date close) against the filed one, and the payouts inside
+    the year against the filed per-share total. A fiscal year runs from the last close on or before the previous
+    May 31 to the last close on or before this one."""
+    tr = validate.fund_total_return(px, divs)
+    rows = []
+    for _, r in hl.iterrows():
+        e = r["fiscal_year_end"]
+        s = pd.Timestamp(year=e.year - 1, month=e.month, day=e.day)
+        s_row, e_row = px.index[px.index <= s][-1], px.index[px.index <= e][-1]
+        got = float(tr.loc[e_row] / tr.loc[s_row] - 1.0) * 100.0
+        paid = float(divs[(divs.index > s) & (divs.index <= e)].sum())
+        filed_paid = -float(r["dist_total"])                     # the N-CSR prints distributions as negatives
+        rows.append(dict(fund=symbol, fiscal_year_end=str(e.date()), start_row=str(s_row.date()), end_row=str(e_row.date()),
+                         total_return_rebuilt_pct=got, total_return_market_filed_pct=float(r["total_return_market_pct"]),
+                         total_return_nav_filed_pct=float(r["total_return_nav_pct"]), payouts=paid, payouts_filed=filed_paid,
+                         tr_error_pp=got - float(r["total_return_market_pct"]), payout_error=paid - filed_paid,
+                         passed=bool(abs(got - float(r["total_return_market_pct"])) <= PEER_TR_TOL_PP
+                                     and abs(paid - filed_paid) <= PEER_DIST_TOL)))
+    return rows
+
+
+def peer_fee_series(hl, index):
+    """The daily fund's filed net expense ratio (annual decimal) on each row: each fiscal year's N-CSR ratio over that
+    year (to May 31), the last one held after its end (PEER_FEE_NOTE)."""
+    fee = pd.Series(np.nan, index=index)
+    for _, r in hl.iterrows():
+        e = r["fiscal_year_end"]
+        s = pd.Timestamp(year=e.year - 1, month=e.month, day=e.day)
+        fee[(index > s) & (index <= e)] = float(r["expense_ratio_net_pct"]) / 100.0
+    if fee.isna().all():
+        raise ValueError("no filed expense ratio covers the window")
+    return fee.ffill().bfill()
+
+
+def real_vs_real_daily(fund, spec, fund_tr, fee_cal, peer_tr, fee_peer, u_tr, u_px, rate):
+    """The realized gap between the real calendar fund and the real daily fund over their shared dates from the
+    calendar fund's inception close to RVR_END, split into the filed fee difference and the rest, next to the model's
+    design gap: the calendar kernel (the fund's reset and its -35% trigger on the ETF price) less the daily kernel, both
+    at L, zero fee and zero spread, financing (L - 1) x DFF, on the ETF's own total return."""
+    end = u_tr.index[u_tr.index <= pd.Timestamp(RVR_END)][-1]
+    reset = u_tr.index[0]                                       # the inception close: the model's first reset
+    first = fund_tr.index[0]                                    # the calendar fund's first price bar (one session later)
+    shared = u_tr.loc[first:end].index.intersection(fund_tr.index).intersection(peer_tr.index)
+    if shared[0] != first or shared[-1] != end:
+        raise ValueError(f"{fund}: both funds need a close on {first.date()} and {end.date()}")
+    a, d = fund_tr.loc[shared], peer_tr.loc[shared]
+    c_a, c_d = validate.cagr(a / a.iloc[0]), validate.cagr(d / d.iloc[0])
+    u, px, r = u_tr.loc[reset:end], u_px.loc[reset:end], rate.loc[reset:end]
+    m_cal = kernel.periodic_reset_series(u, r, reset=spec.reset, L=spec.L, spread_per_nav=0.0, fee=0.0,
+                                         early_drop=spec.early_drop, early_mode="level", trigger=px)
+    m_day = kernel.daily_reset_series(u, r, L=spec.L, spread_per_nav=0.0, fee=0.0)
+    m_cal, m_day = m_cal.loc[shared], m_day.loc[shared]         # the resets stay on the fund's schedule; growth on the shared dates
+    fa, fd = float(fee_cal.loc[first:end].iloc[1:].mean()), float(fee_peer.loc[first:end].iloc[1:].mean())
+    gap = c_a - c_d
+    model_gap = validate.cagr(m_cal / m_cal.iloc[0]) - validate.cagr(m_day / m_day.iloc[0])
+    # Each fund's own residual cost on the same footing: the spread per NAV a year, on top of (L - 1) x DFF and its
+    # filed fee, that makes its kernel grow as the fund did over the shared dates (validate.fit_spread). Its COST DRAG
+    # is the CAGR its kernel loses to fee + residual against the same kernel at zero cost. Because each fit reproduces
+    # its fund's growth, gap = model gap - calendar drag + daily drag holds to the fit's tolerance: the realized gap
+    # splits exactly into the design and the two funds' costs (decomposition_error is the check).
+    fee_c, fee_p = fee_cal.loc[reset:end], fee_peer.reindex(u.index).ffill().bfill()
+
+    def cal_at(x):
+        return kernel.periodic_reset_series(u, r, reset=spec.reset, L=spec.L, spread_per_nav=x, fee=fee_c,
+                                            early_drop=spec.early_drop, early_mode="level", trigger=px)
+
+    def day_at(x):
+        return kernel.daily_reset_series(u, r, L=spec.L, spread_per_nav=x, fee=fee_p)
+
+    s_cal = validate.fit_spread(cal_at, a, -0.10, 0.20)["spread_per_nav"]
+    s_day = validate.fit_spread(day_at, d, -0.10, 0.20)["spread_per_nav"]
+
+    def growth(nav):
+        nav = nav.loc[shared]
+        return validate.cagr(nav / nav.iloc[0])
+
+    drag_cal = growth(m_cal) - growth(cal_at(s_cal))
+    drag_day = growth(m_day) - growth(day_at(s_day))
+    return dict(calendar_fund=fund, daily_fund=DAILY_PEER[fund], reset=spec.reset, L=spec.L, inception=str(reset.date()),
+                start=str(first.date()), end=str(end.date()), years=round((end - first).days / 365.25, 4), rows=int(len(shared)),
+                cagr_calendar=c_a, cagr_daily=c_d, gap=gap, log_gap=float(np.log1p(c_a) - np.log1p(c_d)),
+                fee_calendar=fa, fee_daily=fd, fee_difference=fa - fd, gap_fee_adjusted=gap + (fa - fd),
+                model_gap=model_gap, residual_vs_model=gap + (fa - fd) - model_gap,
+                model_early_resets=m_cal.attrs["early_resets"], residual_spread_calendar=s_cal, residual_spread_daily=s_day,
+                residual_spread_difference=s_day - s_cal, cost_drag_calendar=drag_cal, cost_drag_daily=drag_day,
+                decomposition_error=gap - (model_gap - drag_cal + drag_day),
+                interval=None, interval_note="two years: too few independent years for an interval (too noisy to test)")
 
 
 def structural_spec(spec, fund):
@@ -400,7 +524,7 @@ def main():
               f"- Price vs NAV: {PRICE_VS_NAV_BOUND}. Fund PRICES stand in for NAVs in every fit; bid-ask noise "
               f"inflates tracking error on thin funds.\n")
 
-    c_fit_w1, dsens_all, decomp_all = {}, {}, {}
+    c_fit_w1, dsens_all, decomp_all, rvr_in = {}, {}, {}, {}
     for fund, cfg in FUNDS.items():
         spec = products.PRODUCTS[fund]
         spec_s = structural_spec(spec, fund)
@@ -408,7 +532,9 @@ def main():
         fund_px = loader.close(cfg["symbol"])
         dist, dist_note = distributions(fund)
         fund_tr = validate.fund_total_return(fund_px, dist)
-        start, end = pd.Timestamp(cfg["reset_date"]), fund_tr.index[-1]
+        start, end = pd.Timestamp(cfg["reset_date"]), fund_tr.index[fund_tr.index <= pd.Timestamp(VALIDATE_END)][-1]
+        if end != pd.Timestamp(VALIDATE_END):
+            raise ValueError(f"{fund}: no close on {VALIDATE_END} (the data ends {fund_tr.index[-1].date()})")
         etf_px, etf_low, etf_own, etf_idx = etf_inputs(cfg["etf"], cfg["index_px"], cfg["index_tr"], cfg["reset_date"])
         u_px, u_low, u_tr, u_idx = etf_px.loc[:end], etf_low.loc[:end], etf_own.loc[:end], etf_idx.loc[:end]
         r_obfr = loader.rate_known_before(u_px.index, obfr, "OBFR", max_hole_days=10)
@@ -426,6 +552,7 @@ def main():
         fee_tl = fee_series(fund, u_px.index)
         fee_sens = fee_series(fund, u_px.index, sensitivity=True)
         fall = validate.worst_in_period_fall(u_px, spec.reset, low=u_low)
+        rvr_in[fund] = dict(spec=spec, fund_tr=real, fee=fee_tl, u_tr=u_tr, u_px=u_px, rate=r_dff)   # for section 7
         fr = results["funds"][fund] = dict(
             inception=cfg["reset_date"], first_fund_bar=str(first_fund_day.date()), end=str(end.date()),
             fund_payouts=fund_tr.attrs["distributions"], etf_dividends=etf_own.attrs["distributions"],
@@ -744,9 +871,70 @@ def main():
     md.append("Out of scope (underlying not in this kit): SOXM, SOXW (SOXX), NVDW (NVDA, 1.75x), TSLW (TSLA, 1.5x), TLTM, TLTQ (TLT); "
               "their one-month anchors are in `reference/nav_anchors.csv`.\n")
 
+    # ---- 7. real vs real: each live calendar fund against the real 2x daily fund on the same index (B19) ----
+    peer_tr, peer_fee, checks = {}, {}, []
+    for sym in dict.fromkeys(DAILY_PEER.values()):
+        tkr = sym.split(":")[1]
+        px, divs, hl = loader.close(sym), peer_dividends(tkr), peer_highlights(tkr)
+        checks += peer_checks(tkr, px, divs, hl)
+        first = pd.Timestamp(min(c["reset_date"] for c in FUNDS.values()))
+        tr = validate.fund_total_return(px.loc[first:], divs[divs.index > first])
+        peer_tr[sym], peer_fee[sym] = tr, peer_fee_series(hl, tr.index)
+    peer_ok = all(c["passed"] for c in checks)
+    rvr = [real_vs_real_daily(f, x["spec"], x["fund_tr"], x["fee"], peer_tr[DAILY_PEER[f]], peer_fee[DAILY_PEER[f]],
+                              x["u_tr"], x["u_px"], x["rate"]) for f, x in rvr_in.items()]
+    results["real_vs_real_daily"] = dict(peer_hard_test="PASS" if peer_ok else "FAIL", peer_checks=checks, rows=rvr,
+                                         peer_tr_tol_pp=PEER_TR_TOL_PP, peer_dist_tol=PEER_DIST_TOL, end=RVR_END,
+                                         peer_fee_note=PEER_FEE_NOTE,
+                                         peer_payouts="reference/daily_etf_distributions.csv (SECONDARY; fiscal-year sums checked)",
+                                         peer_filing="reference/daily_etf_highlights.csv (N-CSR, accession on every row)")
+    md.append("\n## Real calendar fund vs real daily fund, inception to " + RVR_END + " (BACKLOG B19)\n")
+    md.append(f"The real 2x DAILY fund on the same index: SSO (S&P 500) and QLD (Nasdaq-100), on market prices plus payouts "
+              f"reinvested on the ex-date close, like the calendar funds. Hard test first: each daily fund's total return "
+              f"rebuilt this way against its own N-CSR market-price total return per fiscal year (within {PEER_TR_TOL_PP} "
+              f"points), and its payouts against the filed per-share total (within {PEER_DIST_TOL}): "
+              f"**{results['real_vs_real_daily']['peer_hard_test']}**.\n")
+    md.append("| daily fund | fiscal year to | rebuilt % | N-CSR market % | N-CSR NAV % | payouts | filed | passed |\n"
+              "|---|---|---|---|---|---|---|---|")
+    for c in checks:
+        md.append(f"| {c['fund']} | {c['fiscal_year_end']} | {c['total_return_rebuilt_pct']:.2f} | {c['total_return_market_filed_pct']:.2f} | "
+                  f"{c['total_return_nav_filed_pct']:.2f} | {c['payouts']:.5f} | {c['payouts_filed']:.2f} | {c['passed']} |")
+    md.append(f"\nFees: the calendar funds' fee timeline above; the daily funds' {PEER_FEE_NOTE}. The model gap runs both "
+              "kernels at equal costs (zero fee, zero spread, (L - 1) x DFF) on the ETF's own total return; the calendar "
+              "kernel keeps the fund's -35% trigger. Gaps are CAGR differences in pp a year; 'rest' = fee-adjusted gap "
+              "minus model gap: everything else (cash yield, swap terms, price vs NAV at the ends).\n")
+    md.append("| calendar | daily | reset | window | years | CAGR calendar % | CAGR daily % | gap | log gap | fee difference | "
+              "gap fee-adjusted | model gap (equal costs) | rest | residual cost calendar / daily, % of NAV a year | "
+              "cost drag calendar / daily, pp a year | interval |\n"
+              "|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|")
+    for p in rvr:
+        md.append(f"| {p['calendar_fund']} | {p['daily_fund']} | {p['reset']} | {p['start']} to {p['end']} | {p['years']:.2f} | "
+                  f"{p['cagr_calendar'] * 100:+.2f} | {p['cagr_daily'] * 100:+.2f} | {fmt_pp(p['gap'])} | {fmt_pp(p['log_gap'])} | "
+                  f"{fmt_pp(p['fee_difference'])} | {fmt_pp(p['gap_fee_adjusted'])} | {fmt_pp(p['model_gap'])} | "
+                  f"{fmt_pp(p['residual_vs_model'])} | "
+                  f"{fmt_pp(p['residual_spread_calendar'])} / {fmt_pp(p['residual_spread_daily'])} | "
+                  f"{fmt_pp(p['cost_drag_calendar'])} / {fmt_pp(p['cost_drag_daily'])} | {p['interval_note']} |")
+        print(f"real vs real {p['calendar_fund']} - {p['daily_fund']} {p['start']}..{p['end']}: gap {p['gap']:+.2%}, "
+              f"fee-adjusted {p['gap_fee_adjusted']:+.2%}, model {p['model_gap']:+.2%}, rest {p['residual_vs_model']:+.2%}; "
+              f"residual cost {p['residual_spread_calendar']:+.2%} / {p['residual_spread_daily']:+.2%}; cost drag "
+              f"{p['cost_drag_calendar']:+.2%} / {p['cost_drag_daily']:+.2%}; decomposition error {p['decomposition_error']:.1e}")
+    md.append("\nResidual cost: the spread per NAV a year, on top of (L - 1) x DFF and the filed fee, that makes each fund's own "
+              "kernel grow as the fund did on the shared dates (validate.fit_spread), on the ETF's own total return for both "
+              "funds (the daily funds track the index itself, so theirs also absorbs the ETF's fee). It is a residual: cash "
+              "yield, swap terms and price vs NAV, not a filed term. Cost drag: the CAGR each fund's kernel loses to its fee "
+              "plus its residual cost, against the same kernel at zero cost. Because each fit reproduces its fund, the gap "
+              "splits exactly: gap = model gap - calendar drag + daily drag (to the fit's tolerance).\n")
+    for c in checks:
+        print(f"peer check {c['fund']} FY to {c['fiscal_year_end']}: TR {c['total_return_rebuilt_pct']:.2f} vs "
+              f"{c['total_return_market_filed_pct']:.2f}; payouts {c['payouts']:.5f} vs {c['payouts_filed']:.2f}: {c['passed']}")
+    md.append("")
+
     (OUT / "validate_live.json").write_text(json.dumps(provenance.json_safe(results), indent=2, allow_nan=False), encoding="utf-8")
     (OUT / "validate_live.md").write_text("\n".join(md), encoding="utf-8")
     print(f"\nwrote {OUT / 'validate_live.json'} and validate_live.md")
+    if not peer_ok:
+        print("DAILY-FUND HARD TEST FAILED on:\n  " + "\n  ".join(str(c) for c in checks if not c["passed"]))
+        sys.exit(1)
 
 
 if __name__ == "__main__":

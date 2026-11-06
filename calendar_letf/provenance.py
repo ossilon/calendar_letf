@@ -27,7 +27,8 @@ from . import loader
 
 REPO = Path(__file__).resolve().parent.parent
 PACKAGE = Path(__file__).resolve().parent                            # calendar_letf/calendar_letf: the code that computes
-DATE_COLUMNS = ("date", "time", "observation_date", "ex_date")      # ex_date: the payout tables in reference/
+DATE_COLUMNS = ("date", "time", "observation_date", "ex_date", "first_day")   # ex_date: the payout tables; first_day: qqq_income_ratios.csv
+TEXT_SUFFIXES = (".csv", ".json", ".jsonl", ".md", ".txt", ".py", ".toml", ".cff")  # hashed with CR LF folded to LF (see sha256_of)
 CHUNK = 1 << 20
 
 
@@ -56,12 +57,24 @@ def json_safe(o):
 
 
 def sha256_of(path):
-    """SHA-256 of the file's bytes, as 64 hex characters."""
+    """SHA-256 of the file's bytes, as 64 hex characters. A text file (TEXT_SUFFIXES) is hashed with its Windows line
+    endings (CR LF) turned into LF first, so the hash does not depend on how a checkout writes line endings: git stores
+    and checks out LF (.gitattributes), while a Windows script may write CR LF (re-grade of 2026-11-06, finding T1).
+    Any other file is hashed as its bytes."""
+    if Path(path).suffix.lower() in TEXT_SUFFIXES:
+        return hashlib.sha256(_normalized_bytes(path)).hexdigest()
     h = hashlib.sha256()
     with open(path, "rb") as f:
         for block in iter(lambda: f.read(CHUNK), b""):
             h.update(block)
     return h.hexdigest()
+
+
+def byte_count(path):
+    """The file's size in bytes, counted like sha256_of: a text file with CR LF folded to LF."""
+    if Path(path).suffix.lower() in TEXT_SUFFIXES:
+        return len(_normalized_bytes(path))
+    return Path(path).stat().st_size
 
 
 def _normalized_bytes(path):
@@ -100,7 +113,7 @@ def _date_text(value):
 def _columns(header):
     """(index of the date column, index of the value column) from a header row.
 
-    Date column: a column named date, time, observation_date or ex_date, else column 0.
+    Date column: a column named date, time, observation_date, ex_date or first_day, else column 0.
     Value column: 'close' if present (price files), else column 1 (FRED files), else the date column itself.
     """
     low = [c.strip().lower() for c in header]
@@ -137,7 +150,7 @@ def file_record(path):
             if first is None:
                 first = date
             last = date
-    return {"file": path.name, "sha256": sha256_of(path), "bytes": path.stat().st_size, "rows": rows,
+    return {"file": path.name, "sha256": sha256_of(path), "bytes": byte_count(path), "rows": rows,
             "first_date": None if first is None else _date_text(first),
             "last_date": None if last is None else _date_text(last)}
 

@@ -193,7 +193,8 @@ direct = world.margin_slice(enc, spec_m.fee, world.me[i1], world.me[i1 + 12])[-1
 check("study: margin_navs and margin_slice agree for the same start (1e-14)", abs(mg_fixed[12][i1] - direct) < 1e-14)
 spec_w = products.PRODUCTS["HYP_SPX_W"]
 spec_3x = replace(spec_w, L=3.0, costs=replace(spec_w.costs, turns=3.0, label="x"))      # a 3x copy (turns follow L)
-raises("study: a cost encoding refuses a non-2x product", lambda: study.kernel_kwargs(spec_3x, enc), "2x funds only")
+raises("study: a 2x cost encoding refuses a 3x product unless carried with encoding_at (B17 guard)",
+       lambda: study.kernel_kwargs(spec_3x, enc), "is set for L = 2 but the product has L = 3")
 check("study: the rate encoding multiplies the rate by 1.3 and the fixed one leaves it alone",
       np.allclose(study.scaled_rate(r_s, study.ENCODINGS["rate"]), 0.026) and np.allclose(study.scaled_rate(r_s, enc), 0.02))
 check("study: both fitted encodings and every sensitivity are labeled ASSUMED",

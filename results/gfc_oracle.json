@@ -1,11 +1,11 @@
 {
  "meta": {
   "title": "The GFC oracle entry",
-  "run_date": "2026-10-29",
+  "run_date": "2026-11-06",
   "code": {
    "script": "run_gfc_oracle.py",
-   "files": 23,
-   "sha256": "89bad975205608bce3e5619f338147a58caca0fd50fbedb4ca5639c60ebd95cb"
+   "files": 27,
+   "sha256": "cc43154446526504acf47f46c5d50d504152ea6065ab8c95f762aa655ad054e7"
   },
   "gfc_window": [
    "2007-01-01",
@@ -448,91 +448,91 @@
    "files": [
     {
      "file": "SP_SPX_daily.csv",
-     "sha256": "8b0c1596b57ee2f159bebf4fd44ddbd707838a7d84f4e124d3e863dcd5d89d21",
-     "bytes": 1424201,
-     "rows": 19326,
+     "sha256": "b146c9af89ccb7f0a62bac558c404e281d6ff3c95450358f68aae9973595c098",
+     "bytes": 1405472,
+     "rows": 19333,
      "first_date": "1950-01-03",
-     "last_date": "2026-10-22"
+     "last_date": "2026-11-02"
     },
     {
      "file": "SP_SPXTR_daily.csv",
-     "sha256": "ac309a0b90f5d8a071d3bffb8583b0b66a7f9656d1378721f684a17b1285df9e",
-     "bytes": 752586,
-     "rows": 9780,
+     "sha256": "edab5090825ed31cffd1016bd027da45668da9991d0035782c2c80a57a44b04c",
+     "bytes": 743369,
+     "rows": 9787,
      "first_date": "1988-01-04",
-     "last_date": "2026-10-23"
+     "last_date": "2026-11-03"
     },
     {
      "file": "AMEX_SPY_daily.csv",
-     "sha256": "38bb2ae821ff99d3d3aa92e86bf16a652b28c2a0bc21d8f1ae308f798a2d0964",
-     "bytes": 614777,
-     "rows": 8482,
+     "sha256": "643d6ef08b88086f17ac834fd8c2c729736d65e2841d6d0209c0c467ff5a78cc",
+     "bytes": 607605,
+     "rows": 8498,
      "first_date": "1993-01-29",
-     "last_date": "2026-10-09"
+     "last_date": "2026-11-02"
     },
     {
      "file": "NASDAQ_NDX_daily.csv",
-     "sha256": "4c3219bda7204173a389675e1d38789718800222853ae4617b79387665343061",
-     "bytes": 904772,
-     "rows": 10504,
+     "sha256": "79d8e8688fa365d3ca2755ccbfbbcb96f0023df65f263f16091a1a1b478697dc",
+     "bytes": 895791,
+     "rows": 10519,
      "first_date": "1985-01-31",
-     "last_date": "2026-10-09"
+     "last_date": "2026-10-30"
     },
     {
      "file": "NASDAQ_XNDX_daily.csv",
-     "sha256": "a10dab98993e4502596d2e09f608e08eedf128ed909d16b9af3afe946fd1fd86",
-     "bytes": 426325,
-     "rows": 5004,
+     "sha256": "d7dcc6dffa24f6cefaf44cb4f4a8c17fed7e8dbafea5ddebd7754efe93cfc507",
+     "bytes": 422682,
+     "rows": 5019,
      "first_date": "2006-11-08",
-     "last_date": "2026-10-09"
+     "last_date": "2026-10-30"
     },
     {
      "file": "NASDAQ_QQQ_daily.csv",
-     "sha256": "1bf106f83579ca717584e5e075ac01ec8769fdfa8a7ddddb9c0df3df5aa9cf47",
-     "bytes": 485867,
-     "rows": 6940,
+     "sha256": "f096cd6c6b7511901c68d674baafd658f0541abb7513addda9a04fd78f4eec74",
+     "bytes": 480184,
+     "rows": 6955,
      "first_date": "1999-03-10",
-     "last_date": "2026-10-09"
+     "last_date": "2026-10-30"
     },
     {
      "file": "AMEX_SSO_daily.csv",
-     "sha256": "9f248b1bedaced881f19e06d4ee86e04cac949a0aedd794c7bd897797197342f",
-     "bytes": 370645,
+     "sha256": "0df3e43a82dba161dda5393d6c01cfd554031a7c657dab661edf029cea084231",
+     "bytes": 365541,
      "rows": 5103,
      "first_date": "2006-06-21",
      "last_date": "2026-10-02"
     },
     {
      "file": "AMEX_UPRO_daily.csv",
-     "sha256": "2462a547956af1cd50a7946f273a24748a790266c417a0d3df8fb635913f9640",
-     "bytes": 330207,
+     "sha256": "17d862355823db15173aa8396d66c675ed5cd4a89b28d05fa1eed983c06b142e",
+     "bytes": 325861,
      "rows": 4345,
      "first_date": "2009-06-25",
      "last_date": "2026-10-02"
     },
     {
      "file": "AMEX_QLD_daily.csv",
-     "sha256": "298046184b2f5daea4d51046eac617a90c720158c8c9bd1bb78e690fe0ae8949",
-     "bytes": 380453,
-     "rows": 5108,
+     "sha256": "9e5453cb02e0463c598e53c454cd4887d843234feafad6df45bdce9411cd91e2",
+     "bytes": 376503,
+     "rows": 5123,
      "first_date": "2006-06-21",
-     "last_date": "2026-10-09"
+     "last_date": "2026-10-30"
     },
     {
      "file": "NASDAQ_TQQQ_daily.csv",
-     "sha256": "d3dc0fa8dc69442e2230ba644ba6b2f4689352147fc9e530e817c6d477e98856",
-     "bytes": 317722,
-     "rows": 4191,
+     "sha256": "ae88fcb39ab38bf6036d188306eecf63971854338991c8e52145492fe2859feb",
+     "bytes": 314761,
+     "rows": 4206,
      "first_date": "2010-02-11",
-     "last_date": "2026-10-09"
+     "last_date": "2026-10-30"
     },
     {
      "file": "DFF.csv",
-     "sha256": "a93504210b53532fda653a7ee8d543b00b1780c83f2131e35bb94827a973c2df",
-     "bytes": 424203,
-     "rows": 26398,
+     "sha256": "e84a934a50143ae0c7590aa7ff0f90b5e8778c81579fff17f00449a9b49efc59",
+     "bytes": 424619,
+     "rows": 26424,
      "first_date": "1954-07-01",
-     "last_date": "2026-10-08"
+     "last_date": "2026-11-03"
     },
     {
      "file": "TB3MS.csv",
@@ -552,22 +552,30 @@
      "rows": 1830,
      "first_date": null,
      "last_date": null
+    },
+    {
+     "file": "qqq_income_ratios.csv",
+     "sha256": "c5a1f3e40461f35cead08010ab864f9cb0e8027d0b0f19fc74bba73bdbadc358",
+     "bytes": 1042,
+     "rows": 8,
+     "first_date": "1999-03-05",
+     "last_date": "2005-10-01"
     }
    ]
   },
   "banner": [
    "Inputs: 12 files; prices from <external>/library, rates from <external>/rates",
-   "  SP_SPX_daily.csv: 19326 rows, 1950-01-03 to 2026-10-22, sha256 8b0c1596b57e",
-   "  SP_SPXTR_daily.csv: 9780 rows, 1988-01-04 to 2026-10-23, sha256 ac309a0b90f5",
-   "  AMEX_SPY_daily.csv: 8482 rows, 1993-01-29 to 2026-10-09, sha256 38bb2ae821ff",
-   "  NASDAQ_NDX_daily.csv: 10504 rows, 1985-01-31 to 2026-10-09, sha256 4c3219bda720",
-   "  NASDAQ_XNDX_daily.csv: 5004 rows, 2006-11-08 to 2026-10-09, sha256 a10dab98993e",
-   "  NASDAQ_QQQ_daily.csv: 6940 rows, 1999-03-10 to 2026-10-09, sha256 1bf106f83579",
-   "  AMEX_SSO_daily.csv: 5103 rows, 2006-06-21 to 2026-10-02, sha256 9f248b1bedac",
-   "  AMEX_UPRO_daily.csv: 4345 rows, 2009-06-25 to 2026-10-02, sha256 2462a547956a",
-   "  AMEX_QLD_daily.csv: 5108 rows, 2006-06-21 to 2026-10-09, sha256 298046184b2f",
-   "  NASDAQ_TQQQ_daily.csv: 4191 rows, 2010-02-11 to 2026-10-09, sha256 d3dc0fa8dc69",
-   "  DFF.csv: 26398 rows, 1954-07-01 to 2026-10-08, sha256 a93504210b53",
+   "  SP_SPX_daily.csv: 19333 rows, 1950-01-03 to 2026-11-02, sha256 b146c9af89cc",
+   "  SP_SPXTR_daily.csv: 9787 rows, 1988-01-04 to 2026-11-03, sha256 edab5090825e",
+   "  AMEX_SPY_daily.csv: 8498 rows, 1993-01-29 to 2026-11-02, sha256 643d6ef08b88",
+   "  NASDAQ_NDX_daily.csv: 10519 rows, 1985-01-31 to 2026-10-30, sha256 79d8e8688fa3",
+   "  NASDAQ_XNDX_daily.csv: 5019 rows, 2006-11-08 to 2026-10-30, sha256 d7dcc6dffa24",
+   "  NASDAQ_QQQ_daily.csv: 6955 rows, 1999-03-10 to 2026-10-30, sha256 f096cd6c6b75",
+   "  AMEX_SSO_daily.csv: 5103 rows, 2006-06-21 to 2026-10-02, sha256 0df3e43a82db",
+   "  AMEX_UPRO_daily.csv: 4345 rows, 2009-06-25 to 2026-10-02, sha256 17d862355823",
+   "  AMEX_QLD_daily.csv: 5123 rows, 2006-06-21 to 2026-10-30, sha256 9e5453cb02e0",
+   "  NASDAQ_TQQQ_daily.csv: 4206 rows, 2010-02-11 to 2026-10-30, sha256 ae88fcb39ab3",
+   "  DFF.csv: 26424 rows, 1954-07-01 to 2026-11-03, sha256 e84a934a5014",
    "  TB3MS.csv: 1112 rows, 1934-01-01 to 2026-08-01, sha256 ebf04b1ae5bc",
    "SPX early-reset trigger: the AMEX:SPY price (daily low) from 1993-01-29, scaled to the SP:SPX price index before that; trigger basis 'etf'; drop 35% from the fund's base; fill mode 'level'.",
    "SPX day counts: financing (reference rate and swap spread) ACT/360; expense ratio ACT/365 (calendar days between rows, so weekends and holidays accrue).",
@@ -1844,12 +1852,12 @@
      "kind": "MODELED calendar",
      "reset": "monthly",
      "encoding": "fixed",
-     "leverage": 2.8166798212311304,
+     "leverage": 2.8166798208285893,
      "early_resets": 0,
      "first_early_reset": null,
-     "vs_real_2x": 1.0089724173247472,
-     "dollars": 3080654.9932091683,
-     "ret": 307.06549932091684,
+     "vs_real_2x": 1.0089724173247465,
+     "dollars": 3080654.993209166,
+     "ret": 307.06549932091656,
      "cagr": 0.37770905758381823,
      "max_dd": -0.6383411327252211
     },
@@ -1859,25 +1867,25 @@
      "reset": "daily",
      "encoding": "fixed",
      "leverage": 2.0,
-     "vs_real_2x": 0.7206641549149367,
-     "dollars": 2200374.9449882135,
-     "ret": 219.03749449882136,
-     "cagr": 0.352027245511076,
-     "max_dd": -0.6429333636020618
+     "vs_real_2x": 0.7206641549149296,
+     "dollars": 2200374.9449881916,
+     "ret": 219.03749449881917,
+     "cagr": 0.3520272455110751,
+     "max_dd": -0.6429333636020624
     },
     {
      "series": "QQQP",
      "kind": "MODELED calendar",
      "reset": "quarterly",
      "encoding": "fixed",
-     "leverage": 4.400509309094267,
+     "leverage": 4.400509309845146,
      "early_resets": 1,
      "first_early_reset": "2008-11-21",
-     "vs_real_2x": 0.8186773817552366,
-     "dollars": 2499634.7973702126,
-     "ret": 248.96347973702126,
+     "vs_real_2x": 0.8186773817552371,
+     "dollars": 2499634.797370214,
+     "ret": 248.9634797370214,
      "cagr": 0.3617021431094658,
-     "max_dd": -0.6412179333737218
+     "max_dd": -0.6412179333737215
     },
     {
      "series": "TWIN_QQQP",
@@ -1885,25 +1893,25 @@
      "reset": "daily",
      "encoding": "fixed",
      "leverage": 2.0,
-     "vs_real_2x": 0.7245407135655854,
-     "dollars": 2212211.085955529,
-     "ret": 220.22110859555292,
-     "cagr": 0.35243288722942023,
-     "max_dd": -0.6428141991418332
+     "vs_real_2x": 0.7245407135655751,
+     "dollars": 2212211.085955498,
+     "ret": 220.2211085955498,
+     "cagr": 0.3524328872294191,
+     "max_dd": -0.6428141991418344
     },
     {
      "series": "HYP_NDX_W",
      "kind": "MODELED calendar",
      "reset": "weekly",
      "encoding": "fixed",
-     "leverage": 2.322025011967258,
+     "leverage": 2.322025011967257,
      "early_resets": 0,
      "first_early_reset": null,
-     "vs_real_2x": 0.8436912901017924,
-     "dollars": 2576008.759952672,
-     "ret": 256.6008759952672,
-     "cagr": 0.3639956953925372,
-     "max_dd": -0.6350481958211209
+     "vs_real_2x": 0.8436912901017892,
+     "dollars": 2576008.759952662,
+     "ret": 256.60087599526616,
+     "cagr": 0.36399569539253673,
+     "max_dd": -0.6350481958211208
     },
     {
      "series": "TWIN_HYP_NDX_W",
@@ -1911,25 +1919,25 @@
      "reset": "daily",
      "encoding": "fixed",
      "leverage": 2.0,
-     "vs_real_2x": 0.7245407135655854,
-     "dollars": 2212211.085955529,
-     "ret": 220.22110859555292,
-     "cagr": 0.35243288722942023,
-     "max_dd": -0.6428141991418332
+     "vs_real_2x": 0.7245407135655751,
+     "dollars": 2212211.085955498,
+     "ret": 220.2211085955498,
+     "cagr": 0.3524328872294191,
+     "max_dd": -0.6428141991418344
     },
     {
      "series": "MQQQ",
      "kind": "MODELED calendar",
      "reset": "monthly",
      "encoding": "rate",
-     "leverage": 2.813527613706453,
+     "leverage": 2.813527613304362,
      "early_resets": 0,
      "first_early_reset": null,
-     "vs_real_2x": 1.156631606285043,
-     "dollars": 3531496.869511265,
-     "ret": 352.14968695112645,
-     "cagr": 0.3882710730536849,
-     "max_dd": -0.6350013409781845
+     "vs_real_2x": 1.1566316062850397,
+     "dollars": 3531496.8695112546,
+     "ret": 352.1496869511255,
+     "cagr": 0.3882710730536847,
+     "max_dd": -0.6350013409781848
     },
     {
      "series": "TWIN_MQQQ",
@@ -1937,23 +1945,23 @@
      "reset": "daily",
      "encoding": "rate",
      "leverage": 2.0,
-     "vs_real_2x": 0.8285735169581214,
-     "dollars": 2529850.269867542,
-     "ret": 251.9850269867542,
-     "cagr": 0.3626173371003083,
-     "max_dd": -0.6398930649529263
+     "vs_real_2x": 0.8285735169581141,
+     "dollars": 2529850.26986752,
+     "ret": 251.98502698675196,
+     "cagr": 0.36261733710030764,
+     "max_dd": -0.6398930649529264
     },
     {
      "series": "QQQP",
      "kind": "MODELED calendar",
      "reset": "quarterly",
      "encoding": "rate",
-     "leverage": 4.379993777282514,
+     "leverage": 4.379993778029892,
      "early_resets": 1,
      "first_early_reset": "2008-11-21",
-     "vs_real_2x": 0.9344632561480373,
-     "dollars": 2853159.1613335386,
-     "ret": 284.3159161333538,
+     "vs_real_2x": 0.9344632561480368,
+     "dollars": 2853159.161333537,
+     "ret": 284.3159161333537,
      "cagr": 0.3718117630284157,
      "max_dd": -0.637207681031507
     },
@@ -1963,25 +1971,25 @@
      "reset": "daily",
      "encoding": "rate",
      "leverage": 2.0,
-     "vs_real_2x": 0.8330303462944694,
-     "dollars": 2543458.1280340776,
-     "ret": 253.34581280340774,
-     "cagr": 0.36302613875551915,
-     "max_dd": -0.6397728909379089
+     "vs_real_2x": 0.8330303462944616,
+     "dollars": 2543458.128034054,
+     "ret": 253.3458128034054,
+     "cagr": 0.3630261387555185,
+     "max_dd": -0.6397728909379088
     },
     {
      "series": "HYP_NDX_W",
      "kind": "MODELED calendar",
      "reset": "weekly",
      "encoding": "rate",
-     "leverage": 2.3214665855977197,
+     "leverage": 2.3214665855977192,
      "early_resets": 0,
      "first_early_reset": null,
-     "vs_real_2x": 0.9695287889076154,
-     "dollars": 2960223.3453790825,
-     "ret": 295.02233453790825,
-     "cagr": 0.3746404204800238,
-     "max_dd": -0.6318850384120741
+     "vs_real_2x": 0.9695287889076084,
+     "dollars": 2960223.345379061,
+     "ret": 295.0223345379061,
+     "cagr": 0.3746404204800231,
+     "max_dd": -0.6318850384120742
     },
     {
      "series": "TWIN_HYP_NDX_W",
@@ -1989,11 +1997,11 @@
      "reset": "daily",
      "encoding": "rate",
      "leverage": 2.0,
-     "vs_real_2x": 0.8330303462944694,
-     "dollars": 2543458.1280340776,
-     "ret": 253.34581280340774,
-     "cagr": 0.36302613875551915,
-     "max_dd": -0.6397728909379089
+     "vs_real_2x": 0.8330303462944616,
+     "dollars": 2543458.128034054,
+     "ret": 253.3458128034054,
+     "cagr": 0.3630261387555185,
+     "max_dd": -0.6397728909379088
     },
     {
      "series": "TQQQ_MODEL",
@@ -2001,10 +2009,10 @@
      "reset": "daily",
      "encoding": "filed",
      "leverage": 3.0,
-     "dollars": 11505260.985540975,
-     "ret": 1149.5260985540976,
-     "cagr": 0.48305146177241953,
-     "max_dd": -0.8175034914868249
+     "dollars": 11505260.985540744,
+     "ret": 1149.5260985540745,
+     "cagr": 0.483051461772418,
+     "max_dd": -0.8175034914868252
     },
     {
      "series": "QLD",
@@ -2023,8 +2031,8 @@
      "reset": "none",
      "encoding": "tr",
      "leverage": 1.0,
-     "dollars": 355113.2756520881,
-     "ret": 34.51132756520881,
+     "dollars": 355113.27565208817,
+     "ret": 34.511327565208816,
      "cagr": 0.22093320021205787,
      "max_dd": -0.35036697314343945
     }
@@ -2047,10 +2055,10 @@
       "series": "TQQQ_MODEL",
       "kind": "MODEL 3x daily (filed terms)",
       "encoding": "filed",
-      "dollars": 3191084.3224338647,
-      "ret": 318.10843224338646,
-      "cagr": 0.4135875927974131,
-      "max_dd": -0.8175034914868249
+      "dollars": 3191084.3224337944,
+      "ret": 318.1084322433794,
+      "cagr": 0.4135875927974113,
+      "max_dd": -0.8175034914868252
      },
      {
       "series": "QLD",
@@ -2079,9 +2087,9 @@
      "shift_first": -400,
      "shift_last": 21,
      "n_shifts": 422,
-     "lead_min": 1.2681701707332829,
+     "lead_min": 1.268170170733294,
      "lead_min_shift": 21,
-     "lead_max": 1.4737206353171268,
+     "lead_max": 1.473720635317141,
      "lead_max_shift": -18,
      "below_one": []
     },
@@ -2091,9 +2099,9 @@
      "shift_first": -400,
      "shift_last": 21,
      "n_shifts": 422,
-     "lead_min": 0.8340397091552366,
+     "lead_min": 0.8340397091552476,
      "lead_min_shift": -12,
-     "lead_max": 1.1746020102497043,
+     "lead_max": 1.1746020102497212,
      "lead_max_shift": 4,
      "below_one": [
       -400,
@@ -2503,9 +2511,9 @@
      "shift_first": -400,
      "shift_last": 21,
      "n_shifts": 422,
-     "lead_min": 1.1287411857105767,
-     "lead_min_shift": 21,
-     "lead_max": 1.1993834193366733,
+     "lead_min": 1.1287411857105887,
+     "lead_min_shift": 20,
+     "lead_max": 1.1993834193366815,
      "lead_max_shift": -397,
      "below_one": []
     },
@@ -2515,9 +2523,9 @@
      "shift_first": -400,
      "shift_last": 21,
      "n_shifts": 422,
-     "lead_min": 1.2647602883793425,
+     "lead_min": 1.2647602883793492,
      "lead_min_shift": 21,
-     "lead_max": 1.4695347482493135,
+     "lead_max": 1.4695347482493226,
      "lead_max_shift": -18,
      "below_one": []
     },
@@ -2527,9 +2535,9 @@
      "shift_first": -400,
      "shift_last": 21,
      "n_shifts": 422,
-     "lead_min": 0.8304411782113679,
+     "lead_min": 0.8304411782113739,
      "lead_min_shift": -12,
-     "lead_max": 1.1657902959434796,
+     "lead_max": 1.1657902959434898,
      "lead_max_shift": 4,
      "below_one": [
       -400,
@@ -2939,10 +2947,10 @@
      "shift_first": -400,
      "shift_last": 21,
      "n_shifts": 422,
-     "lead_min": 1.1282311327875543,
+     "lead_min": 1.1282311327875554,
      "lead_min_shift": 20,
-     "lead_max": 1.1990089815495495,
-     "lead_max_shift": -396,
+     "lead_max": 1.1990089815495484,
+     "lead_max_shift": -397,
      "below_one": []
     }
    ],
@@ -2954,12 +2962,12 @@
       "kind": "MODELED calendar",
       "reset": "monthly",
       "encoding": "fixed",
-      "leverage": 2.152747054160629,
+      "leverage": 2.152747054416322,
       "early_resets": 0,
       "first_early_reset": null,
-      "vs_real_2x": 0.8953465746533842,
-      "dollars": 2876946.5544026247,
-      "ret": 286.69465544026247,
+      "vs_real_2x": 0.8953465746533833,
+      "dollars": 2876946.554402622,
+      "ret": 286.6946554402622,
       "cagr": 0.379842424706627,
       "max_dd": -0.6383411327252211
      },
@@ -2969,25 +2977,25 @@
       "reset": "daily",
       "encoding": "fixed",
       "leverage": 2.0,
-      "vs_real_2x": 0.7181174109569689,
-      "dollars": 2307470.056395749,
-      "ret": 229.74700563957492,
-      "cagr": 0.36264265307287524,
-      "max_dd": -0.6429333636020618
+      "vs_real_2x": 0.7181174109569606,
+      "dollars": 2307470.0563957226,
+      "ret": 229.74700563957225,
+      "cagr": 0.36264265307287435,
+      "max_dd": -0.6429333636020624
      },
      {
       "series": "QQQP",
       "kind": "MODELED calendar",
       "reset": "quarterly",
       "encoding": "fixed",
-      "leverage": 2.4019347906225645,
+      "leverage": 2.4019347909316724,
       "early_resets": 0,
       "first_early_reset": null,
-      "vs_real_2x": 0.8350919509770274,
-      "dollars": 2683335.1229414274,
-      "ret": 267.33351229414274,
+      "vs_real_2x": 0.8350919509770267,
+      "dollars": 2683335.122941425,
+      "ret": 267.3335122941425,
       "cagr": 0.374386585027233,
-      "max_dd": -0.6412179333737218
+      "max_dd": -0.6412179333737215
      },
      {
       "series": "TWIN_QQQP",
@@ -2995,25 +3003,25 @@
       "reset": "daily",
       "encoding": "fixed",
       "leverage": 2.0,
-      "vs_real_2x": 0.7219148103747538,
-      "dollars": 2319671.940537559,
-      "ret": 230.9671940537559,
-      "cagr": 0.36305139056967617,
-      "max_dd": -0.6428141991418332
+      "vs_real_2x": 0.7219148103747419,
+      "dollars": 2319671.9405375207,
+      "ret": 230.96719405375208,
+      "cagr": 0.36305139056967484,
+      "max_dd": -0.6428141991418344
      },
      {
       "series": "HYP_NDX_W",
       "kind": "MODELED calendar",
       "reset": "weekly",
       "encoding": "fixed",
-      "leverage": 2.0412647372306427,
+      "leverage": 2.0412647374617774,
       "early_resets": 0,
       "first_early_reset": null,
-      "vs_real_2x": 0.8103920043610435,
-      "dollars": 2603968.7319566924,
-      "ret": 259.3968731956693,
-      "cagr": 0.37204205660870726,
-      "max_dd": -0.6350481958211209
+      "vs_real_2x": 0.8103920043610402,
+      "dollars": 2603968.7319566817,
+      "ret": 259.39687319566815,
+      "cagr": 0.3720420566087068,
+      "max_dd": -0.6350481958211208
      },
      {
       "series": "TWIN_HYP_NDX_W",
@@ -3021,25 +3029,25 @@
       "reset": "daily",
       "encoding": "fixed",
       "leverage": 2.0,
-      "vs_real_2x": 0.7219148103747538,
-      "dollars": 2319671.940537559,
-      "ret": 230.9671940537559,
-      "cagr": 0.36305139056967617,
-      "max_dd": -0.6428141991418332
+      "vs_real_2x": 0.7219148103747419,
+      "dollars": 2319671.9405375207,
+      "ret": 230.96719405375208,
+      "cagr": 0.36305139056967484,
+      "max_dd": -0.6428141991418344
      },
      {
       "series": "MQQQ",
       "kind": "MODELED calendar",
       "reset": "monthly",
       "encoding": "rate",
-      "leverage": 2.1519642755620976,
+      "leverage": 2.151964275817697,
       "early_resets": 0,
       "first_early_reset": null,
-      "vs_real_2x": 1.0229470944687964,
-      "dollars": 3286955.2440154143,
-      "ret": 327.69552440154143,
-      "cagr": 0.3903363297086029,
-      "max_dd": -0.6350013409781845
+      "vs_real_2x": 1.0229470944687935,
+      "dollars": 3286955.244015405,
+      "ret": 327.69552440154047,
+      "cagr": 0.39033632970860266,
+      "max_dd": -0.6350013409781848
      },
      {
       "series": "TWIN_MQQQ",
@@ -3047,23 +3055,23 @@
       "reset": "daily",
       "encoding": "rate",
       "leverage": 2.0,
-      "vs_real_2x": 0.8227777096047869,
-      "dollars": 2643766.7420609123,
-      "ret": 263.37667420609125,
-      "cagr": 0.37322601048338244,
-      "max_dd": -0.6398930649529263
+      "vs_real_2x": 0.8227777096047775,
+      "dollars": 2643766.742060882,
+      "ret": 263.3766742060882,
+      "cagr": 0.37322601048338155,
+      "max_dd": -0.6398930649529264
      },
      {
       "series": "QQQP",
       "kind": "MODELED calendar",
       "reset": "quarterly",
       "encoding": "rate",
-      "leverage": 2.394740199833836,
+      "leverage": 2.394740200142018,
       "early_resets": 0,
       "first_early_reset": null,
-      "vs_real_2x": 0.94915935779783,
-      "dollars": 3049858.9275919264,
-      "ret": 303.9858927591926,
+      "vs_real_2x": 0.949159357797829,
+      "dollars": 3049858.927591923,
+      "ret": 303.9858927591923,
       "cagr": 0.38442976935503115,
       "max_dd": -0.637207681031507
      },
@@ -3073,25 +3081,25 @@
       "reset": "daily",
       "encoding": "rate",
       "leverage": 2.0,
-      "vs_real_2x": 0.8271283686026213,
-      "dollars": 2657746.3715893393,
-      "ret": 264.7746371589339,
-      "cagr": 0.3736379052486767,
-      "max_dd": -0.6397728909379089
+      "vs_real_2x": 0.8271283686026122,
+      "dollars": 2657746.37158931,
+      "ret": 264.774637158931,
+      "cagr": 0.3736379052486758,
+      "max_dd": -0.6397728909379088
      },
      {
       "series": "HYP_NDX_W",
       "kind": "MODELED calendar",
       "reset": "weekly",
       "encoding": "rate",
-      "leverage": 2.041062898667587,
+      "leverage": 2.0410628988986987,
       "early_resets": 0,
       "first_early_reset": null,
-      "vs_real_2x": 0.9280508948384206,
-      "dollars": 2982032.7678690082,
-      "ret": 297.20327678690086,
-      "cagr": 0.38266032242724846,
-      "max_dd": -0.6318850384120741
+      "vs_real_2x": 0.9280508948384127,
+      "dollars": 2982032.7678689826,
+      "ret": 297.20327678689824,
+      "cagr": 0.3826603224272478,
+      "max_dd": -0.6318850384120742
      },
      {
       "series": "TWIN_HYP_NDX_W",
@@ -3099,11 +3107,11 @@
       "reset": "daily",
       "encoding": "rate",
       "leverage": 2.0,
-      "vs_real_2x": 0.8271283686026213,
-      "dollars": 2657746.3715893393,
-      "ret": 264.7746371589339,
-      "cagr": 0.3736379052486767,
-      "max_dd": -0.6397728909379089
+      "vs_real_2x": 0.8271283686026122,
+      "dollars": 2657746.37158931,
+      "ret": 264.774637158931,
+      "cagr": 0.3736379052486758,
+      "max_dd": -0.6397728909379088
      },
      {
       "series": "TQQQ_MODEL",
@@ -3111,10 +3119,10 @@
       "reset": "daily",
       "encoding": "filed",
       "leverage": 3.0,
-      "dollars": 13346584.457576588,
-      "ret": 1333.658445757659,
-      "cagr": 0.505660799768928,
-      "max_dd": -0.8175034914868249
+      "dollars": 13346584.457576277,
+      "ret": 1333.6584457576275,
+      "cagr": 0.505660799768926,
+      "max_dd": -0.8175034914868252
      },
      {
       "series": "QLD",
@@ -3133,7 +3141,7 @@
       "reset": "none",
       "encoding": "tr",
       "leverage": 1.0,
-      "dollars": 351841.6133373205,
+      "dollars": 351841.61333732045,
       "ret": 34.18416133373205,
       "cagr": 0.22443152730623983,
       "max_dd": -0.35036697314343945

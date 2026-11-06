@@ -2,7 +2,7 @@
 
 Coverage = share of 400 synthetic histories whose 95% interval contains the true constant. Synthetic gap at start s = constant + mean of the h monthly shocks from s (the study's overlap). Block-bootstrap intervals: block = h, t(k-1) x SE. Phase-pooled: non-overlapping windows per start phase, pooled, t(min k_p - 1) x SE (the headline). 't needed' = 95th percentile of |pooled mean - truth| / SE over runs; 't used' = the t multiplier the convention applies.
 
-400 runs per case, 1000 bootstrap resamples per run; seeds in the JSON. Code fingerprint aa82c7998c20.
+400 runs per case, 1000 bootstrap resamples per run; seeds in the JSON. Code fingerprint 148e9a24c416.
 
 ## 1. Published configurations, independent monthly shocks
 
@@ -90,18 +90,18 @@ NDX: autocorrelation of the per-start gap at lags h, 2h, 3h (h = horizon in mont
 
 | product | horizon | starts n | acf lag h | lag 2h | lag 3h | se if independent | iid expected | excess (se) | null SD | excess (MC SD) | p (MC) |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| HYP_NDX_W | 1y | 487 | -0.05 | 0.07 | -0.10 | 0.16 | -0.04 | -0.0 | 0.123 | -0.1 | 0.5473 |
-| HYP_NDX_W | 3y | 463 | -0.07 | 0.00 | -0.33 | 0.28 | -0.10 | 0.1 | 0.199 | 0.1 | 0.4310 |
-| HYP_NDX_W | 5y | 439 | -0.19 | -0.14 | -0.21 | 0.37 | -0.15 | -0.1 | 0.222 | -0.1 | 0.5285 |
-| HYP_NDX_W | 10y | 379 | -0.33 | 0.01 | -0.01 | 0.56 | -0.30 | -0.1 | 0.171 | -0.2 | 0.5727 |
+| HYP_NDX_W | 1y | 487 | -0.05 | 0.07 | -0.10 | 0.16 | -0.04 | -0.0 | 0.123 | -0.1 | 0.5453 |
+| HYP_NDX_W | 3y | 463 | -0.07 | 0.00 | -0.33 | 0.28 | -0.10 | 0.1 | 0.199 | 0.1 | 0.4330 |
+| HYP_NDX_W | 5y | 439 | -0.19 | -0.14 | -0.21 | 0.37 | -0.15 | -0.1 | 0.222 | -0.1 | 0.5292 |
+| HYP_NDX_W | 10y | 379 | -0.33 | 0.01 | -0.01 | 0.56 | -0.30 | -0.1 | 0.171 | -0.2 | 0.5725 |
 | MQQQ | 1y | 487 | 0.11 | 0.05 | 0.08 | 0.16 | -0.04 | 1.0 | 0.123 | 1.1 | 0.1247 |
 | MQQQ | 3y | 463 | 0.17 | -0.06 | -0.03 | 0.28 | -0.10 | 1.0 | 0.199 | 1.3 | 0.1032 |
-| MQQQ | 5y | 439 | -0.07 | 0.02 | 0.03 | 0.37 | -0.15 | 0.2 | 0.222 | 0.4 | 0.3402 |
-| MQQQ | 10y | 379 | 0.06 | -0.12 | -0.13 | 0.56 | -0.30 | 0.6 | 0.171 | 2.1 | 0.0077 |
+| MQQQ | 5y | 439 | -0.07 | 0.02 | 0.03 | 0.37 | -0.15 | 0.2 | 0.222 | 0.4 | 0.3410 |
+| MQQQ | 10y | 379 | 0.06 | -0.12 | -0.13 | 0.56 | -0.30 | 0.6 | 0.171 | 2.1 | 0.0073 |
 | QQQP | 1y | 487 | 0.14 | -0.02 | 0.10 | 0.16 | -0.04 | 1.2 | 0.123 | 1.4 | 0.0835 |
 | QQQP | 3y | 463 | -0.01 | -0.20 | -0.04 | 0.28 | -0.10 | 0.3 | 0.199 | 0.4 | 0.3230 |
-| QQQP | 5y | 439 | -0.33 | 0.07 | -0.11 | 0.37 | -0.15 | -0.5 | 0.222 | -0.8 | 0.7595 |
-| QQQP | 10y | 379 | -0.24 | -0.14 | -0.05 | 0.56 | -0.30 | 0.1 | 0.171 | 0.3 | 0.3940 |
+| QQQP | 5y | 439 | -0.33 | 0.07 | -0.11 | 0.37 | -0.15 | -0.5 | 0.222 | -0.8 | 0.7582 |
+| QQQP | 10y | 379 | -0.24 | -0.14 | -0.05 | 0.56 | -0.30 | 0.1 | 0.171 | 0.3 | 0.3957 |
 
 Nearest simulated case by lag-h autocorrelation (the iid case counts as 'no persistence'). READ WITH CARE: one lag-h number is a poor summary of a slow regime (the phi 0.995 cases show a small lag-h autocorrelation but a large dependence spread over many lags), so this matching is rough; the register quotes the RANGE of coverage over the regime cases, not a matched value.
 
@@ -143,12 +143,12 @@ Each bound of the block-bootstrap mean and median intervals (block = horizon, 10
 | NDX | HYP_NDX_W | 5y | 0.006 | 0.006 | 0.005 | 0.005 | 0.006 |
 | NDX | HYP_NDX_W | 10y | 0.011 | 0.011 | 0.015 | 0.015 | 0.015 |
 | NDX | MQQQ | 1y | 0.011 | 0.011 | 0.006 | 0.006 | 0.011 |
-| NDX | MQQQ | 3y | 0.026 | 0.026 | 0.015 | 0.015 | 0.026 |
+| NDX | MQQQ | 3y | 0.026 | 0.026 | 0.014 | 0.014 | 0.026 |
 | NDX | MQQQ | 5y | 0.012 | 0.012 | 0.017 | 0.017 | 0.017 |
 | NDX | MQQQ | 10y | 0.005 | 0.005 | 0.009 | 0.009 | 0.009 |
 | NDX | QQQP | 1y | 0.026 | 0.026 | 0.005 | 0.005 | 0.026 |
-| NDX | QQQP | 3y | 0.043 | 0.043 | 0.168 | 0.168 | 0.168 |
-| NDX | QQQP | 5y | 0.038 | 0.038 | 0.063 | 0.063 | 0.063 |
+| NDX | QQQP | 3y | 0.043 | 0.043 | 0.167 | 0.167 | 0.167 |
+| NDX | QQQP | 5y | 0.038 | 0.038 | 0.065 | 0.065 | 0.065 |
 | NDX | QQQP | 10y | 0.017 | 0.017 | 0.110 | 0.110 | 0.110 |
 | SPX | HYP_SPX_M | 1y | 0.004 | 0.004 | 0.002 | 0.002 | 0.004 |
 | SPX | HYP_SPX_M | 3y | 0.008 | 0.008 | 0.003 | 0.003 | 0.008 |
@@ -163,7 +163,7 @@ Each bound of the block-bootstrap mean and median intervals (block = horizon, 10
 | SPX | SPYQ | 5y | 0.011 | 0.011 | 0.011 | 0.011 | 0.011 |
 | SPX | SPYQ | 10y | 0.006 | 0.006 | 0.009 | 0.009 | 0.009 |
 
-Largest movement: 0.168 pp (NDX QQQP 3y); largest at ten years 0.110 pp; largest for any mean bound 0.043 pp.
+Largest movement: 0.167 pp (NDX QQQP 3y); largest at ten years 0.110 pp; largest for any mean bound 0.043 pp.
 
 
-Wall time 157.3 s.
+Wall time 105.5 s.

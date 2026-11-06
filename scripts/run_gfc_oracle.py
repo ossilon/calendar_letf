@@ -341,11 +341,13 @@ def banner_lines(worlds, inputs):
 def main():
     worlds, provs, evs, reals, prices = {}, {}, {}, {}, {}
     for name in NAMES:
-        w, pv = study.build_world(name, intraday_trigger=True, trigger_basis="etf")    # the base-case trigger (R2 step 5)
+        # the base-case trigger (R2 step 5); v0.1.1 fixes the data end at the v0.1.0 end (study.V010_END)
+        end = study.V010_END[name]
+        w, pv = study.build_world(name, intraday_trigger=True, trigger_basis="etf", end=end)
         worlds[name], provs[name] = w, pv
-        prices[name] = study.TRIGGER_FOR[name]()                                     # the low is a low of the INDEX price
-        real2 = loader.close(REAL_2X[name][0]).rename(REAL_2X[name][1])
-        real3 = loader.close(REAL_3X[name][0]).rename(REAL_3X[name][1])
+        prices[name] = study.TRIGGER_FOR[name]().loc[:end]                         # the low is a low of the INDEX price
+        real2 = loader.close(REAL_2X[name][0]).loc[:end].rename(REAL_2X[name][1])
+        real3 = loader.close(REAL_3X[name][0]).loc[:end].rename(REAL_3X[name][1])
         reals[name] = (real2, real3)
         evs[name] = B.Evaluator(w, products.MODELS_3X[products.MODEL_3X_FOR[name]], real3, price=prices[name])
     lows = {name: oracle_low(prices[name]) for name in NAMES}

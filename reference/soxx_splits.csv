@@ -1,0 +1,2 @@
+ticker,first_split_adjusted_day,ratio,record_date,source,status,note
+SOXX,2026-11-05,3,2026-11-03,"SEC Form 497, iShares Trust, supplement dated 2026-10-23 (accession 0001193125-26-430480): three-for-one forward split recognized at the commencement of trading on Nasdaq on November 5, 2026",PRIMARY,"read 2026-11-06 on EDGAR; the price library is adjusted for it, the saved payout page (2026-11-06) is not"

@@ -14,4 +14,4 @@ Research tooling, not investment advice. Results for designs with no live fund t
 fund of each design traded 2024-08-30 to 2025-02-28; see products.MODELED_NOTE).
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"

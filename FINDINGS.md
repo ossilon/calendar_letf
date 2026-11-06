@@ -156,7 +156,7 @@ shipped variants pass. Nits:
 - Both studies re-run: no reset gap moved by more than 0.01 pp; pre-1988 S&P absolute 2x CAGRs rose 0.3-0.4 pp/yr.
   F11, F12, F13, F14 and the S3 settings line updated.
 
-Still open in B7: QQQ distributions 1999-2006 for the Nasdaq-100 (0.3% assumed).
+Still open in B7: QQQ distributions 1999-2006 for the Nasdaq-100 (0.3% assumed). Closed in v0.1.1 by F30.
 
 **S5b packaging, 2026-10-13 (the README written in this step because the headline wording is audit-bound).** User
 decisions:
@@ -787,6 +787,48 @@ Recorded, not fixed: the Guppy chart and the reference dividend rows stay by dec
 scanner's blind spots, the fresh-clone check from HEAD and the `early_drop=None` switch. Also the loader's cell
 coercion, typed filing figures and labels, the unpinned README era edges and untracked files in the code fingerprint.
 
+**B18, 2026-11-06 (v0.1.1): THEORY.md.** Before it, a source read covered every paper an equation rests on. The
+reading took each paper in full and put each verdict in a private memo. What the reading changed:
+- The daily log formula (THEORY equation 10) uses the raw sum of squared returns. Avellaneda and Zhang (their
+  equations 4 to 6) and Leung and Santoli (their equation 2.8) demean it. That drops a term that matters in a trend,
+  and a planted 63-day trend shows the size.
+- `tests/test_canon.py` cited the wrong equations of Avellaneda and Zhang. It also called its serial-correlation check
+  a replication of a Bessembinder figure; it is an independent check under the figure's design. Both comments now
+  say so.
+- Neither Kelly nor Rotando and Thorp print the closed-form growth-optimal leverage. THEORY.md derives it, and the
+  `leverage.kelly_daily` docstring no longer cites Merton (1969), which this project has not read.
+- The F10 heading misread Trainor's "dissipates": his measure is a probability, not the return gap. The heading now
+  says so.
+- THEORY equation 26 matches Gatheral's Heston expected variance. The text states that VIX squared is a 30-day
+  average and that the output is a variance-swap volatility.
+`tests/test_theory.py` checks the document: no fund or sponsor names, every code reference and the formula map. It
+also checks the worked examples, the README link and the status of each reference.
+
+**Re-grade of v0.1.1, 2026-11-06 (independent audit): EXACT A, PROVEN A-, UNCERTAINTY B, TRACEABLE B.** The release
+gate needs A on all four. The fixes, in one loop:
+- TRACEABLE: a git clone checks out LF line endings, while the scripts on Windows wrote CR LF. Four hashes of results
+  and reference files then failed in a clone. Text files now hash with CR LF folded to LF (`provenance.sha256_of`).
+  The fresh-clone check now writes each file as git checks it out. One test now ties the version in `CITATION.cff`,
+  `pyproject.toml` and the package together.
+- UNCERTAINTY: F27 gives each reset-day comparison a p-value and Holm's adjustment over all 26. None survives, so F27
+  no longer calls the Monday lag a calendar effect. F29 gives each LEAP-minus-fund gap a yearly interval with its
+  coverage verdict. F22, F23, F25 and F28 label the intervals that cover zero or fail the coverage check.
+- PROVEN: `tests/test_leap.py` checks the LEAP roll loop against a flat-index closed form and a second
+  implementation. That test found a real fault. The normal distribution function lost all precision in its far lower
+  tail, so a far out-of-the-money call priced at zero. `options.norm_cdf` now uses the complementary error function;
+  no published number moved. New boundary cases cover the half-payout guard of the payout search and the entry
+  leverage after an early reset. A mutation check of the new code killed 15 of 15 mutants.
+- EXACT: the LEAP study's long-run VIX level is now an expanding mean, so it uses no later data. Its rate enters the
+  option formula as a continuous rate. The B10 entry leverage after a level-fill early reset now uses the trigger level as its
+  base. The QQQ income table now says which fiscal years print the pair net of the fee waiver; the sums are the same.
+The golden files hold the reason for every number that moved: the B10 entry-leverage buckets and the LEAP study.
+
+A scoped re-check then read EXACT A, PROVEN A, UNCERTAINTY A-, TRACEABLE A. The last gap was F29's wording: a cost per
+roll erased the LEAP's lead below 2x only for the quarterly roll. F29 now gives each interval with its verdict, and a
+test plants the LEAP study's causal inputs. **Engine grade after the confirming check (2026-11-06): EXACT A, PROVEN A,
+UNCERTAINTY A, TRACEABLE A.** Suite 2,333 checks, 0 failures; 458 prose pins; fresh clone PASS with the line endings a
+git checkout writes.
+
 ## Results
 
 ### S2: model against the live funds and the issuer's NAV figures (R2 step 2, 2026-10-24; `scripts/run_validate_live.py`, `results/validate_live.{json,md}`)
@@ -963,7 +1005,7 @@ Could not test:
 ### S3: calendar reset against daily reset, the passive study (2026-10-12; re-run 2026-10-24 after R2; `scripts/run_calendar_vs_daily.py`, `results/calendar_vs_daily.{md,json}`)
 Settings for every number unless stated:
 - Index data: S&P 500 total return 1950-01-03 to 2026-10-22 (Shiller's MEASURED monthly dividend yield before 1988,
-  B7). Nasdaq-100 total return 1985-01-31 to 2026-10-09 (0.3% yield before 2006, ASSUMED).
+  B7). Nasdaq-100 total return 1985-01-31 to 2026-10-09 (QQQ's measured yields 1999-2006, F30; 0.3% before 1999, ASSUMED).
 - Rates: reference rate DFF lagged (TB3MS proxy before 1954-07); financing legs on ACT/360 and the fee on 365 (R2).
 - Reset dates: from the NYSE session calendar (R2).
 - Early-reset trigger: it watches the ETF's price (its daily low) from the ETF's first bar (SPY 1993-01-29, QQQ
@@ -991,12 +1033,12 @@ beat daily on the S&P, and on the Nasdaq-100 its sign depends on one day in 2008
 encoding; share of starts the calendar fund wins):
 - SPYQ **-0.54 | -0.60 pp (44%)**, SPX monthly +0.29 | +0.29 (58%), SPX weekly +0.29 | +0.29 (68%), over 799 starts
   1950-2016;
-- MQQQ **+1.36 | +1.35 (92%)**, QQQP **-2.09 | -2.12 (30%)**, NDX weekly +1.13 | +1.14 (96%), over 379 starts
+- MQQQ **+1.35 | +1.34 (92%)**, QQQP **-2.09 | -2.14 (30%)**, NDX weekly +1.13 | +1.14 (96%), over 379 starts
   1985-2016.
 
 Mean and 95% interval (phase-pooled from independent windows, the headline; ASSUMPTIONS section 7), fixed encoding:
 - SPYQ -0.68 [-1.90, +0.54]; SPX monthly +0.38 [-0.59, +1.35]; SPX weekly +0.19 [-0.36, +0.74];
-- MQQQ +1.04 [-2.23, +4.31]; QQQP -2.43 [-10.79, +5.94]; NDX weekly +1.17 [-0.24, +2.58].
+- MQQQ +1.04 [-2.23, +4.31]; QQQP -2.44 [-10.85, +5.97]; NDX weekly +1.17 [-0.24, +2.58].
 
 **All six cover zero.** The interval uses t with 5 degrees of freedom on the S&P and 2 on the Nasdaq-100 (3-7
 independent windows per phase). Its simulated coverage on this overlap structure is 0.98 on the S&P and 1.00 on the
@@ -1011,29 +1053,29 @@ MQQQ at 10 years is borderline (p 0.01 on three windows per phase). Everywhere e
 low end is the S&P weekly design at 5 years: one of 24 rows screened, and noisy on the headline interval regardless.
 SPYQ and the Nasdaq-100 weekly series sit on the independent value (ASSUMPTIONS section 7, R2 steps 11-12).
 
-One 10-year row depends on the width of the Nasdaq-100 interval. NDX weekly's t ratio is 3.57 on 2 degrees of
+One 10-year row depends on the width of the Nasdaq-100 interval. NDX weekly's t ratio is 3.58 on 2 degrees of
 freedom, below t(2) = 4.30. Independent windows need a multiplier of 2.21 [2.05, 2.59], and the mildest regime stress
 needs 3.09 [2.76, 3.70] (95% Monte Carlo intervals). So on the needed multiplier the row would be clear under
 independent windows and too close to call under the mildest regime stress. The headline keeps t(df) for every row, so
-the row stays noisy. The other five 10-year t ratios run from -1.43 to +1.37, below every interval.
+the row stays noisy. The other five 10-year t ratios run from -1.43 to +1.36, below every interval.
 
 Block-bootstrap intervals (10,000 draws, block = horizon) are secondary, because with block = window length their
 standard error runs 0.52-0.86 of the truth at the published configurations. The ratio is 0.83 even with 201 blocks,
 and their coverage is 0.85-0.93 (results/coverage_sim.md). Their intervals read:
-- mean SPYQ [-1.50, +0.14], SPX monthly [-0.42, +1.18], SPX weekly [-0.24, +0.62], MQQQ [-0.46, +2.46], QQQP [-7.07,
-  +2.17], NDX weekly [+0.40, +1.93];
-- median SPYQ [-2.23, +1.15], SPX monthly [-0.85, +1.42], SPX weekly [-0.27, +0.85], MQQQ [+0.23, +2.49], QQQP
-  [-9.95, +5.76], NDX weekly [+0.35, +1.92].
+- mean SPYQ [-1.50, +0.14], SPX monthly [-0.42, +1.18], SPX weekly [-0.24, +0.62], MQQQ [-0.46, +2.46], QQQP [-7.12,
+  +2.19], NDX weekly [+0.40, +1.93];
+- median SPYQ [-2.23, +1.15], SPX monthly [-0.85, +1.42], SPX weekly [-0.27, +0.85], MQQQ [+0.20, +2.49], QQQP
+  [-10.00, +5.81], NDX weekly [+0.35, +1.92].
 
 On those secondary intervals NDX weekly (mean and median) and MQQQ (median) would read as clear at 10 years. The
 headline interval does not support that. With three blocks on the Nasdaq-100, a reader should not take a bootstrap
 clearance as a finding.
 
-MQQQ's mean (+1.00 over all starts, +1.04 phase-pooled) sits well below its median (+1.36). The gaps have a skew, so
-the median flatters the calendar side. At shorter horizons, NDX weekly at 1, 3 and 5 years (+1.05 [+0.14, +1.96];
-+1.07 [+0.22, +1.92]; +1.11 [+0.19, +2.04]) are the only clear rows. That holds on the headline interval, and these
+MQQQ's mean (+1.00 over all starts, +1.04 phase-pooled) sits well below its median (+1.35). The gaps have a skew, so
+the median flatters the calendar side. At shorter horizons, NDX weekly at 1, 3 and 5 years (+1.05 [+0.15, +1.96];
++1.07 [+0.22, +1.92]; +1.11 [+0.19, +2.03]) are the only clear rows. That holds on the headline interval, and these
 rows carry two labels:
-- clear under independent windows (t ratios 2.35 / 2.77 / 2.94, where independent windows need 2.06 / 2.15 / 2.05);
+- clear under independent windows (t ratios 2.35 / 2.77 / 2.95, where independent windows need 2.06 / 2.15 / 2.05);
 - under the mildest regime stress the project ran: noisy at 1 year and too close to call at 3 and 5 years. That
   stress is a 2% persistent share with a 34-month half-life. It needs 3.01 / 2.88 / 2.84. Each needed multiplier is
   the 95th percentile of 400 simulated runs, so it carries Monte Carlo error. Its 95% Monte Carlo interval at 3 and 5
@@ -1048,7 +1090,7 @@ Independent-window phases (120 phases of 6-7 windows on the S&P, 3-4 on the Nasd
 - QQQP 15% / 33% (48% / 50% in the v1 run with the index-close trigger, not re-run).
 
 The cost encoding and its sensitivities (1.4% / 3.5%; 1.0 / 1.5 turns) move the monthly and weekly gaps on the S&P by
-at most 0.02 pp. They move the Nasdaq-100 weekly design by 0.02, MQQQ by 0.07, SPYQ by 0.14 and QQQP by 0.05. These
+at most 0.02 pp. They move the Nasdaq-100 weekly design by 0.02, MQQQ by 0.06, SPYQ by 0.14 and QQQP by 0.06. These
 are the spans of the six 10-year medians in the sensitivity table. Also, the fill mode moves SPYQ by 0.3 pp
 (next_close -0.28), and the trigger basis moves QQQP by 2.4 pp (F9). So:
 - the S&P +0.3 pp is a modest edge that a coin could mimic;
@@ -1097,7 +1139,7 @@ its twin: +1.14 pp at zero costs, +1.16 (fixed), +1.15 (rate), 321/321 wins. Ear
 
 Quarterly +0.11 at zero costs (188/321), +0.29
 at base costs (201/321), min -2.86 pp (the 2008 windows). The v1 run with the index-close trigger had -2.35 (not
-re-run). On NDX over the same starts: MQQQ +1.60 (321/321); QQQP -2.08 (104/321) under the base trigger, +0.78
+re-run). On NDX over the same starts: MQQQ +1.61 (321/321); QQQP -2.09 (104/321) under the base trigger, +0.78
 (188/321) in the v1 run, not re-run.
 
 The gap is the reset effect: costs move it by 0.05 pp or less for monthly and weekly (C3 confirmed).
@@ -1118,9 +1160,9 @@ funds. `results/calendar_vs_daily.md` section 6b: the 120 S&P 10-year windows th
 **-2.10 pp and 0% wins**. The other 679 have **+0.07 pp, 52%**. With the trigger switched off (a sensitivity, not the
 product), SPYQ is **+0.27 pp, 59%**, the same as monthly.
 
-On the Nasdaq-100, MQQQ's single 1987 episode costs -3.33 pp inside its 31 windows but +1.55 outside and +1.36 with
-the trigger off. QQQP is **-5.09 pp over the 246 windows that contain an episode (1% wins), +0.97 over the other
-133**. With the trigger off it is **+0.38**, against MQQQ's +1.36. The quarter's leverage drift does damage with or
+On the Nasdaq-100, MQQQ's single 1987 episode costs -3.33 pp inside its 31 windows but +1.56 outside and +1.35 with
+the trigger off. QQQP is **-5.11 pp over the 246 windows that contain an episode (1% wins), +0.97 over the other
+133**. With the trigger off it is **+0.38**, against MQQQ's +1.35. The quarter's leverage drift does damage with or
 without the trigger, and the trigger decides the sign of the headline.
 
 Trigger-basis table (section 9b; 10-year median, fixed):
@@ -1128,12 +1170,13 @@ Trigger-basis table (section 9b; 10-year median, fixed):
   or the ETF low at 36%.
 - SPYQ: -0.54 in every cell except four. It is +0.27 with the ETF close at 35% or 36%, the index close at 36%, or the
   ETF low at 36%. The index low at 36% still fires, on 2008-11-21, index only.
-- MQQQ: +1.36 in every cell.
+- MQQQ: +1.35 in every cell.
 
 No fund of any kind hit zero 1950-2026; the daily twin's worst day was 1987-10-19 (-41%).
 
 **F10. The monthly advantage is flat for a year and grows after three. (C8: Trainor's "dissipates beyond six
-months" is what the annualized curve shows over 1-12 months. What he did not see is the rise after 3 years).**
+months" measures the chance that the realized multiple stays within 20% of its target, not the return gap. His own
+return table shows a gap that persists. This study measures the gap itself.)**
 
 SPX monthly median gap by holding period, annualized: +0.41 / +0.17 / +0.10 / +0.03 / +0.11 / +0.18 / +0.29 pp at
 1 / 3 / 6 / 12 / 36 / 60 / 120 months. In total-return terms (auditor scratch 2026-10-12, not re-run) these
@@ -1162,11 +1205,11 @@ Fund minus margin at 10 years (pp/yr). A finished window counts as -100% CAGR, t
 - Intervals over the survivors only, with finished windows left out of their phases (R2 step 12f: -1.34 [-5.39,
   +2.72], -0.84 [-4.73, +3.04], -0.91 [-4.67, +2.85]). All are noisy.
 
-Nasdaq-100: MQQQ +2.61, QQQP +1.12, weekly +2.31 over all windows (52-54%), and **-1.14 / -4.70 / -1.71 among
-survivors (43-45%)**. The pooled means over all windows are +14.43 / +10.99 / +14.58 and over the survivors +0.08 /
--2.59 / +0.18. They rest on one or two degrees of freedom and are all noisy (for example, MQQQ over the survivors
-[-52.89, +53.06]). Over all windows, the monthly fund beats the margin position by +1.01 / +1.27 / +2.61 pp at 3 / 5 /
-10 years. The daily twin beats it by -0.61 / -0.38 / +1.37.
+Nasdaq-100: MQQQ +2.61, QQQP +1.06, weekly +2.28 over all windows (52-54%), and **-1.07 / -4.69 / -1.68 among
+survivors (43-45%)**. The pooled means over all windows are +14.41 / +10.65 / +14.27 and over the survivors +0.15 /
+-2.57 / +0.20. They rest on one or two degrees of freedom and are all noisy (for example, MQQQ over the survivors
+[-51.23, +51.52]). Over all windows, the monthly fund beats the margin position by +0.97 / +1.37 / +2.61 pp at 3 / 5 /
+10 years. The daily twin beats it by -0.54 / -0.30 / +1.37.
 
 The study did not re-run the 30% maintenance-call variants. In the S3 audit scratch of 2026-10-12, a call came in 39%
 of S&P 10-year windows. Liquidate-to-cash turned the comparison in the funds' favor; deleverage-to-1x did not.
@@ -1205,8 +1248,8 @@ ETF-low trigger). QQQP's edges moved by 2-3 pp because its passive benchmark did
 
 **F13. No timing rule is a reliable improvement on buy-and-hold across both indexes.** Ten-year median edge over
 the passive fund (pp/yr; share of starts the rule wins), delay 1, fixed encoding, on SPYQ | MQQQ:
-- trend_200d_sma **+4.0 (70%) | -5.2 (37%)**; trend_200d_ema +1.9 (65%) | -5.7 (37%);
-- trend_50d_sma -1.0 | -6.9; trend_50d_ema -0.9 | -9.9;
+- trend_200d_sma **+4.0 (70%) | -5.3 (37%)**; trend_200d_ema +1.9 (65%) | -5.7 (37%);
+- trend_50d_sma -1.0 | -7.1; trend_50d_ema -0.9 | -9.9;
 - trend_200w_sma -0.9 | -0.6; trend_200w_ema -2.1 | +0.5;
 - guppy +0.1 (53%) | -3.6; guppy_f200 +1.8 (59%) | -5.4;
 - guppy_weekly 0.0 (wins 39%, ties 17%, losses 44%) | -4.2; guppy_weekly_f200 -2.1 | -0.4;
@@ -1221,18 +1264,18 @@ Means and the headline interval (phase-pooled over non-overlapping 10-year windo
 [-4.13, +10.76]; trend_200d_ema +1.66 [-5.62, +8.94]; guppy_f200 +1.16 [-7.15, +9.47]. Two more rules: vol_threshold
 +0.00 [-5.13, +5.13]; drawdown_stop -2.91 [-11.10, +5.28]. MQQQ has 3-4 windows per phase, so t has 2 degrees of
 freedom. There the means of the 200-day rules have the opposite sign to their medians:
-- trend_200d_sma +1.21 [-46.10, +48.52] against a median of -5.25;
-- trend_200d_ema +2.38 [-49.72, +54.48] against -5.73.
+- trend_200d_sma +1.23 [-46.20, +48.66] against a median of -5.33;
+- trend_200d_ema +2.40 [-49.84, +54.65] against -5.73.
 
-The windows that contain the 2000-02 crash carry the mean. The other two: vol_threshold +2.25 [-32.56, +37.07];
-drawdown_stop -3.17 [-56.71, +50.37]. The rate encoding moves the medians by at most 0.55 pp (SPYQ trend_50d_sma:
+The windows that contain the 2000-02 crash carry the mean. The other two: vol_threshold +2.33 [-32.66, +37.32];
+drawdown_stop -3.20 [-56.71, +50.31]. The rate encoding moves the medians by at most 0.55 pp (SPYQ trend_50d_sma:
 -1.01 fixed, -0.46 rate). On QQQP the edges depend on the trigger basis as much as on the rule, because the passive
 benchmark moved by 2.4 pp (F9). The rules show it (trend_200d_sma -5.0 under the v1 trigger, -2.3 under the base;
 vol_threshold +3.0 and +5.9).
 
 Full-history CAGR / max drawdown, same window, SPYQ from 1953 (Shiller yields, R2 conventions): passive
 10.6% / -93%; trend_200d_sma 13.5% / -46%; guppy_f200 11.7% / -48%; drawdown_stop 6.3% / -64%. MQQQ from 1988:
-passive 17.8% / -99%; vol_threshold 21.1% / -60%; trend_200d_ema 19.8% / -65%; drawdown_stop 8.0% / -51%.
+passive 17.9% / -99%; vol_threshold 21.2% / -60%; trend_200d_ema 19.9% / -65%; drawdown_stop 8.1% / -51%.
 
 **F14. The S&P 200-day rule's edge was positive before 2009 and negative after. No test on one history establishes
 that split: 1990-2008 against 2009-2026 gives z 1.6. The higher z for all history before 2009 against after
@@ -1272,7 +1315,7 @@ delays 1 / 2 / 3. All three are noisy on the pooled interval, R2 step 12e: +3.32
 
 Delay 0 is LOWER than delay 1, so no rule depends on a same-close fill (the good news). Two rules, guppy_f200 (+1.8 /
 +2.3 / +2.2) and vol_threshold on SPYQ (+0.6 / +1.1 / +1.0), are stable to delay 3 and turn negative at delays 9-10
-(scratch). The rule vol_threshold on MQQQ is erratic (+2.3 / +0.4 / +5.7); trend_50d_sma worsens (-1.0 / -3.2 /
+(scratch). The rule vol_threshold on MQQQ is erratic (+2.3 / +0.4 / +5.8); trend_50d_sma worsens (-1.0 / -3.2 /
 -4.0). On the daily twins one rule changes sign with delay in the results table (guppy on the S&P twin). SPX lag-1
 autocorrelation was about +0.12 before 1990 (a reading of F7's decade values, not a results key) and negative after.
 This is consistent with the idea that part of the pre-1990 edge is one-day follow-through that a day's delay removes
@@ -1348,7 +1391,7 @@ Caveats from the B13 audit:
 - S&P 500 (SPYQ): -20% fired 11 times 1957-2022, median +76%; -30% six times, +38%; -40% three times (1974-08-23,
   2002-07-16, 2008-10-09), +46%; -50% once (2008-11-20), +127%.
 - Nasdaq-100 (MQQQ): -20% eight times, +66%; -30% four times, +74%. The -40% / -50% / -60% / -70% levels fired once
-  each, all in 2000-01 and all 3-year LOSSES (-89 / -79 / -65 / -30%). Then -80% once (2002-07-22), +121%.
+  each, all in 2000-01 and all 3-year LOSSES (-89 / -80 / -65 / -31%). Then -80% once (2002-07-22), +124%.
 
 Deepest falls in the data: S&P -56.8%, Nasdaq-100 -82.9%. On the S&P every level was positive on median at three
 years, but the levered fund beat the unlevered index only at 20% and 50%. At 30% SPYQ's +38% trailed the index's
@@ -1366,7 +1409,7 @@ starts at a NAV 21-97% above the hindsight bottom's (audit). The informative com
 level entries, which can be early. There the confirmations LOST more often than they won on the S&P (8-9 of 21 at
 their own 3-year windows). At the same end date the count is 6-8 of 21, and the median gap is -14 to -22%. On the
 Nasdaq-100 they helped on median only because the 2000-01 parent entries were catastrophic (own windows +34.8%
-against -26.4%).
+against -26.8%).
 
 At the same end date the Nasdaq-100 count is 6 of 16. Robust to the fill delay in the v1 audit's scratch run (1-5
 sessions unchanged; 10 sessions 6-8 of 21; not re-run in R2). The weekly red->gray never came within two years of the
@@ -1426,6 +1469,420 @@ The real UPRO and TQQQ (price only) started after the low. From their first clos
 $1,251,553 and $3,758,161, with models at $1,126,404 and $3,191,084. One hindsight path has no interval, so F21 is an
 illustration, not a statistic.
 
+**F22. Real monthly-reset funds, 2009-2026: the model explains them, and their edge over real daily funds has the
+size the model predicts. In 2024-26 the extra costs of the Tradr funds were larger than the edge.**
+
+The study is `scripts/run_live_monthly.py`, with `results/live_monthly.{json,md}` (B19, v0.1.1), and section 7 of
+`results/validate_live.md`. The calendar funds are mutual funds with a daily NAV. Direxion DXSLX (S&P 500) and DXQLX
+(Nasdaq-100) reset monthly at 2x from 2009-10-01 and at 1.75x from 2022-08-01. Rydex RMQHX (Nasdaq-100) resets monthly
+at 2x from 2014-11-28. The daily funds on the same indexes are ProFunds ULPIX and UOPIX, Rydex RYVYX (2x) and Rydex
+Nova RYNVX (1.5x S&P 500). Every fund fact comes from an SEC filing (`reference/mutual_funds/`, with an accession
+number on every row).
+
+Total return. The vendor NAVs do not include distributions, and no filing gives an ex-date. The rebuild adds each
+filed payout back on the day the NAV falls by that amount (`calendar_letf/navtr.py`). The hard test passes. In it, 212 of
+212 report periods are within 0.10 points (largest error 0.06). Also, 262 of 262 prospectus returns are within their
+rounding (largest error 0.28).
+
+Rules set some rows aside, with four labels (`live_monthly.md`, section 1). One label
+marks a filing error: the Nova one-year return for 2011 prints +0.57, and the after-tax line of the same filing gives
+-0.57.
+
+Costs. The fitted residual cost is the cost on top of (L - 1) x fed funds and the filed fee, in % of NAV a year:
+- DXSLX 0.94 at 2x and 0.88 at 1.75x; DXQLX 0.87 and 0.98;
+- RMQHX 0.17 over its whole life, and 0.84 from 2016-04-01;
+- ULPIX 1.10, UOPIX 0.96, RYVYX 0.52, RYNVX 0.43.
+
+These fits are the third cost anchor of B17. Their yearly intervals are too short. The yearly values persist (lag-1
+autocorrelation 0.70 for DXSLX and 0.79 for DXQLX), and the simulated coverage falls to 0.59 and 0.48. Use the range
+across funds as the measure of uncertainty. RMQHX did not track a 2x monthly fund in its first year: in January 2015
+it lost less than the index itself. The window from 2016 is a sensitivity: the study chose it after the data showed this.
+
+Real fund against real fund. Same index, same dates, the fee difference added back, against the gap that the model
+gives at equal costs (pp a year):
+- DXSLX against ULPIX (2009-11-27 to 2022-07-29): +1.49, model +1.20;
+- DXQLX against UOPIX (same dates): +1.72, model +1.66;
+- RMQHX against RYVYX (2014-11-28 to 2026-09-30): +2.64, model +1.86; from 2016: +1.94, model +2.00.
+
+The rest is the real gap less the model gap. Its yearly interval is [-0.07, +0.54] and [-0.12, +0.27] for the two
+Direxion pairs. For RMQHX from 2016 it is [-0.36, +0.01]. These three intervals pass the coverage check (0.92-0.95).
+So the model explains the real funds.
+
+The edge itself is not clear for the Direxion pairs. The yearly gap intervals are [-0.12, +2.48] on the S&P 500 and
+[-0.17, +2.79] on the Nasdaq-100. Most of the edge came in 2011 and 2020. These two intervals are also too short
+(bootstrap coverage 0.86 and 0.89), so the true uncertainty is wider. The Rydex interval excludes zero: [+0.90, +4.24]
+over the whole life, though it fails the coverage check, and [+0.40, +3.64] from 2016, which passes it. Part of that gap is the lower fee of RMQHX.
+
+Tradr against ProShares, 2024-26, on market prices plus payouts, in pp a year: SPYQ trailed SSO by 0.87. MQQQ trailed
+QLD by 0.59, and QQQP trailed QLD by 1.73. At equal costs the model puts the three designs ahead by +1.27, +2.25 and
++0.39. The fitted residual costs explain the difference: 2.17, 2.36 and 2.00% of NAV a year for the Tradr funds.
+For SSO and QLD they are 0.75, 0.66 and 0.65. Two years give no interval.
+
+Before this comparison, the SSO and QLD series pass a hard test against their own N-CSR. The rebuild gives the filed
+market-price total return of each fiscal year to 0.01 points: SSO 15.68 and 57.17%, QLD 17.80 and 88.39%.
+
+Could not test (B19):
+- DXNLX (1.25x monthly Nasdaq-100 since 2016): the price library has no NAV history for it, and this study did not
+  read its filings;
+- the ex-dates: no filing gives them, so the rebuild finds them in the NAV, and payouts under 0.5% of NAV widen the
+  anchor tolerances instead;
+- the SSO and QLD payouts after 2026-05-31 (two quarters) have no filing yet; they come from vendor history only.
+
+**F23. Below 2x, growth peaks at or near 2x and the bad-case measures favor 1x. A 1.2x weekly index fund at a 1% fee
+grew more slowly than the index, but only one of the four cases clears its interval.**
+
+The study is `scripts/run_sub2x.py`, with `results/sub2x.{json,md}` and `results/sub2x_curve.png` (B17, v0.1.1). It
+runs each design at L = 1.00 to 3.00 in steps of 0.05. A design is a reset (daily, weekly, monthly or quarterly), a
+trigger rule and a cost case. Every fund is hypothetical, because no index fund below 2x with a calendar reset exists.
+The data end on 2026-09-30, and every design pays a fee of 1.00%.
+
+Costs. The swap spread falls on all L turns of exposure, as in the live funds. Two anchors carry the spread from 2x to
+L. The B19 anchor is the median residual cost of the real monthly-fund fits: 0.94% of NAV a year at 2x. The Tradr
+anchor is the 2024-26 fit: 2.60% at 2x. A 1x fund holds the index and pays no spread.
+
+Growth. Growth here is the mean yearly log return over full years: 1951-2025 for the S&P 500 and 1986-2025 for the
+Nasdaq-100. The best L at or under 2x, at the B19 anchor, with the early reset at an index fall of 0.70 / L:
+- S&P 500: 2.00 for the daily, weekly and monthly designs, and growth still rises at 2x; 1.90 for the quarterly design;
+- Nasdaq-100: 1.95 daily, 2.00 weekly, 1.80 monthly and 1.65 quarterly.
+
+On the whole curve to 3x, the S&P 500 optimum lies above 2x: 2.70 daily, 2.85 weekly and 2.50 monthly. On the
+Nasdaq-100, the plateau spans 1.00 to 2.00 in every design. The plateau holds every L within one standard error of the
+best. So one history cannot separate 1.2x, 1.5x, 1.7x and 2x on that index. No interval of the best L against a 1x
+fund excludes zero. On the 5th-percentile 10-year wealth and on the 10-year CAGR per unit of drawdown, 1x is best in
+every design.
+
+Break-even fee. It is the largest fee at which the fund grows as fast as the index (total return, no fee). At the B19
+anchor, over the four resets:
+- S&P 500: 0.45-0.49% at 1.2x, 1.62-1.77% at 1.5x and 2.25-2.51% at 1.7x;
+- Nasdaq-100: 0.64-0.82% at 1.2x, 1.66-2.30% at 1.5x and 1.84-3.00% at 1.7x.
+
+At the Tradr anchor, a 1.2x fund trails the index even with no fee, on both indexes. The intervals are wide: for the
+1.2x weekly design on the S&P 500, about -0.41% to +1.21%. The structure matters most at low L. With the index held
+and a swap for the excess only, the 1.2x break-even rises to 0.83-0.87% (S&P 500) and 1.02-1.19% (Nasdaq-100).
+
+The 1.2x weekly design copies the WeeklyPay rules: no reset inside the week and a fee of 0.99%. On the S&P 500 it grew
+11.12% a year at the B19 anchor and 10.01% at the Tradr anchor, against 11.71% for the index. On the Nasdaq-100 it
+grew 14.61% and 13.45%, against 14.81%. Only the shortfall at the Tradr anchor on the S&P 500 is clear: its yearly
+interval is [-2.41, -0.79] points. The weekly reset adds little over a 1.2x daily fund: [-0.01, +0.05] points a year
+on the S&P 500 and [+0.05, +0.19] on the Nasdaq-100. Both intervals fail the coverage check, so the true uncertainty is
+wider.
+
+Out of sample. Choose L at or under 2x on the early years, then score it on the later years. On the S&P 500, 1951-1989
+picks 2.00 for the daily, weekly and monthly designs, and 2x also wins in 1990-2025. On the Nasdaq-100, 1986-2005 picks
+1.35 daily, 1.50 weekly, 1.40 monthly and 1.00 quarterly. In 2006-2025 the best L is 2.00, and 1.95 for the quarterly
+design. The era test finds no change in the best L: every |z| stays below 1.96.
+
+A walk-forward choice every 10 years on the Nasdaq-100 trailed a fixed 2x by 1.49-1.93 points a year at the B19
+anchor.
+
+Three claims from the backlog:
+- C13: at zero cost, the reset gap at L is L(L-1)/2 times the gap at 2x. The match holds within 0.9% for the weekly
+  and monthly S&P 500 designs. The fit is looser for the quarterly design (13.8%) and on the Nasdaq-100 (12.4-56.3%). The formula is
+  second order, and larger moves fit it less well;
+- C14: the Kelly closed form puts the growth-optimal daily L at 2.96 on the S&P 500 and 1.99 on the Nasdaq-100 (B19
+  anchor). A grid search of the kernel's full-history log wealth gives 2.85 and 2.00. These differ from the optima
+  above, which maximize the mean yearly log return over full years. The earlier guess for the Nasdaq-100 was too low;
+- C10: the second-order break-even fee of a daily fund matches the kernel within 0.053 points on the S&P 500 and
+  0.022 points on the Nasdaq-100.
+
+No fund at or under 2x lost all its value, under any trigger rule. Above 2x with no early reset, a quarterly S&P 500
+fund at 2.85x or more died on 2008-11-20 (C9; B1 covers 3x).
+
+Could not test (B17):
+- the spread that an index fund below 2x would pay. No such fund exists, so the anchors carry 2x costs to L on a
+  stated structure;
+- how a sponsor would build a 1.2x weekly index fund;
+- the spread of the best L over simulated paths (B11 adds it);
+- many yearly intervals fail the coverage check, because the yearly values persist; `sub2x.md` marks each one;
+- the break-even interval is an approximation: it moves the fund-minus-index interval by the fee;
+- multiple testing: each index has 1640 variants, so the largest of them overstates the true best.
+
+**F24. On 5000 simulated decades, the weekly and monthly Nasdaq-100 designs lead their daily twins, and the quarterly
+design trails. On the S&P 500 every gap is small.**
+
+The study is `scripts/run_montecarlo.py`, with `results/montecarlo.{json,md}` and `results/montecarlo_fan.png` (B11,
+v0.1.1). Each path is ten years on the real NYSE calendar of 2016-2026. Its days copy real days of the history to
+2026-09-30, in blocks of 21, 63, 126 or 252 days. A copied day keeps its index move, price move, intraday low and fed
+funds rate together. The funds and costs are those of the passive study (fixed encoding). These distributions show the
+spread of outcomes, not confidence intervals for the true gap.
+
+Ten-year gap with 252-day blocks: the median, its Monte Carlo interval, and the share of paths where the calendar fund
+leads:
+- Nasdaq-100 weekly design: +0.61 [+0.58, +0.63], share 0.79;
+- MQQQ (monthly): +0.68 [+0.63, +0.71], share 0.68;
+- QQQP (quarterly): -0.92 [-1.06, -0.78], share 0.41;
+- S&P 500 monthly design: +0.11 [+0.09, +0.12], share 0.59;
+- SPYQ (quarterly): +0.19 [+0.17, +0.22], share 0.60;
+- S&P 500 weekly design: -0.01 [-0.02, +0.00], share 0.49.
+
+The block length matters most for QQQP. With 21-day blocks it leads by +0.75; with longer blocks it trails by
+0.92-1.06. Short blocks break up long falls: QQQP resets early on 0.22 of those paths, against 0.52-0.54 with longer
+blocks. The S&P 500 monthly lead falls from +0.17 with 21-day blocks to +0.11 with 252-day blocks. The Nasdaq-100 weekly
+lead stays between +0.60 and +0.62.
+
+Wealth after ten years, 252-day blocks. On the S&P 500, $1 in the monthly design has a median of 3.22 (5th to 95th
+percentile 0.51-14.76), against 3.03 for the index. On the Nasdaq-100 the figures are 5.23 (0.18-56.43) and 4.37. The
+fund ends above the index on 0.54 and 0.56 of the paths. The real decade 2016-2026 ends above 0.80 and 0.78 of the
+paths, so it was a good draw. No fund or twin loses all its value on any path.
+
+The mechanism. On made-up AR(1) paths with the drift and volatility of each index, the gap falls as the lag-1
+autocorrelation rises, for every reset. The second-order formula (Bessembinder) matches the weekly gap within 0.04
+points on the S&P 500 and 0.09 on the Nasdaq-100. For the quarterly design it misses by up to 0.25 and 0.62 points. At
+an autocorrelation of -0.05 it even gets the quarterly sign wrong on both indexes. A quarter holds 63 days, and the
+higher-order terms matter there.
+
+C5, by each path's own volatility and trend. These are known only at the end, so they describe a mechanism, not a
+timing rule. The weekly gaps grow with volatility at every horizon. At 10 years the most volatile third
+leads the calmest third by +0.44 (S&P 500, z 32.8) and +0.73 points (Nasdaq-100, z 28.8). The quarterly
+gaps shrink with volatility: -0.46 points on the S&P 500 and -3.16 on the Nasdaq-100. At 10 years, in the calm,
+strong-uptrend cell, only the S&P 500 weekly design trails its twin (-0.09).
+
+The Nasdaq-100 monthly design leads in that cell by +0.88. So C5 holds for the weekly designs and fails for the quarterly ones. The S&P 500 monthly gap also grows with
+volatility at every horizon (+0.22 at 10 years). The Nasdaq-100 monthly gap does so only at short horizons: at 10
+years the difference is +0.07 (z 1.2).
+
+B17 on paths, B19 cost anchor, 252-day blocks. The best L at or under 2x has a median of 2.00 in every design except
+the Nasdaq-100 quarterly design (1.85). Yet 0.25-0.29 of the paths do best at 1x, and the 10th to 90th percentile spans
+1.00-2.00 in every design. On the whole grid to 3x, the medians are 2.75-3.00 on the S&P 500 and 2.05-2.25 on the
+Nasdaq-100. The best L of the real history (F23) is one draw inside these ranges.
+
+Stress cases:
+- a flat decade, with each daily move less the history's mean. The 2x funds end at a median of 0.32-0.33 on the S&P
+  500 and 0.27-0.34 on the Nasdaq-100. The index ends at 0.98 and 1.11;
+- a rate shock on the S&P 500, with blocks only from 1973-74, 1980-82 and 2022. There the mean fed funds rate is
+  10.44% and the index log return -21.60% a year. The funds end at a median of 0.004-0.005, the index at 0.17;
+- 1929-39 on the S&P 500, PARAMETRIC: Shiller's monthly prices with random daily moves between them. At a 0% rate SPYQ
+  ends at 0.07 and its twin at 0.12, against 0.66 for the index. SPYQ resets early on 0.37 of the paths. At a 4% rate
+  SPYQ ends at 0.04 and its twin at 0.08.
+
+Could not test (B11):
+- events outside the history, except the parametric 1929-39 path; the S&P 500 blocks come from 1950-2026 and the
+  Nasdaq-100 blocks from 1985-2026;
+- dependence across block seams: each seam breaks it, and long blocks repeat the few regimes of the history;
+- the 1929-39 path takes Shiller's monthly average prices as month-end levels, and no short rate exists here before
+  1934, so two rates bracket it;
+- the rate-shock eras are the author's choice;
+- the reset-day half of B12 (it needs B12's reset anchors).
+
+**F25. At 3x the trigger rule decides. With no trigger, a fall of 1/3 inside a period ends the fund, and three of the
+six designs died in history. Only the weekly Nasdaq-100 design leads its 3x daily twin, and its 10-year intervals
+cover zero.**
+
+The study is `scripts/run_3x.py`, with `results/three_x.{json,md}` (B1, v0.1.1). Every 3x calendar fund is
+hypothetical. Each design pays the swap spread and swap turns that the real 3x daily funds filed. That is 2.23% of NAV a year
+on the S&P 500 (UPRO) and 2.71% on the Nasdaq-100 (TQQQ). It also pays fed funds on 2 borrowed turns and a fee of
+1.00%, and its daily twin pays the same. The trigger rules: none, an early reset at a 23.33% fall (the 70% fund loss
+that 35% gives at 2x), 20%, 25%, 30% and 35%.
+
+Wipeouts. With no trigger, the quarterly S&P 500 design dies on 2008-11-20, which answers C9. The monthly and
+quarterly Nasdaq-100 designs die on 1987-10-26. The weekly designs and the monthly S&P 500 design survive. The 35% rule
+never fires first, because a fall of 1/3 ends the fund before it. On the history it gives the same funds as no trigger.
+
+On 5000 simulated decades, the 35% rule adds at most 0.9 points to a wipe rate, because it watches the day's low. With
+no trigger the quarterly design dies on 0.11 of the S&P 500 paths. The monthly and quarterly Nasdaq-100 designs die on
+0.15 and 0.55 of their paths. With the 23.33% trigger no design dies on any path. But early resets come often: on 0.75
+and 0.88 of the monthly and quarterly Nasdaq-100 paths.
+
+The 10-year gap against the 3x daily twin, trigger at 23.33%, median in points a year:
+- S&P 500: weekly -0.14, monthly -0.56, quarterly -2.56;
+- Nasdaq-100: weekly +2.80, monthly -4.19, quarterly +0.59.
+
+Every one of these six 10-year intervals covers zero. The weekly Nasdaq-100 design leads in 0.95 of its 10-year
+windows, and its yearly interval is [-0.03, +4.17]. The quarterly S&P 500 design trails its twin: its yearly interval
+is [-5.51, -0.37].
+
+C13 at 3x (zero cost, no trigger). The 3x gap is 2.84-3.17 times the 2x gap for the weekly and monthly S&P 500
+designs, over 10-year medians and the full history. The second-order ratio is 3. For the weekly Nasdaq-100 design the
+ratio is 2.20-2.47.
+
+The fill sets how much a trigger saves. At the trigger level, the 23.33% rule costs the fund 70%. Filled at the close of
+1987-10-19, the monthly S&P 500 design lost 91.0%. Filled at the next close, the Nasdaq-100 monthly design lost 90.9%.
+With a 30% trigger and the next-close fill, the quarterly designs die: on the S&P 500 on 2008-11-20, and on the
+Nasdaq-100 on 2001-09-18.
+
+Through 2000-02, $10,000 in the 3x Nasdaq-100 daily twin fell to $12, and the index fell to $2,660. Through 2008-09 on the
+S&P 500, the twin kept $2,159 and the weekly design $1,985. From UPRO's first bar (2009-06-25), the real UPRO price grew
+32.08% a year, its model 31.26% and the twin 31.12%. From TQQQ's first bar (2010-02-11) the figures are 42.48%, 41.07%
+and 40.81%. The real prices leave out payouts, so the real funds lead the models by more than this.
+
+Twice the filed spread cuts each design's CAGR by 2.51-2.55 points a year on the S&P 500 and 2.98-3.09 on the
+Nasdaq-100. It moves the 10-year median gap by at most 0.11 points, because the twin pays it too.
+
+Could not test (B1):
+- the spread of a 3x calendar fund: no such fund exists, so the real daily funds' filed 2026 spread stands in over the
+  whole history;
+- the wipeout test with no trigger reads the close, and an intraday test would add up to the 0.9 points above;
+- the true fill inside a crash: the level fill is the optimistic end and the next-close fill the pessimistic end;
+- the real UPRO and TQQQ are price only.
+
+**F26. On semiconductors, leverage did not pay: from 1994 to 2026 no fund from 1.2x to 3x kept up with the index, even
+with no fee. Below 2x the weekly and monthly resets beat daily resets clearly.**
+
+The study is `scripts/run_semis.py`, with `results/semis.{json,md}` (B16, v0.1.1). The index is the PHLX Semiconductor
+Sector Index (SOX), price only, because no total-return series of it is on hand. Every fund is hypothetical. Each
+design pays the fee that SOXM and SOXW filed, 1.30%. It also pays USD's filed swap spread of 0.9391% over fed funds on
+each of its L turns. One bad daily low in the index data (1997-08-08) had fired the trigger, and a rule now removes such lows.
+
+The index grew 15.48% a year. No fund at any L from 1.2x to 3x grew as fast, on any reset, even with no fee. With no
+fee the shortfall is 0.25-0.52 points a year at 1.2x, 0.20-0.96 at 1.5x and 3.04-6.08 at 2x. The price series leaves
+out the index's dividends. Each 1% of dividend yield is worth L - 1 points a year to a fund at L.
+
+SOXX's payouts in 2022-2025 came to 0.65-1.09% of its price a year (SECONDARY). With their mean added back, only the
+1.5x weekly and monthly designs edge ahead with no fee, by +0.11 and +0.23 points. At the 1.30% fee every design still
+trails.
+
+The one-month check passes. On SOXX's own total return the model gives SOXM and SOXW within 0.05 points of their filed
+returns, -0.72% and -3.36%. The study fits nothing on these funds. The payout page had not yet applied SOXX's 3-for-1 split
+of 2026-11-05 (SEC Form 497), so the study divides each earlier payout by 3. Without that step the check failed.
+
+The best L is 1.00 in every design, and the plateau reaches 2.00, so one history cannot separate 1x from 2x.
+
+With no trigger, the weekly and monthly designs lead their daily twins at every L from 1.2x to 1.7x. Each yearly
+interval excludes zero and passes the coverage check: [+0.05, +0.33] for the 1.2x weekly design and [+0.15, +2.12] for
+the 1.7x monthly one. At 2x the weekly design grew 10.57% a year against 8.94% for its twin. The quarterly designs do
+not lead. For the weekly design the gap at 1.2x, 1.5x and 1.7x is 0.137, 0.413 and 0.634 of the 2x gap. C13's second
+order gives 0.12, 0.375 and 0.595.
+
+Below 2x the scaled trigger never fires in the weekly and monthly designs. At 2x the quarterly design resets early 6
+times. At 3x every design lost money, and the 3x daily twin grew -9.18% a year. With no trigger the 3x monthly design
+died on 2001-09-26 and the 3x quarterly one on 1997-12-12.
+
+On 5000 simulated decades from the index's own history, the 2x quarterly design with no trigger dies on 0.06 of the
+paths. At 3x the monthly and quarterly designs die on 0.26 and 0.79. The weekly designs never die.
+
+From 2010-03-11 the real SOXL price grew 38.66% a year, and the 3x daily twin here 31.74%. The two differ in three ways.
+SOXL tracks another index since 2021, its swaps pay it the dividends, and its fee is below the twin's. So this
+comparison does not test the model. The same holds for the real 2x fund USD on its own index. From 2007-02-01 it grew
+28.12% a year, and the 2x daily twin 20.09%.
+
+Could not test (B16):
+- SOXX's payouts before 2021-09: the saved page starts there, so the yield above covers 2022-2025 only;
+- a total return for SOX: the dividends are left out;
+- SOXX's index dates: they are SECONDARY, and this study did not read iShares' filings;
+- the spread of a semiconductor calendar fund: USD's 2026 spread stands in for every year. SOXL's filing does not
+  state the units of its spread.
+
+**F27. The reset day matters little by mechanics. In history a weekly reset on Monday trailed the Friday reset. After
+26 comparisons that lag could be chance, and simulated paths show none. Entry on any trading day gives the month-end
+result.**
+
+The study is `scripts/run_reset_day.py`, with `results/reset_day.{json,md}` (B12 and the rest of B10, v0.1.1). It moves
+each design's reset from the prospectus day to other days. A weekly fund resets on Monday to Thursday, and a monthly fund
+on the 5th, 10th, 15th or 20th. A quarterly fund resets on the 5th to 20th of the quarter's last month, or the 15th of
+its middle month. Costs, trigger and twin stay those of the passive study.
+
+On 5000 simulated decades the day moves the 10-year gap by at most 0.09 points a year. A simulated path copies real days
+onto another calendar, so calendar effects drop out and only the mechanics stay. A first run placed every block seam
+near the standard period ends, and there the shifted days looked better. A random seam position per path removed that
+artifact. The same alignment moves the standard-day medians of B11 by at most 0.07 points.
+
+In history the day moves more. A weekly reset on Monday trailed the standard day. The yearly interval of that lag is [-0.90, -0.07]
+points on the S&P 500 and [-1.73, -0.10] on the Nasdaq-100. The S&P 500 interval fails the coverage check. The two
+lags have p-values of 0.023 and 0.029. Holm's adjustment over all 26 comparisons raises them to 0.58 and 0.71.
+
+On the simulated paths the Monday reset does not trail (+0.015 and +0.035 points), so the lag is not mechanical. It
+may be a calendar effect, but one history cannot show it: no comparison of the 26 survives the adjustment.
+
+The quarterly funds move most, because the day decides which crash the 35% trigger catches. Reset on the 15th of the
+quarter's last month, the S&P 500 quarterly fund beat the standard day by [+0.10, +0.73]. That is the largest of the 26
+comparisons, and its adjusted p is 0.25. These history intervals come from 26 comparisons, so one or two would
+exclude zero by chance.
+
+B10. Entry on every trading day, each design at its standard day, gives the 10-year median gap of the month-end starts
+within 0.01 points. An entry inside a period starts at a leverage of 1.76-2.31 (Nasdaq-100 quarterly, 5th to 95th
+percentile). For the S&P 500 quarterly fund the 10-year gap was +0.09 after entries below 1.9x and -0.97 after entries
+above 2.1x. These splits carry no interval.
+
+Could not test (B12):
+- whether the Monday lag in history is real: it does not survive the adjustment for 26 comparisons, and the study
+  tests no cause;
+- an interval for each entry-leverage split;
+- before 1970 the anchors use the data's rows, because the exchange calendar here starts in 1970.
+
+**F28. The reset gap is the sum-of-squares difference. When the days inside a period reverse, the period's move is
+smaller than its daily moves add up to, and the calendar fund gains. In a smooth trend the daily fund gains.**
+
+The study is `scripts/run_compounding.py`, with `results/compounding.{json,md}` (B14, v0.1.1). It runs every design at
+zero cost, so only the mechanism is left. To second order, a window's log gap of a calendar fund against its daily twin
+follows one formula. It is L(L-1)/2 times the sum of squared daily returns less the sum of squared period returns.
+
+On the S&P 500 this formula explains the weekly and monthly 2x gaps. Against the line y = x its R^2 is 0.93-0.99 at every
+horizon. On the Nasdaq-100 it is 0.53-0.77 for the weekly design. For the quarterly designs and at 3x it fails, because
+larger moves and the trigger add higher-order terms.
+
+The ratio of the two sums shows the order of the days. At 10 years its median is 0.82 for the Nasdaq-100 weekly design,
+and it lies below 1 in 0.98 of the windows: the days reverse. For the S&P 500 weekly design it is 0.91. For the S&P 500
+quarterly design it is 1.18: over a quarter the days follow through, and the quarterly fund trails.
+
+The hypothesis in the backlog: calendar funds suffer less drag in chop but gain less in trends. The weekly and monthly
+designs show it. The split compares medians of windows that overlap and carries no interval, so it illustrates the
+mechanism; the identity itself needs no test. At 10 years the S&P 500 monthly design gained +0.0943 in log terms in the choppiest third of windows
+and -0.0264 in the trending third. The quarterly designs turn this around, because their worst windows hold a crash and
+end near where they began. Each split uses the whole window, so it describes a mechanism, not a timing rule.
+
+A worked example: the index ends +50% after one year. At 10% volatility the daily 2x fund made +122.6% and the quarterly
++115.8%: daily compounding wins in a smooth rise. At 40% volatility the daily fund made +91.8% and the quarterly
++102.0%: the drag now costs the daily fund more.
+
+Could not test (B14):
+- a sign of the hypothesis that holds at every horizon: the splits rest on one history per index;
+- the formula at 3x: its error is too large to use.
+
+**F29. A rolling LEAP is mostly the index plus a cheap loan. Below 2x no exchange lists its strikes, so the comparison
+is about the cost of leverage. With no trading cost the LEAP led at every L; a 0.5% cost per quarterly roll erases that below 2x.**
+
+The study is `scripts/run_leap.py`, with `results/leap.{json,md}` (B15, v0.1.1). It holds two-year calls on the S&P 500
+and buys new ones at each roll, with the leverage set to L. A Black-Scholes-Merton model prices the calls, with the
+index's dividend yield and a volatility from VIX, from 1990-01-03 to 2026-09-30. The comparator is the quarterly
+calendar fund at the same L and the B19 cost. No real option quotes are on hand, so the skew, the term structure and the
+trading cost are assumptions with sensitivities.
+
+The strikes sit at 0.17, 0.34, 0.42 and 0.52 of the index at 1.2x, 1.5x, 1.7x and 2x. No option is listed below about
+half the index, so the rows below 2x compare financing rates, not trades. The embedded put costs at most 0.03% of the
+position a year below 2x and 0.18% at 2x. So the call is the index plus a loan at about the risk-free rate.
+
+With no trading cost, the LEAP rolled every quarter grew 12.56% a year at 1.2x and 16.92% at 2x. The fund grew 11.05%
+and 14.10%. Paired by year, the LEAP's lead is +1.68 points [+1.36, +2.00] at 1.2x and +3.11 [+1.48, +4.74] at 2x.
+Only the 2x interval passes the coverage check; the others are too short, so the true uncertainty is wider.
+
+A round-trip cost of 0.5% per roll moves the quarterly LEAP to 10.34% at 1.2x, below the fund. Below 2x the yearly
+differences then run from -0.32 to -0.06 points. At 1.5x and 1.7x the intervals cover zero. At 1.2x the interval,
+[-0.64, -0.004], only just excludes zero and fails the coverage check. So at that cost no valid test separates the two.
+
+Rolled once a year at the same cost, the LEAP grew 12.22% at 1.2x and 15.64% at 2x. Its lead is [+0.62, +1.45] points
+at 1.2x, an interval that fails the coverage check, and [+0.05, +2.52] at 2x, a valid one. At 1.5x and 1.7x the
+intervals cover zero.
+
+Between rolls the 2x LEAP's leverage drifts from 1.87x to 2.13x (5th to 95th percentile, quarterly roll). The fund's
+drifts from 1.83x to 2.19x. Through 2008-09 the 2x LEAP kept $4,547 of $10,000 and the fund $3,661, because a call's
+loss stops at its price. Three years from the 2009 bottom they stood at $41,702 and $42,648.
+
+Could not test (B15):
+- real quotes and bid-ask spreads of deep in-the-money LEAPs: the trading cost per roll is an assumption;
+- the Nasdaq-100: no implied-volatility series of it (VXN) is in the price library;
+- the implied volatility of a two-year deep in-the-money call: it comes from VIX with an assumed term structure and
+  skew.
+
+**F30. QQQ's own filings now give the Nasdaq-100 dividend yield for 1999-2006. It averaged 0.35% a year against the
+assumed 0.3%, so no result moves by much.**
+
+The trust behind QQQ reports its income for each fiscal year, October to September. Two prospectuses on SEC EDGAR
+(485BPOS, filed 2004-01-30 and 2007-01-31) print the ratios. A script reads them into `reference/qqq_income_ratios.csv`.
+The yield is the expense ratio plus the net-investment-income ratio. A fee waiver moves both by the same amount, so
+the sum is the same on either basis. Both filings print fiscal
+2002 and 2003, and the two agree.
+
+The yield was 0.03% to 0.17% a year in fiscal 1999-2003. It rose to 0.27% in 2004 and to 1.39% in 2005, the year of
+Microsoft's special dividend. Fiscal 2006 gave 0.61%.
+
+`series.ndx_total_return` now uses these yields from 1999-03-05 to 2006-11-07 (B7b, v0.1.1). Before 1999 the 0.3%
+stays ASSUMED. From 2006 on, the Nasdaq-100 total-return level stands 0.38% above the v0.1.0 level. The option
+`qqq_yield=None` gives the v0.1.0 series.
+
+Could not test (B7b):
+- the Nasdaq-100 yield before QQQ's launch on 1999-03-05;
+- the index's own yield: the trust's income share of its net assets stands in for it.
+
 Could not test (B13):
 - the trigger's fill (the model assumes the level; the basis and the drop are sensitivities, F9);
 - no live calendar fund before 2024;
@@ -1434,7 +1891,7 @@ Could not test (B13):
 - F21's real funds are price only: the issuer's distribution table (fund pages, read 2026-10-26) starts in 2017, and
   older annual reports stay unread;
 - seven bottoms per index is a small sample;
-- NDX pre-2006 yield assumed.
+- NDX yield before 1999 assumed (F30).
 
 Could not test (S4):
 - real bid-ask costs (assumed; thin funds may cost more);
@@ -1444,12 +1901,13 @@ Could not test (S4):
 - the study chose the best rule after the fact from 12 variants, so that count inflates its edge.
 
 Could not test (S3):
-- no live calendar fund before 2024-08 (the liquidated weekly and SPY-monthly funds left one published month, F1b);
+- no live calendar ETF before 2024-08 (the liquidated weekly and SPY-monthly funds left one published month, F1b).
+  F22 tests the real monthly-reset mutual funds from 2009;
 - the trigger never fired live, and the model assumes its fill at the level. Whether the 2008 episodes count depends
   on one point of the drop and on which price the trigger watches (F9). So the quarterly results are conditional on
   that choice;
 - costs fitted on 2024-26 (the encodings diverge when rates move, see F5);
-- pre-1988 S&P yields are Shiller's measured monthly series, and pre-2006 Nasdaq-100 yields assumed;
+- pre-1988 S&P yields are Shiller's measured monthly series, and Nasdaq-100 yields before 1999 assumed (F30);
 - pre-1954 rates a proxy; prices not NAVs in the fit;
 - the headline interval (non-overlapping windows pooled over phases, 3-7 windows per phase at ten years) has simulated
   coverage under independent months only. The S&P monthly gap series is persistent across such windows, so its

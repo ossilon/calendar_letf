@@ -18,7 +18,7 @@ import numpy as np
 import pandas as pd
 
 from _harness import ROOT, check, raises
-from calendar_letf import loader, products, series
+from calendar_letf import loader, products, provenance, series
 
 spec = importlib.util.spec_from_file_location("run_gfc_oracle", ROOT / "scripts" / "run_gfc_oracle.py")
 go = importlib.util.module_from_spec(spec)
@@ -200,7 +200,7 @@ def _published_file(path):
     """None if `path` is the file the published run read, else the reason it is not."""
     if not path.exists():
         return f"{path.name} is absent"
-    if hashlib.sha256(path.read_bytes()).hexdigest() != PUBLISHED.get(path.name):
+    if provenance.sha256_of(path) != PUBLISHED.get(path.name):          # line endings folded, as the manifest does
         return f"{path.name} differs from the file the published run read (sha256); re-run py scripts\\run_gfc_oracle.py on your data"
     return None
 
@@ -296,8 +296,10 @@ for name, (idx_sym, real_sym, real3_sym, tr_sym) in checks.items():
     low = min(inside, key=lambda d: (inside[d], d))
     check(f"second route {name}: the lowest {idx_sym} close in the window, read from the raw file, is the published entry date",
           low == W["entry"]["date"], (low, W["entry"]["date"]))
-    check(f"second route {name}: the end is the earliest last date of the three raw files", min(max(idx), max(real), max(real3)) == W["end"],
-          (max(idx), max(real), max(real3), W["end"]))
+    # v0.1.1: the study also stops at its fixed v0.1.0 end (study.V010_END), whatever the files hold after it
+    _fixed = go.study.V010_END[name]
+    check(f"second route {name}: the end is the earliest of the three raw files' last dates and the fixed end {_fixed}",
+          min(max(idx), max(real), max(real3), _fixed) == W["end"], (max(idx), max(real), max(real3), _fixed, W["end"]))
     row = {r["series"]: r for r in W["rows"] if r["encoding"] in ("price", "filed", "tr")}
     lrow = {r["series"]: r for r in W["launch"]["rows"]}
     close_to(row[real_sym.split(":")[1]]["dollars"], 10_000 * real[W["end"]]["close"] / real[W["entry"]["date"]]["close"],

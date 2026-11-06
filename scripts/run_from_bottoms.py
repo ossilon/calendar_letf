@@ -607,11 +607,12 @@ def main():
     real_info = {}
     for name in ("SPX", "NDX"):
         # BASE CASE (R2 step 5): the trigger watches the ETF's daily low from the ETF's first bar, the index before.
-        w, pv = study.build_world(name, intraday_trigger=True, trigger_basis="etf")
+        # v0.1.1: the data end is fixed at the v0.1.0 end (study.V010_END), so a library top-up moves nothing
+        w, pv = study.build_world(name, intraday_trigger=True, trigger_basis="etf", end=study.V010_END[name])
         worlds[name], wprov[name] = w, pv
-        idx_price[name] = study.TRIGGER_FOR[name]()                # the entries are defined on the INDEX price
+        idx_price[name] = study.TRIGGER_FOR[name]().loc[:study.V010_END[name]]   # the entries are defined on the INDEX price
         sym, rname = REAL[name]
-        real = loader.close(sym)
+        real = loader.close(sym).loc[:study.V010_END[name]]
         real_info[name] = dict(symbol=sym, name=rname, first=str(real.index[0].date()), last=str(real.index[-1].date()), rows=int(len(real)),
                                basis="price only, dividends NOT reinvested (distributions are not in the export)")
         evs[name] = B.Evaluator(w, products.MODELS_3X[products.MODEL_3X_FOR[name]], real, price=idx_price[name])
@@ -661,7 +662,7 @@ def main():
         shallow = [e for e in entries if e["family"] == "hindsight_shallow"]
         timing = timing_study(w, ev, major, w.specs, encs)
         # labeled sensitivity: the same major-bottom entries under the v1 trigger (index price, close only)
-        w_v1, _ = study.build_world(name)
+        w_v1, _ = study.build_world(name, end=study.V010_END[name])
         ev_v1 = B.Evaluator(w_v1, ev.model_3x, ev.real, price=idx_price[name])
         tsens = trigger_sensitivity(ev_v1, major, w.specs)
 
@@ -867,7 +868,7 @@ def main():
               "- Hindsight bottoms are, by construction, not knowable at the time; the rule entries (B) and the Guppy-confirmed entries (C) are. There are few independent crashes "
               "(about 7 per index), so medians over them are descriptive, not evidence of a rule.\n"
               "- Index data start 1950 (S&P 500) and 1985 (Nasdaq-100), so earlier falls cannot be seen; the first drawdown in each file is measured from the first close, not a true earlier high.\n"
-              "- Dividend yields before 1988 (S&P, Shiller measured) and before 2006 (Nasdaq-100, 0.3% ASSUMED) enter the total-return underlying (B7).\n"
+              "- Dividend yields before 1988 (S&P, Shiller measured) and before 2006 (Nasdaq-100: QQQ's measured yields 1999-2006, 0.3% ASSUMED before 1999) enter the total-return underlying (B7).\n"
               "- TQQQ_MODEL's 0.82% fee is as given in the brief; no TQQQ expense ratio is on file, so its status is ASSUMED. SOXL not used.\n"
               "- Judgment calls: tiering (major = the brief's list, plus NDX 1987 / 1990, plus any trough deeper than 40% the list omits; shallow = the rest); troughs are found inside "
               "long falls too; ties on the month-end for the timing shifts go to the earlier month-end; Guppy fills are at the next close; the 3x and margin comparators use "

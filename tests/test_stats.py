@@ -666,3 +666,30 @@ nav05 = wv.nav("SPYQ", ENC_)
 check("World.variant: the 5% trigger fires on the planted path where the 35% one does not, so the NAVs differ (the 35% world's cache is untouched)",
       len(nav05.attrs["early_resets"]) > 0 == len(nav0.attrs["early_resets"]) and not np.allclose(nav05.values, nav0.values)
       and w_rev.nav("SPYQ", ENC_) is nav0, (len(nav05.attrs["early_resets"]), len(nav0.attrs["early_resets"])))
+
+
+# ---- t p-values and Holm (re-grade 2026-11-06, finding U1) ----
+# df = 1 is the Cauchy law: p = 1 - (2/pi) atan|t|; df = 2 has p = 1 - |t| / sqrt(2 + t^2). Both are closed forms, an
+# independent route from the incomplete-beta continued fraction the code uses.
+_e = max(max(abs(stats.t_two_sided_p(t_, 1) - (1 - 2 / math.pi * math.atan(abs(t_)))),
+             abs(stats.t_two_sided_p(t_, 2) - (1 - abs(t_) / math.sqrt(2 + t_ * t_)))) for t_ in (0.0, 0.3, -1.0, 2.5, 7.0, -40.0))
+check("t_two_sided_p equals the closed forms at df 1 (Cauchy) and df 2 to 1e-13 on six values of t", _e < 1e-13, _e)
+check("t_two_sided_p: t = 0 gives 1; the p falls as |t| rises; it is symmetric in t",
+      abs(stats.t_two_sided_p(0.0, 7) - 1.0) < 1e-14 and stats.t_two_sided_p(1.0, 7) > stats.t_two_sided_p(2.0, 7) > stats.t_two_sided_p(3.0, 7)
+      and stats.t_two_sided_p(-2.0, 7) == stats.t_two_sided_p(2.0, 7))
+check("t_two_sided_p at the 97.5% quantile t975(df) is 0.05 (two-sided) for df 4, 12, 39 and 74 (to 1e-5: the table's rounding)",
+      all(abs(stats.t_two_sided_p(stats.t975(d_), d_) - 0.05) < 1e-5 for d_ in (4, 12, 39, 74)))
+try:
+    from scipy.stats import t as _tt
+    _w = max(abs(stats.t_two_sided_p(t_, d_) - 2 * _tt.sf(abs(t_), d_)) for t_ in (0.1, 1.5, 2.32, 3.3, 9.0) for d_ in (1, 3, 12, 39, 74, 400))
+    check("t_two_sided_p equals scipy's 2 x t.sf to 1e-12 on 30 cases (scipy used only here)", _w < 1e-12, _w)
+except ImportError:
+    print("note: scipy not installed; the closed-form checks above stand on their own")
+_h = stats.holm([0.01, 0.04, 0.03])
+check("holm: p = (0.01, 0.04, 0.03) gives (0.03, 0.06, 0.06): ranks 1-3 times 3, 2, 1, then the running maximum",
+      np.allclose(_h, [0.03, 0.06, 0.06], atol=1e-15), _h)
+check("holm: adjusted p never falls below the raw p, never exceeds 1, NaN stays NaN and does not count toward m",
+      list(stats.holm([0.5, float("nan"), 0.6])[[0, 2]]) == [1.0, 1.0] and np.isnan(stats.holm([0.5, float("nan")])[1])
+      and abs(stats.holm([0.01, float("nan")])[0] - 0.01) < 1e-15)
+check("holm BREAK: a family of 26 with smallest p 0.0208 (|t| 2.66 at 12 df) has an adjusted p of 26 x 0.0208, above 0.05",
+      stats.holm([stats.t_two_sided_p(2.66, 12)] + [0.5] * 25)[0] > 0.5)

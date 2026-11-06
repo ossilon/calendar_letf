@@ -192,6 +192,61 @@ def period_end_flags(dates, reset, *, calendar="nyse"):
     return flags
 
 
+WEEKDAYS = ("mon", "tue", "wed", "thu", "fri")
+
+
+def anchored_period_end_flags(dates, reset, anchor):
+    """Reset flags for a fund that resets on another day of its period than the last session (BACKLOG B12).
+
+    weekly     anchor one of WEEKDAYS: the close of the last row on or before that weekday in each Monday-Sunday week
+               ("fri" is the standard rule: the week's last session)
+    monthly    anchor a day of the month 1-28: the close of the last row on or before that day in each month
+    quarterly  anchor (k, d): the last row on or before day d of the quarter's k-th month (k = 1, 2, 3); the standard
+               quarter end is not an anchor here (use period_end_flags)
+    From 1970-01-01 only rows that are NYSE sessions can be reset days, as in period_end_flags: a stray row on a closure
+    day (the S&P 500 data hold one on 1985-09-27, when the NYSE was shut for Hurricane Gloria) never carries a reset.
+    Before 1970 every data row counts. A period whose anchor date lies after the last row is not flagged (the data stop
+    before the reset); a period with no session on or before its anchor (an anchor on a holiday Monday, say) has no
+    reset that period. Returns a bool array.
+    """
+    idx = _as_dates(dates)
+    n = len(idx)
+    flags = np.zeros(n, dtype=np.bool_)
+    if n == 0:
+        return flags
+    day = _day_numbers(idx)
+    if reset == "weekly":
+        if anchor not in WEEKDAYS:
+            raise ValueError(f"weekly anchor must be one of {WEEKDAYS}, got {anchor!r}")
+        monday = day - idx.dayofweek.to_numpy().astype(np.int64)
+        target = monday + WEEKDAYS.index(anchor)
+        group = monday
+    elif reset == "monthly":
+        if not (isinstance(anchor, int) and 1 <= anchor <= 28):
+            raise ValueError(f"monthly anchor must be a day 1-28, got {anchor!r}")
+        month = idx.values.astype("datetime64[M]")
+        target = month.astype("datetime64[D]").astype(np.int64) + (anchor - 1)
+        group = month.astype(np.int64)
+    elif reset == "quarterly":
+        k, d = anchor if isinstance(anchor, tuple) else (None, None)
+        if k not in (1, 2, 3) or not (isinstance(d, int) and 1 <= d <= 28):
+            raise ValueError(f"quarterly anchor must be (month 1-3, day 1-28), got {anchor!r}")
+        month = idx.values.astype("datetime64[M]").astype(np.int64)
+        qstart = month - month % 3
+        target = (qstart + (k - 1)).astype("datetime64[M]").astype("datetime64[D]").astype(np.int64) + (d - 1)
+        group = qstart
+    else:
+        raise ValueError(f"reset must be one of {RESETS}, got {reset!r}")
+    session = (day < 0) | np.isin(day, nyse.session_day_numbers())         # rows before 1970 all count
+    on_or_before = (day <= target) & session
+    for g in np.unique(group):
+        rows = np.flatnonzero((group == g) & on_or_before)
+        tgt = target[group == g][0]
+        if rows.size and tgt <= day[-1]:
+            flags[rows[-1]] = True
+    return flags
+
+
 def session_mismatches(dates, start=None, end=None):
     """Where the data's calendar and the NYSE calendar disagree, from max(start, 1970-01-01, first row) to the
     last row (or `end`): dict(missing=[sessions with no row], extra=[rows that are not sessions]) as ISO dates."""

@@ -1,0 +1,2622 @@
+{
+ "meta": {
+  "title": "B14: volatility drag and enhanced compounding, calendar against daily",
+  "run_date": "2026-11-06",
+  "caption": "Data: TradingView (via local export), FRED. Modeled funds at zero cost (the mechanism alone). Not investment advice.",
+  "study_end": "2026-09-30",
+  "horizons": [
+   1,
+   3,
+   5,
+   10
+  ],
+  "example_vols": [
+   0.1,
+   0.2,
+   0.4
+  ],
+  "example_paths": 2000,
+  "example_gain": 0.5,
+  "seed": 20261106,
+  "underlyings": {
+   "SPX": {
+    "banner": "[SPX_TR] symbols: SP:SPX, SP:SPXTR; basis: constructed; published 1988-01-04 on (PUBLISHED (SP:SPXTR as exported)); before that price + Shiller's measured monthly dividend yield (mean 4.10%/yr over the pre-splice years) (MEASURED (Shiller monthly D/P; quarterly dividends interpolated to months by the source)); splice date 1988-01-04; days missing from the published series carried by the price move: ['1994-04-27']; stale published rows on non-trading days dropped: ['2001-09-11', '2001-09-12', '2001-09-13', '2001-09-14']; published rows after the price file's last date dropped: ['2026-11-03'] (top up the price file)",
+    "first": "1950-01-03",
+    "last": "2026-09-30",
+    "rows": 19310,
+    "rate": {
+     "source": "FRED DFF (effective fed funds), lagged one row; TB3MS proxy where DFF is not yet published",
+     "proxy_rows": 1125,
+     "proxy_until": "1954-07-01",
+     "proxy_rule": "TB3MS monthly average shifted forward one month (month t uses month t-1's average), then lagged one row",
+     "rate_last_date": "2026-11-03",
+     "stale_rows": 0
+    },
+    "price_symbol": "SP:SPX",
+    "trigger": {
+     "basis": "etf",
+     "etf_symbol": "AMEX:SPY",
+     "etf_first_bar": "1993-01-29",
+     "etf_last_bar": "2026-11-02",
+     "scale": 9.986339614911921,
+     "bad_low_days": [],
+     "intraday": true,
+     "rows_carried_inside_etf_range": [
+      "1994-04-27"
+     ],
+     "rows_carried_after_etf_end": {
+      "count": 0,
+      "first": null,
+      "last": null
+     }
+    },
+    "trigger_text": "the AMEX:SPY price (daily low) from 1993-01-29, scaled to the SP:SPX price index before that"
+   },
+   "NDX": {
+    "banner": "[NDX_TR] symbols: NASDAQ:NDX, NASDAQ:XNDX; basis: constructed; published 2010-01-04 on (VERIFIED (NASDAQ:XNDX, anchor-checked)); 2006-11-08..2010-01-04 price + 0.73%/yr (MEASURED (level change of mis-dated XNDX block)); 1999-03-05..2006-11-08 price + QQQ's fiscal-year income yield (mean 0.35%/yr; MEASURED (QQQ gross income / average net assets by fiscal year; SEC 485BPOS financial highlights)); before 1999-03-05 price + 0.30%/yr (ASSUMED); splice date 2010-01-04; days missing from the published series carried by the price move: ['2012-10-31']",
+    "first": "1985-01-31",
+    "last": "2026-09-30",
+    "rows": 10497,
+    "rate": {
+     "source": "FRED DFF (effective fed funds), lagged one row; TB3MS proxy where DFF is not yet published",
+     "proxy_rows": 0,
+     "proxy_until": null,
+     "proxy_rule": "TB3MS monthly average shifted forward one month (month t uses month t-1's average), then lagged one row",
+     "rate_last_date": "2026-11-03",
+     "stale_rows": 0
+    },
+    "price_symbol": "NASDAQ:NDX",
+    "trigger": {
+     "basis": "etf",
+     "etf_symbol": "NASDAQ:QQQ",
+     "etf_first_bar": "1999-03-10",
+     "etf_last_bar": "2026-10-30",
+     "scale": 39.92185596083231,
+     "bad_low_days": [
+      {
+       "date": "2000-04-12",
+       "etf_gap": -0.31385869565217395,
+       "index_gap": -0.00033574415674941793
+      },
+      {
+       "date": "2002-05-03",
+       "etf_gap": -0.1970412921851742,
+       "index_gap": -0.004157246789032398
+      },
+      {
+       "date": "2002-06-27",
+       "etf_gap": -0.21442227606933384,
+       "index_gap": -0.03958548537501272
+      }
+     ],
+     "intraday": true,
+     "rows_carried_inside_etf_range": [],
+     "rows_carried_after_etf_end": {
+      "count": 0,
+      "first": null,
+      "last": null
+     }
+    },
+    "trigger_text": "the NASDAQ:QQQ price (daily low) from 1999-03-10, scaled to the NASDAQ:NDX price index before that"
+   }
+  },
+  "inputs": {
+   "data_dir": "<external>/library",
+   "rates_dir": "<external>/rates",
+   "files": [
+    {
+     "file": "SP_SPX_daily.csv",
+     "sha256": "b146c9af89ccb7f0a62bac558c404e281d6ff3c95450358f68aae9973595c098",
+     "bytes": 1405472,
+     "rows": 19333,
+     "first_date": "1950-01-03",
+     "last_date": "2026-11-02"
+    },
+    {
+     "file": "SP_SPXTR_daily.csv",
+     "sha256": "edab5090825ed31cffd1016bd027da45668da9991d0035782c2c80a57a44b04c",
+     "bytes": 743369,
+     "rows": 9787,
+     "first_date": "1988-01-04",
+     "last_date": "2026-11-03"
+    },
+    {
+     "file": "AMEX_SPY_daily.csv",
+     "sha256": "643d6ef08b88086f17ac834fd8c2c729736d65e2841d6d0209c0c467ff5a78cc",
+     "bytes": 607605,
+     "rows": 8498,
+     "first_date": "1993-01-29",
+     "last_date": "2026-11-02"
+    },
+    {
+     "file": "NASDAQ_NDX_daily.csv",
+     "sha256": "79d8e8688fa365d3ca2755ccbfbbcb96f0023df65f263f16091a1a1b478697dc",
+     "bytes": 895791,
+     "rows": 10519,
+     "first_date": "1985-01-31",
+     "last_date": "2026-10-30"
+    },
+    {
+     "file": "NASDAQ_XNDX_daily.csv",
+     "sha256": "d7dcc6dffa24f6cefaf44cb4f4a8c17fed7e8dbafea5ddebd7754efe93cfc507",
+     "bytes": 422682,
+     "rows": 5019,
+     "first_date": "2006-11-08",
+     "last_date": "2026-10-30"
+    },
+    {
+     "file": "NASDAQ_QQQ_daily.csv",
+     "sha256": "f096cd6c6b7511901c68d674baafd658f0541abb7513addda9a04fd78f4eec74",
+     "bytes": 480184,
+     "rows": 6955,
+     "first_date": "1999-03-10",
+     "last_date": "2026-10-30"
+    },
+    {
+     "file": "DFF.csv",
+     "sha256": "e84a934a50143ae0c7590aa7ff0f90b5e8778c81579fff17f00449a9b49efc59",
+     "bytes": 424619,
+     "rows": 26424,
+     "first_date": "1954-07-01",
+     "last_date": "2026-11-03"
+    },
+    {
+     "file": "TB3MS.csv",
+     "sha256": "ebf04b1ae5bc5729ba3bb2b35dbb0e0c5e22dace36bea0c02632782d625ae6ab",
+     "bytes": 17849,
+     "rows": 1112,
+     "first_date": "1934-01-01",
+     "last_date": "2026-08-01"
+    }
+   ],
+   "reference_dir": "reference",
+   "reference_files": [
+    {
+     "file": "shiller_sp500_monthly.csv",
+     "sha256": "44414783f35b9a22465162dbf6a4daf91089c4804513969c115cdc9cab91a647",
+     "bytes": 55721,
+     "rows": 1830,
+     "first_date": null,
+     "last_date": null
+    },
+    {
+     "file": "qqq_income_ratios.csv",
+     "sha256": "c5a1f3e40461f35cead08010ab864f9cb0e8027d0b0f19fc74bba73bdbadc358",
+     "bytes": 1042,
+     "rows": 8,
+     "first_date": "1999-03-05",
+     "last_date": "2005-10-01"
+    }
+   ]
+  },
+  "banner": [
+   "Inputs: 8 files; prices from <external>/library, rates from <external>/rates",
+   "  SP_SPX_daily.csv: 19333 rows, 1950-01-03 to 2026-11-02, sha256 b146c9af89cc",
+   "  SP_SPXTR_daily.csv: 9787 rows, 1988-01-04 to 2026-11-03, sha256 edab5090825e",
+   "  AMEX_SPY_daily.csv: 8498 rows, 1993-01-29 to 2026-11-02, sha256 643d6ef08b88",
+   "  NASDAQ_NDX_daily.csv: 10519 rows, 1985-01-31 to 2026-10-30, sha256 79d8e8688fa3",
+   "  NASDAQ_XNDX_daily.csv: 5019 rows, 2006-11-08 to 2026-10-30, sha256 d7dcc6dffa24",
+   "  NASDAQ_QQQ_daily.csv: 6955 rows, 1999-03-10 to 2026-10-30, sha256 f096cd6c6b75",
+   "  DFF.csv: 26424 rows, 1954-07-01 to 2026-11-03, sha256 e84a934a5014",
+   "  TB3MS.csv: 1112 rows, 1934-01-01 to 2026-08-01, sha256 ebf04b1ae5bc",
+   "SPX early-reset trigger: the AMEX:SPY price (daily low) from 1993-01-29, scaled to the SP:SPX price index before that; trigger basis 'etf'; drop 35% from the fund's base; fill mode 'level'.",
+   "SPX day counts: financing (reference rate and swap spread) ACT/360; expense ratio ACT/365 (calendar days between rows, so weekends and holidays accrue).",
+   "SPX reset dates: last NYSE session of the week / month / quarter from 1970-01-01 (calendar_letf/nyse.py, refuses data that lack it); before that the last row of the period.",
+   "NDX early-reset trigger: the NASDAQ:QQQ price (daily low) from 1999-03-10, scaled to the NASDAQ:NDX price index before that; trigger basis 'etf'; drop 35% from the fund's base; fill mode 'level'.",
+   "NDX day counts: financing (reference rate and swap spread) ACT/360; expense ratio ACT/365 (calendar days between rows, so weekends and holidays accrue).",
+   "NDX reset dates: last NYSE session of the week / month / quarter from 1970-01-01 (calendar_letf/nyse.py, refuses data that lack it); before that the last row of the period.",
+   "Zero cost. 2x: the passive study's designs (35% trigger); 3x: B1's designs (trigger 0.70 / 3). Study end 2026-09-30."
+  ],
+  "code": {
+   "script": "run_compounding.py",
+   "files": 27,
+   "sha256": "36939e9beddd62238eab79ad5bec9204656eef887c854cf0bcd66b56de40ae09"
+  },
+  "timing": {
+   "total_wall_seconds": 110.29647169999953
+  }
+ },
+ "worlds": {
+  "SPX": {
+   "windows": [
+    {
+     "product": "SPYQ",
+     "reset": "quarterly",
+     "L": 2.0,
+     "horizon_years": 1,
+     "n": 907,
+     "ratio_median": 1.1151245022128142,
+     "share_ratio_below_1": 0.41345093715545755,
+     "gap_median": -0.001627458588624342,
+     "cal_enhanced": 0.5711135611907387,
+     "daily_enhanced": 0.5192943770672547,
+     "formula": {
+      "n": 907,
+      "slope": 1.1451113035721676,
+      "r2_identity": 0.3050618282154586,
+      "median_abs_error": 0.0029544477020261063
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 302,
+       "gap_median": 0.001998399438118581,
+       "ratio_median": 0.8833457036062576,
+       "cal_enhanced": 0.076158940397351,
+       "daily_enhanced": 0.0
+      },
+      {
+       "tercile": "middle",
+       "n": 302,
+       "gap_median": 0.0009006844322434898,
+       "ratio_median": 0.9862216609729502,
+       "cal_enhanced": 0.652317880794702,
+       "daily_enhanced": 0.5562913907284768
+      },
+      {
+       "tercile": "trend",
+       "n": 303,
+       "gap_median": -0.006525191267601538,
+       "ratio_median": 1.7230255935183747,
+       "cal_enhanced": 0.9834983498349835,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "SPYQ",
+     "reset": "quarterly",
+     "L": 2.0,
+     "horizon_years": 3,
+     "n": 883,
+     "ratio_median": 1.2255815628810491,
+     "share_ratio_below_1": 0.3420158550396376,
+     "gap_median": -0.007920258325584961,
+     "cal_enhanced": 0.5866364665911665,
+     "daily_enhanced": 0.6591166477916195,
+     "formula": {
+      "n": 883,
+      "slope": 1.0017727092763642,
+      "r2_identity": 0.2170809846685321,
+      "median_abs_error": 0.006918819318620595
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 294,
+       "gap_median": -0.0063341675928149654,
+       "ratio_median": 0.9869109812176451,
+       "cal_enhanced": 0.07142857142857142,
+       "daily_enhanced": 0.07142857142857142
+      },
+      {
+       "tercile": "middle",
+       "n": 294,
+       "gap_median": -0.004124103833494486,
+       "ratio_median": 1.1341431882002118,
+       "cal_enhanced": 0.6904761904761905,
+       "daily_enhanced": 0.9047619047619048
+      },
+      {
+       "tercile": "trend",
+       "n": 295,
+       "gap_median": -0.010874167528946765,
+       "ratio_median": 1.4484251292925117,
+       "cal_enhanced": 0.9966101694915255,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "SPYQ",
+     "reset": "quarterly",
+     "L": 2.0,
+     "horizon_years": 5,
+     "n": 859,
+     "ratio_median": 1.1744931687243825,
+     "share_ratio_below_1": 0.3341094295692666,
+     "gap_median": -0.011829572176639047,
+     "cal_enhanced": 0.6577415599534342,
+     "daily_enhanced": 0.7066356228172294,
+     "formula": {
+      "n": 859,
+      "slope": 0.9505514961442042,
+      "r2_identity": 0.1299950099879824,
+      "median_abs_error": 0.014175848397654955
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 286,
+       "gap_median": -0.05460647044038448,
+       "ratio_median": 0.9841324354498246,
+       "cal_enhanced": 0.06293706293706294,
+       "daily_enhanced": 0.11888111888111888
+      },
+      {
+       "tercile": "middle",
+       "n": 286,
+       "gap_median": 0.0006970392229602163,
+       "ratio_median": 1.0656492284399752,
+       "cal_enhanced": 0.9090909090909091,
+       "daily_enhanced": 1.0
+      },
+      {
+       "tercile": "trend",
+       "n": 287,
+       "gap_median": -0.021754155284824606,
+       "ratio_median": 1.504854321757477,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "SPYQ",
+     "reset": "quarterly",
+     "L": 2.0,
+     "horizon_years": 10,
+     "n": 799,
+     "ratio_median": 1.1750672752372155,
+     "share_ratio_below_1": 0.34167709637046306,
+     "gap_median": -0.06517781254299804,
+     "cal_enhanced": 0.6996245306633292,
+     "daily_enhanced": 0.7546933667083855,
+     "formula": {
+      "n": 799,
+      "slope": 0.8899207671731015,
+      "r2_identity": -0.07282787107668143,
+      "median_abs_error": 0.024943252968929963
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 266,
+       "gap_median": -0.19492791133683307,
+       "ratio_median": 0.9665993999485469,
+       "cal_enhanced": 0.11654135338345864,
+       "daily_enhanced": 0.2631578947368421
+      },
+      {
+       "tercile": "middle",
+       "n": 266,
+       "gap_median": 0.00016035931513291857,
+       "ratio_median": 1.0425345932095988,
+       "cal_enhanced": 0.981203007518797,
+       "daily_enhanced": 1.0
+      },
+      {
+       "tercile": "trend",
+       "n": 267,
+       "gap_median": -0.04028816248837597,
+       "ratio_median": 1.4190850700367004,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_SPX_M",
+     "reset": "monthly",
+     "L": 2.0,
+     "horizon_years": 1,
+     "n": 907,
+     "ratio_median": 1.0406541366436115,
+     "share_ratio_below_1": 0.46306504961411243,
+     "gap_median": -0.0003505157824119226,
+     "cal_enhanced": 0.5435501653803748,
+     "daily_enhanced": 0.5192943770672547,
+     "formula": {
+      "n": 907,
+      "slope": 0.9096843605251872,
+      "r2_identity": 0.971982983594734,
+      "median_abs_error": 0.0009851741500979533
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 302,
+       "gap_median": 0.001863427418917242,
+       "ratio_median": 0.8950374466635507,
+       "cal_enhanced": 0.016556291390728478,
+       "daily_enhanced": 0.0
+      },
+      {
+       "tercile": "middle",
+       "n": 302,
+       "gap_median": 0.0013265559441309194,
+       "ratio_median": 0.9352350185976412,
+       "cal_enhanced": 0.6125827814569537,
+       "daily_enhanced": 0.5562913907284768
+      },
+      {
+       "tercile": "trend",
+       "n": 303,
+       "gap_median": -0.002927080593314091,
+       "ratio_median": 1.3617285246880841,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_SPX_M",
+     "reset": "monthly",
+     "L": 2.0,
+     "horizon_years": 3,
+     "n": 883,
+     "ratio_median": 1.0565331864617005,
+     "share_ratio_below_1": 0.43148357870894677,
+     "gap_median": -0.000619399859362324,
+     "cal_enhanced": 0.6613816534541337,
+     "daily_enhanced": 0.6591166477916195,
+     "formula": {
+      "n": 883,
+      "slope": 0.9246418584633745,
+      "r2_identity": 0.9810951886124891,
+      "median_abs_error": 0.002041502658263694
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 294,
+       "gap_median": 0.018751388486879628,
+       "ratio_median": 0.852974648733431,
+       "cal_enhanced": 0.1360544217687075,
+       "daily_enhanced": 0.07142857142857142
+      },
+      {
+       "tercile": "middle",
+       "n": 294,
+       "gap_median": 0.0013179568419498522,
+       "ratio_median": 1.013139128352844,
+       "cal_enhanced": 0.8469387755102041,
+       "daily_enhanced": 0.9047619047619048
+      },
+      {
+       "tercile": "trend",
+       "n": 295,
+       "gap_median": -0.003562895984355774,
+       "ratio_median": 1.149618513194446,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_SPX_M",
+     "reset": "monthly",
+     "L": 2.0,
+     "horizon_years": 5,
+     "n": 859,
+     "ratio_median": 1.0527745254187852,
+     "share_ratio_below_1": 0.4540162980209546,
+     "gap_median": 0.0007453405208492914,
+     "cal_enhanced": 0.6984866123399301,
+     "daily_enhanced": 0.7066356228172294,
+     "formula": {
+      "n": 859,
+      "slope": 0.9351168673283161,
+      "r2_identity": 0.9847851971066203,
+      "median_abs_error": 0.003833962352018272
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 286,
+       "gap_median": 0.04737785270846798,
+       "ratio_median": 0.7593796275911546,
+       "cal_enhanced": 0.11888111888111888,
+       "daily_enhanced": 0.11888111888111888
+      },
+      {
+       "tercile": "middle",
+       "n": 286,
+       "gap_median": 0.014353802718526876,
+       "ratio_median": 0.9380928957765716,
+       "cal_enhanced": 0.9755244755244755,
+       "daily_enhanced": 1.0
+      },
+      {
+       "tercile": "trend",
+       "n": 287,
+       "gap_median": -0.00913185347216472,
+       "ratio_median": 1.1686336911859416,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_SPX_M",
+     "reset": "monthly",
+     "L": 2.0,
+     "horizon_years": 10,
+     "n": 799,
+     "ratio_median": 0.9921326118747258,
+     "share_ratio_below_1": 0.5168961201501877,
+     "gap_median": 0.012451826226740348,
+     "cal_enhanced": 0.8210262828535669,
+     "daily_enhanced": 0.7546933667083855,
+     "formula": {
+      "n": 799,
+      "slope": 0.9453562619559537,
+      "r2_identity": 0.9887732251576321,
+      "median_abs_error": 0.007418135815707189
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 266,
+       "gap_median": 0.09430935075901076,
+       "ratio_median": 0.6856983905842386,
+       "cal_enhanced": 0.462406015037594,
+       "daily_enhanced": 0.2631578947368421
+      },
+      {
+       "tercile": "middle",
+       "n": 266,
+       "gap_median": 0.027657625189694945,
+       "ratio_median": 0.9099253282595042,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      },
+      {
+       "tercile": "trend",
+       "n": 267,
+       "gap_median": -0.026427543866991865,
+       "ratio_median": 1.2264343196070624,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_SPX_W",
+     "reset": "weekly",
+     "L": 2.0,
+     "horizon_years": 1,
+     "n": 907,
+     "ratio_median": 1.0176940382261976,
+     "share_ratio_below_1": 0.4696802646085998,
+     "gap_median": -5.888879023238647e-05,
+     "cal_enhanced": 0.5104740904079382,
+     "daily_enhanced": 0.5192943770672547,
+     "formula": {
+      "n": 907,
+      "slope": 1.019626597285375,
+      "r2_identity": 0.9273239223223211,
+      "median_abs_error": 0.00029878905375577136
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 302,
+       "gap_median": 0.00018450802339254127,
+       "ratio_median": 0.984392510114873,
+       "cal_enhanced": 0.0,
+       "daily_enhanced": 0.0
+      },
+      {
+       "tercile": "middle",
+       "n": 302,
+       "gap_median": 0.0003637575517200231,
+       "ratio_median": 0.9819332360690561,
+       "cal_enhanced": 0.5298013245033113,
+       "daily_enhanced": 0.5562913907284768
+      },
+      {
+       "tercile": "trend",
+       "n": 303,
+       "gap_median": -0.0005954153093544745,
+       "ratio_median": 1.0875266857239605,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_SPX_W",
+     "reset": "weekly",
+     "L": 2.0,
+     "horizon_years": 3,
+     "n": 883,
+     "ratio_median": 0.9658446856052776,
+     "share_ratio_below_1": 0.5526613816534541,
+     "gap_median": 0.00169515960097133,
+     "cal_enhanced": 0.6715741789354474,
+     "daily_enhanced": 0.6591166477916195,
+     "formula": {
+      "n": 883,
+      "slope": 0.9943395260500646,
+      "r2_identity": 0.9369989702839018,
+      "median_abs_error": 0.0006792471362737917
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 294,
+       "gap_median": 0.006256224788610487,
+       "ratio_median": 0.9341493224451962,
+       "cal_enhanced": 0.08503401360544217,
+       "daily_enhanced": 0.07142857142857142
+      },
+      {
+       "tercile": "middle",
+       "n": 294,
+       "gap_median": 0.0033183385413182998,
+       "ratio_median": 0.9404031094344308,
+       "cal_enhanced": 0.9285714285714286,
+       "daily_enhanced": 0.9047619047619048
+      },
+      {
+       "tercile": "trend",
+       "n": 295,
+       "gap_median": 0.0002622519629771336,
+       "ratio_median": 1.008213563930772,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_SPX_W",
+     "reset": "weekly",
+     "L": 2.0,
+     "horizon_years": 5,
+     "n": 859,
+     "ratio_median": 0.9413991335147887,
+     "share_ratio_below_1": 0.6181606519208381,
+     "gap_median": 0.005315758997126663,
+     "cal_enhanced": 0.7031431897555297,
+     "daily_enhanced": 0.7066356228172294,
+     "formula": {
+      "n": 859,
+      "slope": 0.9825238253653797,
+      "r2_identity": 0.9426671498777703,
+      "median_abs_error": 0.0011354682597633364
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 286,
+       "gap_median": 0.017454880070595473,
+       "ratio_median": 0.8920310097991722,
+       "cal_enhanced": 0.10839160839160839,
+       "daily_enhanced": 0.11888111888111888
+      },
+      {
+       "tercile": "middle",
+       "n": 286,
+       "gap_median": 0.008247682443423554,
+       "ratio_median": 0.9247415507487435,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      },
+      {
+       "tercile": "trend",
+       "n": 287,
+       "gap_median": 0.0026075219723646903,
+       "ratio_median": 0.9834645012038086,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_SPX_W",
+     "reset": "weekly",
+     "L": 2.0,
+     "horizon_years": 10,
+     "n": 799,
+     "ratio_median": 0.9133723597245144,
+     "share_ratio_below_1": 0.6808510638297872,
+     "gap_median": 0.02081079266107011,
+     "cal_enhanced": 0.7446808510638298,
+     "daily_enhanced": 0.7546933667083855,
+     "formula": {
+      "n": 799,
+      "slope": 0.9604881438440432,
+      "r2_identity": 0.9490517493705035,
+      "median_abs_error": 0.003647827856696595
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 266,
+       "gap_median": 0.03538511099916136,
+       "ratio_median": 0.8763005857363435,
+       "cal_enhanced": 0.23308270676691728,
+       "daily_enhanced": 0.2631578947368421
+      },
+      {
+       "tercile": "middle",
+       "n": 266,
+       "gap_median": 0.027760633091708842,
+       "ratio_median": 0.9017259323570124,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      },
+      {
+       "tercile": "trend",
+       "n": 267,
+       "gap_median": 0.006093948882956113,
+       "ratio_median": 0.9645511068603447,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_SPX_W_3x_scaled",
+     "reset": "weekly",
+     "L": 3.0,
+     "horizon_years": 1,
+     "n": 907,
+     "ratio_median": 1.0176940382261976,
+     "share_ratio_below_1": 0.4696802646085998,
+     "gap_median": -0.0009390959998655246,
+     "cal_enhanced": 0.5082690187431091,
+     "daily_enhanced": 0.5148842337375965,
+     "formula": {
+      "n": 907,
+      "slope": 0.02793826383199648,
+      "r2_identity": -1.1726203348053015,
+      "median_abs_error": 0.001162080883171896
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 302,
+       "gap_median": -0.000799229254495798,
+       "ratio_median": 0.984392510114873,
+       "cal_enhanced": 0.009933774834437087,
+       "daily_enhanced": 0.0033112582781456954
+      },
+      {
+       "tercile": "middle",
+       "n": 302,
+       "gap_median": 0.00022862745652726946,
+       "ratio_median": 0.9819332360690561,
+       "cal_enhanced": 0.5132450331125827,
+       "daily_enhanced": 0.5397350993377483
+      },
+      {
+       "tercile": "trend",
+       "n": 303,
+       "gap_median": -0.0017169123780924611,
+       "ratio_median": 1.0875266857239605,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_SPX_W_3x_scaled",
+     "reset": "weekly",
+     "L": 3.0,
+     "horizon_years": 3,
+     "n": 883,
+     "ratio_median": 0.9658446856052776,
+     "share_ratio_below_1": 0.5526613816534541,
+     "gap_median": -0.0015716433819892295,
+     "cal_enhanced": 0.6138165345413363,
+     "daily_enhanced": 0.6217440543601359,
+     "formula": {
+      "n": 883,
+      "slope": 0.11305096566629841,
+      "r2_identity": -1.3230441853250183,
+      "median_abs_error": 0.0024924441082596685
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 294,
+       "gap_median": -0.03198625703704998,
+       "ratio_median": 0.9341493224451962,
+       "cal_enhanced": 0.07482993197278912,
+       "daily_enhanced": 0.06802721088435375
+      },
+      {
+       "tercile": "middle",
+       "n": 294,
+       "gap_median": 0.0061228527927740806,
+       "ratio_median": 0.9404031094344308,
+       "cal_enhanced": 0.7653061224489796,
+       "daily_enhanced": 0.7959183673469388
+      },
+      {
+       "tercile": "trend",
+       "n": 295,
+       "gap_median": 0.0010726917211110187,
+       "ratio_median": 1.008213563930772,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_SPX_W_3x_scaled",
+     "reset": "weekly",
+     "L": 3.0,
+     "horizon_years": 5,
+     "n": 859,
+     "ratio_median": 0.9413991335147887,
+     "share_ratio_below_1": 0.6181606519208381,
+     "gap_median": -0.0006331730974533656,
+     "cal_enhanced": 0.6321303841676368,
+     "daily_enhanced": 0.6577415599534342,
+     "formula": {
+      "n": 859,
+      "slope": 0.20486714517321478,
+      "r2_identity": -1.1527578896826505,
+      "median_abs_error": 0.0038751245665562747
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 286,
+       "gap_median": -0.05071773997427852,
+       "ratio_median": 0.8920310097991722,
+       "cal_enhanced": 0.02097902097902098,
+       "daily_enhanced": 0.06993006993006994
+      },
+      {
+       "tercile": "middle",
+       "n": 286,
+       "gap_median": 0.007438241196391471,
+       "ratio_median": 0.9247415507487435,
+       "cal_enhanced": 0.8741258741258742,
+       "daily_enhanced": 0.9020979020979021
+      },
+      {
+       "tercile": "trend",
+       "n": 287,
+       "gap_median": 0.0058775815331566506,
+       "ratio_median": 0.9834645012038086,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_SPX_W_3x_scaled",
+     "reset": "weekly",
+     "L": 3.0,
+     "horizon_years": 10,
+     "n": 799,
+     "ratio_median": 0.9399606692892367,
+     "share_ratio_below_1": 0.6808510638297872,
+     "gap_median": -0.011560250504684122,
+     "cal_enhanced": 0.6896120150187734,
+     "daily_enhanced": 0.704630788485607,
+     "formula": {
+      "n": 799,
+      "slope": 0.35469151711953667,
+      "r2_identity": -0.7979290706613811,
+      "median_abs_error": 0.015012070269350919
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 266,
+       "gap_median": -0.010909296153926551,
+       "ratio_median": 0.8763005857363435,
+       "cal_enhanced": 0.07142857142857142,
+       "daily_enhanced": 0.11278195488721804
+      },
+      {
+       "tercile": "middle",
+       "n": 266,
+       "gap_median": -0.034039895188129776,
+       "ratio_median": 0.9063541326054971,
+       "cal_enhanced": 0.9962406015037594,
+       "daily_enhanced": 1.0
+      },
+      {
+       "tercile": "trend",
+       "n": 267,
+       "gap_median": -0.015520734993961671,
+       "ratio_median": 0.9651915119960965,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_SPX_M_3x_scaled",
+     "reset": "monthly",
+     "L": 3.0,
+     "horizon_years": 1,
+     "n": 907,
+     "ratio_median": 1.0764010430657962,
+     "share_ratio_below_1": 0.43770672546857775,
+     "gap_median": -0.0018823494072028324,
+     "cal_enhanced": 0.535832414553473,
+     "daily_enhanced": 0.5148842337375965,
+     "formula": {
+      "n": 907,
+      "slope": 0.47612580290629203,
+      "r2_identity": -0.07702663151653799,
+      "median_abs_error": 0.0038284451805897096
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 302,
+       "gap_median": 0.0006552981707339395,
+       "ratio_median": 0.9755682290501886,
+       "cal_enhanced": 0.016556291390728478,
+       "daily_enhanced": 0.0033112582781456954
+      },
+      {
+       "tercile": "middle",
+       "n": 302,
+       "gap_median": 0.0030221530492360316,
+       "ratio_median": 0.9363170848448397,
+       "cal_enhanced": 0.5927152317880795,
+       "daily_enhanced": 0.5397350993377483
+      },
+      {
+       "tercile": "trend",
+       "n": 303,
+       "gap_median": -0.007790179243827466,
+       "ratio_median": 1.3617285246880841,
+       "cal_enhanced": 0.9966996699669967,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_SPX_M_3x_scaled",
+     "reset": "monthly",
+     "L": 3.0,
+     "horizon_years": 3,
+     "n": 883,
+     "ratio_median": 1.0888719861057188,
+     "share_ratio_below_1": 0.35447338618346547,
+     "gap_median": -0.010613141569971063,
+     "cal_enhanced": 0.6002265005662514,
+     "daily_enhanced": 0.6217440543601359,
+     "formula": {
+      "n": 883,
+      "slope": 0.5358980768174719,
+      "r2_identity": 0.14264381546075044,
+      "median_abs_error": 0.009505819167478724
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 294,
+       "gap_median": -0.012454540736101999,
+       "ratio_median": 1.0601166274288096,
+       "cal_enhanced": 0.08843537414965986,
+       "daily_enhanced": 0.06802721088435375
+      },
+      {
+       "tercile": "middle",
+       "n": 294,
+       "gap_median": -0.005464080430002793,
+       "ratio_median": 1.079438413430733,
+       "cal_enhanced": 0.7108843537414966,
+       "daily_enhanced": 0.7959183673469388
+      },
+      {
+       "tercile": "trend",
+       "n": 295,
+       "gap_median": -0.011171734361283825,
+       "ratio_median": 1.149618513194446,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_SPX_M_3x_scaled",
+     "reset": "monthly",
+     "L": 3.0,
+     "horizon_years": 5,
+     "n": 859,
+     "ratio_median": 1.1149413926375344,
+     "share_ratio_below_1": 0.32363213038416766,
+     "gap_median": -0.0346536753405946,
+     "cal_enhanced": 0.6006984866123399,
+     "daily_enhanced": 0.6577415599534342,
+     "formula": {
+      "n": 859,
+      "slope": 0.5762487574029775,
+      "r2_identity": 0.323299997453498,
+      "median_abs_error": 0.016867239470440998
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 286,
+       "gap_median": -0.024633681615487235,
+       "ratio_median": 1.0193192340108936,
+       "cal_enhanced": 0.024475524475524476,
+       "daily_enhanced": 0.06993006993006994
+      },
+      {
+       "tercile": "middle",
+       "n": 286,
+       "gap_median": -0.043324333684811034,
+       "ratio_median": 1.091724725724195,
+       "cal_enhanced": 0.7762237762237763,
+       "daily_enhanced": 0.9020979020979021
+      },
+      {
+       "tercile": "trend",
+       "n": 287,
+       "gap_median": -0.02806504656802722,
+       "ratio_median": 1.1764640145198229,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_SPX_M_3x_scaled",
+     "reset": "monthly",
+     "L": 3.0,
+     "horizon_years": 10,
+     "n": 799,
+     "ratio_median": 1.1920329424783715,
+     "share_ratio_below_1": 0.40550688360450565,
+     "gap_median": -0.05977306259637549,
+     "cal_enhanced": 0.7083854818523154,
+     "daily_enhanced": 0.704630788485607,
+     "formula": {
+      "n": 799,
+      "slope": 0.6116235941392693,
+      "r2_identity": 0.5273409014181248,
+      "median_abs_error": 0.035071992007178615
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 266,
+       "gap_median": 0.22980577210415076,
+       "ratio_median": 0.6856983905842386,
+       "cal_enhanced": 0.12781954887218044,
+       "daily_enhanced": 0.11278195488721804
+      },
+      {
+       "tercile": "middle",
+       "n": 266,
+       "gap_median": -0.05800132145886083,
+       "ratio_median": 1.146907994511961,
+       "cal_enhanced": 0.9962406015037594,
+       "daily_enhanced": 1.0
+      },
+      {
+       "tercile": "trend",
+       "n": 267,
+       "gap_median": -0.07814059220332847,
+       "ratio_median": 1.2375125909143903,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "SPYQ_3x_scaled",
+     "reset": "quarterly",
+     "L": 3.0,
+     "horizon_years": 1,
+     "n": 907,
+     "ratio_median": 1.143030451779486,
+     "share_ratio_below_1": 0.3947078280044101,
+     "gap_median": -0.005198574496256769,
+     "cal_enhanced": 0.557883131201764,
+     "daily_enhanced": 0.5148842337375965,
+     "formula": {
+      "n": 907,
+      "slope": 1.0735609866654436,
+      "r2_identity": 0.33738192032226655,
+      "median_abs_error": 0.010701777249885719
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 302,
+       "gap_median": 0.0015349983702462877,
+       "ratio_median": 0.9447864044272747,
+       "cal_enhanced": 0.07947019867549669,
+       "daily_enhanced": 0.0033112582781456954
+      },
+      {
+       "tercile": "middle",
+       "n": 302,
+       "gap_median": 0.0045717246815019374,
+       "ratio_median": 0.9847320094993612,
+       "cal_enhanced": 0.6357615894039735,
+       "daily_enhanced": 0.5397350993377483
+      },
+      {
+       "tercile": "trend",
+       "n": 303,
+       "gap_median": -0.01606641744545456,
+       "ratio_median": 1.7247356237673532,
+       "cal_enhanced": 0.9570957095709571,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "SPYQ_3x_scaled",
+     "reset": "quarterly",
+     "L": 3.0,
+     "horizon_years": 3,
+     "n": 883,
+     "ratio_median": 1.253241571050695,
+     "share_ratio_below_1": 0.29105322763306907,
+     "gap_median": -0.03340072650043635,
+     "cal_enhanced": 0.5345413363533409,
+     "daily_enhanced": 0.6217440543601359,
+     "formula": {
+      "n": 883,
+      "slope": 1.0141108999887685,
+      "r2_identity": 0.1873720304240687,
+      "median_abs_error": 0.0383557456208957
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 294,
+       "gap_median": -0.16793690648923182,
+       "ratio_median": 1.0580378746938548,
+       "cal_enhanced": 0.07482993197278912,
+       "daily_enhanced": 0.06802721088435375
+      },
+      {
+       "tercile": "middle",
+       "n": 294,
+       "gap_median": -0.022486445367725816,
+       "ratio_median": 1.2257887832435557,
+       "cal_enhanced": 0.54421768707483,
+       "daily_enhanced": 0.7959183673469388
+      },
+      {
+       "tercile": "trend",
+       "n": 295,
+       "gap_median": -0.0268285634282317,
+       "ratio_median": 1.4484251292925117,
+       "cal_enhanced": 0.9830508474576272,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "SPYQ_3x_scaled",
+     "reset": "quarterly",
+     "L": 3.0,
+     "horizon_years": 5,
+     "n": 859,
+     "ratio_median": 1.261304836705317,
+     "share_ratio_below_1": 0.23050058207217694,
+     "gap_median": -0.08553307912681918,
+     "cal_enhanced": 0.5459837019790454,
+     "daily_enhanced": 0.6577415599534342,
+     "formula": {
+      "n": 859,
+      "slope": 1.012099612202346,
+      "r2_identity": 0.047851998337556045,
+      "median_abs_error": 0.09184869701932963
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 286,
+       "gap_median": -0.3241946627194648,
+       "ratio_median": 1.093398026161183,
+       "cal_enhanced": 0.03146853146853147,
+       "daily_enhanced": 0.06993006993006994
+      },
+      {
+       "tercile": "middle",
+       "n": 286,
+       "gap_median": -0.04271083411705834,
+       "ratio_median": 1.2083582758535871,
+       "cal_enhanced": 0.6783216783216783,
+       "daily_enhanced": 0.9020979020979021
+      },
+      {
+       "tercile": "trend",
+       "n": 287,
+       "gap_median": -0.06092868066856094,
+       "ratio_median": 1.5086048523132842,
+       "cal_enhanced": 0.926829268292683,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "SPYQ_3x_scaled",
+     "reset": "quarterly",
+     "L": 3.0,
+     "horizon_years": 10,
+     "n": 799,
+     "ratio_median": 1.3257373508828296,
+     "share_ratio_below_1": 0.22528160200250313,
+     "gap_median": -0.23309379059815616,
+     "cal_enhanced": 0.574468085106383,
+     "daily_enhanced": 0.704630788485607,
+     "formula": {
+      "n": 799,
+      "slope": 1.059924667569367,
+      "r2_identity": -0.1684339618396289,
+      "median_abs_error": 0.21353974096563877
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 266,
+       "gap_median": -0.38386171679641523,
+       "ratio_median": 0.9833816400578805,
+       "cal_enhanced": 0.0,
+       "daily_enhanced": 0.11278195488721804
+      },
+      {
+       "tercile": "middle",
+       "n": 266,
+       "gap_median": -0.1351113343253556,
+       "ratio_median": 1.1998358358546197,
+       "cal_enhanced": 0.7218045112781954,
+       "daily_enhanced": 1.0
+      },
+      {
+       "tercile": "trend",
+       "n": 267,
+       "gap_median": -0.11881983345233493,
+       "ratio_median": 1.4212003620461118,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    }
+   ]
+  },
+  "NDX": {
+   "windows": [
+    {
+     "product": "MQQQ",
+     "reset": "monthly",
+     "L": 2.0,
+     "horizon_years": 1,
+     "n": 487,
+     "ratio_median": 0.8603609590267217,
+     "share_ratio_below_1": 0.6303901437371663,
+     "gap_median": 0.006018613557288444,
+     "cal_enhanced": 0.5195071868583162,
+     "daily_enhanced": 0.46406570841889117,
+     "formula": {
+      "n": 487,
+      "slope": 1.0353806242827828,
+      "r2_identity": 0.5336515911056325,
+      "median_abs_error": 0.002844796783025773
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 162,
+       "gap_median": 0.00898896068749748,
+       "ratio_median": 0.7440696249916312,
+       "cal_enhanced": 0.006172839506172839,
+       "daily_enhanced": 0.0
+      },
+      {
+       "tercile": "middle",
+       "n": 162,
+       "gap_median": 0.005023689642481982,
+       "ratio_median": 0.8487102049258561,
+       "cal_enhanced": 0.5802469135802469,
+       "daily_enhanced": 0.3888888888888889
+      },
+      {
+       "tercile": "trend",
+       "n": 163,
+       "gap_median": 0.0018476925171817538,
+       "ratio_median": 1.00639819640393,
+       "cal_enhanced": 0.9693251533742331,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "MQQQ",
+     "reset": "monthly",
+     "L": 2.0,
+     "horizon_years": 3,
+     "n": 463,
+     "ratio_median": 0.8140003345772664,
+     "share_ratio_below_1": 0.8077753779697624,
+     "gap_median": 0.023931428148155298,
+     "cal_enhanced": 0.6177105831533477,
+     "daily_enhanced": 0.5853131749460043,
+     "formula": {
+      "n": 463,
+      "slope": 0.9697816834835368,
+      "r2_identity": 0.6098566514703475,
+      "median_abs_error": 0.008592663120070537
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 154,
+       "gap_median": 0.027697633882762668,
+       "ratio_median": 0.7941391001821099,
+       "cal_enhanced": 0.05844155844155844,
+       "daily_enhanced": 0.032467532467532464
+      },
+      {
+       "tercile": "middle",
+       "n": 154,
+       "gap_median": 0.021753542417477345,
+       "ratio_median": 0.8053537885210325,
+       "cal_enhanced": 0.7922077922077922,
+       "daily_enhanced": 0.7207792207792207
+      },
+      {
+       "tercile": "trend",
+       "n": 155,
+       "gap_median": 0.021060979917880696,
+       "ratio_median": 0.8478385900433427,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "MQQQ",
+     "reset": "monthly",
+     "L": 2.0,
+     "horizon_years": 5,
+     "n": 439,
+     "ratio_median": 0.7936759495168834,
+     "share_ratio_below_1": 0.8291571753986332,
+     "gap_median": 0.05467247624604488,
+     "cal_enhanced": 0.6332574031890661,
+     "daily_enhanced": 0.6355353075170843,
+     "formula": {
+      "n": 439,
+      "slope": 0.9199215457921907,
+      "r2_identity": 0.6701263915004352,
+      "median_abs_error": 0.014486951803686726
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 146,
+       "gap_median": 0.09083602240086908,
+       "ratio_median": 0.7363776870465384,
+       "cal_enhanced": 0.07534246575342465,
+       "daily_enhanced": 0.0684931506849315
+      },
+      {
+       "tercile": "middle",
+       "n": 146,
+       "gap_median": 0.04952228112839918,
+       "ratio_median": 0.783125230628249,
+       "cal_enhanced": 0.821917808219178,
+       "daily_enhanced": 0.8356164383561644
+      },
+      {
+       "tercile": "trend",
+       "n": 147,
+       "gap_median": 0.040407152768329624,
+       "ratio_median": 0.8270632185978466,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "MQQQ",
+     "reset": "monthly",
+     "L": 2.0,
+     "horizon_years": 10,
+     "n": 379,
+     "ratio_median": 0.7697397273746748,
+     "share_ratio_below_1": 0.8364116094986808,
+     "gap_median": 0.13006945676676152,
+     "cal_enhanced": 0.683377308707124,
+     "daily_enhanced": 0.6464379947229552,
+     "formula": {
+      "n": 379,
+      "slope": 0.782488150128449,
+      "r2_identity": 0.6002668884848215,
+      "median_abs_error": 0.03616327788830276
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 126,
+       "gap_median": 0.12521832817379575,
+       "ratio_median": 0.8291228546758689,
+       "cal_enhanced": 0.09523809523809523,
+       "daily_enhanced": 0.05555555555555555
+      },
+      {
+       "tercile": "middle",
+       "n": 126,
+       "gap_median": 0.13770575231341653,
+       "ratio_median": 0.7017791026087536,
+       "cal_enhanced": 0.9523809523809523,
+       "daily_enhanced": 0.8809523809523809
+      },
+      {
+       "tercile": "trend",
+       "n": 127,
+       "gap_median": 0.11685610450010131,
+       "ratio_median": 0.8213796961287366,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "QQQP",
+     "reset": "quarterly",
+     "L": 2.0,
+     "horizon_years": 1,
+     "n": 487,
+     "ratio_median": 0.9873312803216361,
+     "share_ratio_below_1": 0.5071868583162218,
+     "gap_median": 0.0033946909080970755,
+     "cal_enhanced": 0.48459958932238195,
+     "daily_enhanced": 0.46406570841889117,
+     "formula": {
+      "n": 487,
+      "slope": 0.8036023061247888,
+      "r2_identity": 0.07783035285534412,
+      "median_abs_error": 0.008891048037375449
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 162,
+       "gap_median": 0.010391837401788999,
+       "ratio_median": 0.7038365840050467,
+       "cal_enhanced": 0.037037037037037035,
+       "daily_enhanced": 0.0
+      },
+      {
+       "tercile": "middle",
+       "n": 162,
+       "gap_median": 0.005686339960672693,
+       "ratio_median": 0.9282449721155625,
+       "cal_enhanced": 0.47530864197530864,
+       "daily_enhanced": 0.3888888888888889
+      },
+      {
+       "tercile": "trend",
+       "n": 163,
+       "gap_median": -0.004877072369856628,
+       "ratio_median": 1.3709103337844706,
+       "cal_enhanced": 0.9386503067484663,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "QQQP",
+     "reset": "quarterly",
+     "L": 2.0,
+     "horizon_years": 3,
+     "n": 463,
+     "ratio_median": 1.0189501721226082,
+     "share_ratio_below_1": 0.4773218142548596,
+     "gap_median": 0.00819031708477258,
+     "cal_enhanced": 0.572354211663067,
+     "daily_enhanced": 0.5853131749460043,
+     "formula": {
+      "n": 463,
+      "slope": 1.2339700288633977,
+      "r2_identity": 0.13614802211410515,
+      "median_abs_error": 0.023589500074299122
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 154,
+       "gap_median": -0.20380041629011889,
+       "ratio_median": 0.953870810229547,
+       "cal_enhanced": 0.032467532467532464,
+       "daily_enhanced": 0.032467532467532464
+      },
+      {
+       "tercile": "middle",
+       "n": 154,
+       "gap_median": 0.01686724439361348,
+       "ratio_median": 1.024903237258593,
+       "cal_enhanced": 0.7142857142857143,
+       "daily_enhanced": 0.7207792207792207
+      },
+      {
+       "tercile": "trend",
+       "n": 155,
+       "gap_median": 0.019547839320379623,
+       "ratio_median": 1.0737312379041097,
+       "cal_enhanced": 0.967741935483871,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "QQQP",
+     "reset": "quarterly",
+     "L": 2.0,
+     "horizon_years": 5,
+     "n": 439,
+     "ratio_median": 1.023074465911775,
+     "share_ratio_below_1": 0.4624145785876993,
+     "gap_median": 0.0024115503356865187,
+     "cal_enhanced": 0.5831435079726651,
+     "daily_enhanced": 0.6355353075170843,
+     "formula": {
+      "n": 439,
+      "slope": 1.4289143873422598,
+      "r2_identity": 0.18012558499154885,
+      "median_abs_error": 0.05140013429183776
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 146,
+       "gap_median": -0.22682452324995067,
+       "ratio_median": 0.9622895671214877,
+       "cal_enhanced": 0.0684931506849315,
+       "daily_enhanced": 0.0684931506849315
+      },
+      {
+       "tercile": "middle",
+       "n": 146,
+       "gap_median": 0.014582100351228755,
+       "ratio_median": 1.023696074610381,
+       "cal_enhanced": 0.678082191780822,
+       "daily_enhanced": 0.8356164383561644
+      },
+      {
+       "tercile": "trend",
+       "n": 147,
+       "gap_median": 0.03587779994537432,
+       "ratio_median": 1.0389589536285049,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "QQQP",
+     "reset": "quarterly",
+     "L": 2.0,
+     "horizon_years": 10,
+     "n": 379,
+     "ratio_median": 1.0431435960138555,
+     "share_ratio_below_1": 0.45382585751978893,
+     "gap_median": -0.18388810975431524,
+     "cal_enhanced": 0.5145118733509235,
+     "daily_enhanced": 0.6464379947229552,
+     "formula": {
+      "n": 379,
+      "slope": 1.3903885002806873,
+      "r2_identity": -0.3187491967415774,
+      "median_abs_error": 0.23216943687514846
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 126,
+       "gap_median": -0.5193698231400872,
+       "ratio_median": 1.135899375998414,
+       "cal_enhanced": 0.03968253968253968,
+       "daily_enhanced": 0.05555555555555555
+      },
+      {
+       "tercile": "middle",
+       "n": 126,
+       "gap_median": -0.18040140178080244,
+       "ratio_median": 0.9168456217443051,
+       "cal_enhanced": 0.5,
+       "daily_enhanced": 0.8809523809523809
+      },
+      {
+       "tercile": "trend",
+       "n": 127,
+       "gap_median": 0.03302661506322613,
+       "ratio_median": 1.0572941171208066,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_NDX_W",
+     "reset": "weekly",
+     "L": 2.0,
+     "horizon_years": 1,
+     "n": 487,
+     "ratio_median": 0.8909124055094366,
+     "share_ratio_below_1": 0.7145790554414785,
+     "gap_median": 0.0037775339686021703,
+     "cal_enhanced": 0.5112936344969199,
+     "daily_enhanced": 0.46406570841889117,
+     "formula": {
+      "n": 487,
+      "slope": 0.8530982819022177,
+      "r2_identity": 0.7679453805500123,
+      "median_abs_error": 0.0008770255031925536
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 162,
+       "gap_median": 0.002914065757283032,
+       "ratio_median": 0.8957342539157895,
+       "cal_enhanced": 0.012345679012345678,
+       "daily_enhanced": 0.0
+      },
+      {
+       "tercile": "middle",
+       "n": 162,
+       "gap_median": 0.005912892174260415,
+       "ratio_median": 0.8440702922124239,
+       "cal_enhanced": 0.5370370370370371,
+       "daily_enhanced": 0.3888888888888889
+      },
+      {
+       "tercile": "trend",
+       "n": 163,
+       "gap_median": 0.00189893875925784,
+       "ratio_median": 0.9585889625369503,
+       "cal_enhanced": 0.9815950920245399,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_NDX_W",
+     "reset": "weekly",
+     "L": 2.0,
+     "horizon_years": 3,
+     "n": 463,
+     "ratio_median": 0.86885717163822,
+     "share_ratio_below_1": 0.8660907127429806,
+     "gap_median": 0.015443384916749237,
+     "cal_enhanced": 0.6177105831533477,
+     "daily_enhanced": 0.5853131749460043,
+     "formula": {
+      "n": 463,
+      "slope": 0.7604409606640496,
+      "r2_identity": 0.6659028289404894,
+      "median_abs_error": 0.00194308090874995
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 154,
+       "gap_median": 0.036128927328215654,
+       "ratio_median": 0.8273008303612248,
+       "cal_enhanced": 0.05194805194805195,
+       "daily_enhanced": 0.032467532467532464
+      },
+      {
+       "tercile": "middle",
+       "n": 154,
+       "gap_median": 0.009165727366894527,
+       "ratio_median": 0.9184197671200063,
+       "cal_enhanced": 0.7987012987012987,
+       "daily_enhanced": 0.7207792207792207
+      },
+      {
+       "tercile": "trend",
+       "n": 155,
+       "gap_median": 0.011456835783842934,
+       "ratio_median": 0.8801449231200249,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_NDX_W",
+     "reset": "weekly",
+     "L": 2.0,
+     "horizon_years": 5,
+     "n": 439,
+     "ratio_median": 0.8145422110100057,
+     "share_ratio_below_1": 0.9384965831435079,
+     "gap_median": 0.05171552015716152,
+     "cal_enhanced": 0.6469248291571754,
+     "daily_enhanced": 0.6355353075170843,
+     "formula": {
+      "n": 439,
+      "slope": 0.755173189566412,
+      "r2_identity": 0.6276870927665194,
+      "median_abs_error": 0.004260280847826037
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 146,
+       "gap_median": 0.07393932987556201,
+       "ratio_median": 0.7896590278060153,
+       "cal_enhanced": 0.07534246575342465,
+       "daily_enhanced": 0.0684931506849315
+      },
+      {
+       "tercile": "middle",
+       "n": 146,
+       "gap_median": 0.031352004782438936,
+       "ratio_median": 0.877262313633441,
+       "cal_enhanced": 0.863013698630137,
+       "daily_enhanced": 0.8356164383561644
+      },
+      {
+       "tercile": "trend",
+       "n": 147,
+       "gap_median": 0.03347577047836037,
+       "ratio_median": 0.8526830674954596,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_NDX_W",
+     "reset": "weekly",
+     "L": 2.0,
+     "horizon_years": 10,
+     "n": 379,
+     "ratio_median": 0.8204145607358729,
+     "share_ratio_below_1": 0.9815303430079155,
+     "gap_median": 0.08765935361532673,
+     "cal_enhanced": 0.683377308707124,
+     "daily_enhanced": 0.6464379947229552,
+     "formula": {
+      "n": 379,
+      "slope": 0.7680640886584269,
+      "r2_identity": 0.5271935188230977,
+      "median_abs_error": 0.008470014138240667
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 126,
+       "gap_median": 0.17708279351180647,
+       "ratio_median": 0.7974493545613583,
+       "cal_enhanced": 0.0873015873015873,
+       "daily_enhanced": 0.05555555555555555
+      },
+      {
+       "tercile": "middle",
+       "n": 126,
+       "gap_median": 0.08137794699891876,
+       "ratio_median": 0.8229428750060923,
+       "cal_enhanced": 0.9603174603174603,
+       "daily_enhanced": 0.8809523809523809
+      },
+      {
+       "tercile": "trend",
+       "n": 127,
+       "gap_median": 0.06925067053726064,
+       "ratio_median": 0.8438526070500135,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_NDX_W_3x_scaled",
+     "reset": "weekly",
+     "L": 3.0,
+     "horizon_years": 1,
+     "n": 487,
+     "ratio_median": 0.8909124055094366,
+     "share_ratio_below_1": 0.7145790554414785,
+     "gap_median": 0.009577880696062302,
+     "cal_enhanced": 0.48254620123203285,
+     "daily_enhanced": 0.4517453798767967,
+     "formula": {
+      "n": 487,
+      "slope": 0.7656225489256041,
+      "r2_identity": 0.4793256295653363,
+      "median_abs_error": 0.0035479007753666247
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 162,
+       "gap_median": 0.007707122175993949,
+       "ratio_median": 0.8957342539157895,
+       "cal_enhanced": 0.018518518518518517,
+       "daily_enhanced": 0.018518518518518517
+      },
+      {
+       "tercile": "middle",
+       "n": 162,
+       "gap_median": 0.017204297364197846,
+       "ratio_median": 0.8440702922124239,
+       "cal_enhanced": 0.4567901234567901,
+       "daily_enhanced": 0.3395061728395062
+      },
+      {
+       "tercile": "trend",
+       "n": 163,
+       "gap_median": 0.005131911675116396,
+       "ratio_median": 0.9585889625369503,
+       "cal_enhanced": 0.9693251533742331,
+       "daily_enhanced": 0.9938650306748467
+      }
+     ]
+    },
+    {
+     "product": "HYP_NDX_W_3x_scaled",
+     "reset": "weekly",
+     "L": 3.0,
+     "horizon_years": 3,
+     "n": 463,
+     "ratio_median": 0.86885717163822,
+     "share_ratio_below_1": 0.8660907127429806,
+     "gap_median": 0.03767571377691881,
+     "cal_enhanced": 0.5809935205183585,
+     "daily_enhanced": 0.550755939524838,
+     "formula": {
+      "n": 463,
+      "slope": 0.5942695086964144,
+      "r2_identity": 0.04174450198728341,
+      "median_abs_error": 0.0071378808891608275
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 154,
+       "gap_median": 0.09151860658397243,
+       "ratio_median": 0.8273008303612248,
+       "cal_enhanced": 0.06493506493506493,
+       "daily_enhanced": 0.06493506493506493
+      },
+      {
+       "tercile": "middle",
+       "n": 154,
+       "gap_median": 0.026075269013937308,
+       "ratio_median": 0.9184197671200063,
+       "cal_enhanced": 0.6753246753246753,
+       "daily_enhanced": 0.5844155844155844
+      },
+      {
+       "tercile": "trend",
+       "n": 155,
+       "gap_median": 0.02954908758468089,
+       "ratio_median": 0.8801449231200249,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_NDX_W_3x_scaled",
+     "reset": "weekly",
+     "L": 3.0,
+     "horizon_years": 5,
+     "n": 439,
+     "ratio_median": 0.8145422110100057,
+     "share_ratio_below_1": 0.9384965831435079,
+     "gap_median": 0.13110556411079244,
+     "cal_enhanced": 0.6104783599088838,
+     "daily_enhanced": 0.5740318906605922,
+     "formula": {
+      "n": 439,
+      "slope": 0.5805269625419395,
+      "r2_identity": -0.3580346193643127,
+      "median_abs_error": 0.015689228346644102
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 146,
+       "gap_median": 0.19747974979548316,
+       "ratio_median": 0.7896590278060153,
+       "cal_enhanced": 0.1232876712328767,
+       "daily_enhanced": 0.1232876712328767
+      },
+      {
+       "tercile": "middle",
+       "n": 146,
+       "gap_median": 0.07868544688210544,
+       "ratio_median": 0.877262313633441,
+       "cal_enhanced": 0.7054794520547946,
+       "daily_enhanced": 0.5958904109589042
+      },
+      {
+       "tercile": "trend",
+       "n": 147,
+       "gap_median": 0.07149583406565796,
+       "ratio_median": 0.8526830674954596,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "HYP_NDX_W_3x_scaled",
+     "reset": "weekly",
+     "L": 3.0,
+     "horizon_years": 10,
+     "n": 379,
+     "ratio_median": 0.8204145607358729,
+     "share_ratio_below_1": 0.9815303430079155,
+     "gap_median": 0.2556349094304724,
+     "cal_enhanced": 0.6226912928759895,
+     "daily_enhanced": 0.5488126649076517,
+     "formula": {
+      "n": 379,
+      "slope": 0.600415233074301,
+      "r2_identity": -1.3202869113566562,
+      "median_abs_error": 0.037213686926871326
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 126,
+       "gap_median": 0.4038038333043943,
+       "ratio_median": 0.7974493545613583,
+       "cal_enhanced": 0.11904761904761904,
+       "daily_enhanced": 0.11904761904761904
+      },
+      {
+       "tercile": "middle",
+       "n": 126,
+       "gap_median": 0.23001055032277745,
+       "ratio_median": 0.8229428750060923,
+       "cal_enhanced": 0.746031746031746,
+       "daily_enhanced": 0.5238095238095238
+      },
+      {
+       "tercile": "trend",
+       "n": 127,
+       "gap_median": 0.2030323613862013,
+       "ratio_median": 0.8438526070500135,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "MQQQ_3x_scaled",
+     "reset": "monthly",
+     "L": 3.0,
+     "horizon_years": 1,
+     "n": 487,
+     "ratio_median": 0.8840639902824302,
+     "share_ratio_below_1": 0.6078028747433265,
+     "gap_median": 0.011582492736825004,
+     "cal_enhanced": 0.4989733059548255,
+     "daily_enhanced": 0.4517453798767967,
+     "formula": {
+      "n": 487,
+      "slope": -0.015797066560227002,
+      "r2_identity": -0.29230708632192104,
+      "median_abs_error": 0.012199994134153541
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 162,
+       "gap_median": 0.02013398667345032,
+       "ratio_median": 0.7701269582434593,
+       "cal_enhanced": 0.012345679012345678,
+       "daily_enhanced": 0.018518518518518517
+      },
+      {
+       "tercile": "middle",
+       "n": 162,
+       "gap_median": 0.011134666960747802,
+       "ratio_median": 0.8740916138071733,
+       "cal_enhanced": 0.5308641975308642,
+       "daily_enhanced": 0.3395061728395062
+      },
+      {
+       "tercile": "trend",
+       "n": 163,
+       "gap_median": 0.0048975362483758555,
+       "ratio_median": 1.0100809486239228,
+       "cal_enhanced": 0.950920245398773,
+       "daily_enhanced": 0.9938650306748467
+      }
+     ]
+    },
+    {
+     "product": "MQQQ_3x_scaled",
+     "reset": "monthly",
+     "L": 3.0,
+     "horizon_years": 3,
+     "n": 463,
+     "ratio_median": 0.8516245327399705,
+     "share_ratio_below_1": 0.7602591792656588,
+     "gap_median": 0.04451930098349344,
+     "cal_enhanced": 0.48596112311015116,
+     "daily_enhanced": 0.550755939524838,
+     "formula": {
+      "n": 463,
+      "slope": -0.3760273407636875,
+      "r2_identity": -0.5281675682562352,
+      "median_abs_error": 0.0425110396105661
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 154,
+       "gap_median": -0.14071545012374026,
+       "ratio_median": 0.8403926069581882,
+       "cal_enhanced": 0.05844155844155844,
+       "daily_enhanced": 0.06493506493506493
+      },
+      {
+       "tercile": "middle",
+       "n": 154,
+       "gap_median": 0.047540407659202755,
+       "ratio_median": 0.8509698116472819,
+       "cal_enhanced": 0.564935064935065,
+       "daily_enhanced": 0.5844155844155844
+      },
+      {
+       "tercile": "trend",
+       "n": 155,
+       "gap_median": 0.0556140785023016,
+       "ratio_median": 0.8689277432539991,
+       "cal_enhanced": 0.832258064516129,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "MQQQ_3x_scaled",
+     "reset": "monthly",
+     "L": 3.0,
+     "horizon_years": 5,
+     "n": 439,
+     "ratio_median": 0.8385807928945422,
+     "share_ratio_below_1": 0.8018223234624146,
+     "gap_median": -0.13851484991474394,
+     "cal_enhanced": 0.5603644646924829,
+     "daily_enhanced": 0.5740318906605922,
+     "formula": {
+      "n": 439,
+      "slope": -0.5182756980849477,
+      "r2_identity": -0.8463877995671829,
+      "median_abs_error": 0.12045500667220399
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 146,
+       "gap_median": -0.4937607095637795,
+       "ratio_median": 0.8041043489757735,
+       "cal_enhanced": 0.11643835616438356,
+       "daily_enhanced": 0.1232876712328767
+      },
+      {
+       "tercile": "middle",
+       "n": 146,
+       "gap_median": -0.061627200024087614,
+       "ratio_median": 0.8096560049797831,
+       "cal_enhanced": 0.5753424657534246,
+       "daily_enhanced": 0.5958904109589042
+      },
+      {
+       "tercile": "trend",
+       "n": 147,
+       "gap_median": 0.11433152898517118,
+       "ratio_median": 0.8875001534370155,
+       "cal_enhanced": 0.9863945578231292,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "MQQQ_3x_scaled",
+     "reset": "monthly",
+     "L": 3.0,
+     "horizon_years": 10,
+     "n": 379,
+     "ratio_median": 0.8363266461904811,
+     "share_ratio_below_1": 0.8153034300791556,
+     "gap_median": -0.3623054397059957,
+     "cal_enhanced": 0.48284960422163586,
+     "daily_enhanced": 0.5488126649076517,
+     "formula": {
+      "n": 379,
+      "slope": -1.2766759927755407,
+      "r2_identity": -3.580298926299241,
+      "median_abs_error": 0.6866303910978441
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 126,
+       "gap_median": -0.7830582348212638,
+       "ratio_median": 0.8906318284890449,
+       "cal_enhanced": 0.11904761904761904,
+       "daily_enhanced": 0.11904761904761904
+      },
+      {
+       "tercile": "middle",
+       "n": 126,
+       "gap_median": -0.38400118089383584,
+       "ratio_median": 0.8072343323465019,
+       "cal_enhanced": 0.3253968253968254,
+       "daily_enhanced": 0.5238095238095238
+      },
+      {
+       "tercile": "trend",
+       "n": 127,
+       "gap_median": -0.052104541176076324,
+       "ratio_median": 0.8638309796849206,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "QQQP_3x_scaled",
+     "reset": "quarterly",
+     "L": 3.0,
+     "horizon_years": 1,
+     "n": 487,
+     "ratio_median": 0.943540429746362,
+     "share_ratio_below_1": 0.5297741273100616,
+     "gap_median": 0.014166410040799715,
+     "cal_enhanced": 0.5051334702258727,
+     "daily_enhanced": 0.4517453798767967,
+     "formula": {
+      "n": 487,
+      "slope": 0.3203987591955874,
+      "r2_identity": -0.5209116027619067,
+      "median_abs_error": 0.03102587414450393
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 162,
+       "gap_median": 0.0322071761996828,
+       "ratio_median": 0.6801608359513198,
+       "cal_enhanced": 0.04938271604938271,
+       "daily_enhanced": 0.018518518518518517
+      },
+      {
+       "tercile": "middle",
+       "n": 162,
+       "gap_median": 0.020668733859122435,
+       "ratio_median": 0.9226744271768117,
+       "cal_enhanced": 0.5246913580246914,
+       "daily_enhanced": 0.3395061728395062
+      },
+      {
+       "tercile": "trend",
+       "n": 163,
+       "gap_median": -0.008640639475252176,
+       "ratio_median": 1.3709103337844706,
+       "cal_enhanced": 0.9386503067484663,
+       "daily_enhanced": 0.9938650306748467
+      }
+     ]
+    },
+    {
+     "product": "QQQP_3x_scaled",
+     "reset": "quarterly",
+     "L": 3.0,
+     "horizon_years": 3,
+     "n": 463,
+     "ratio_median": 0.993160870655845,
+     "share_ratio_below_1": 0.5075593952483801,
+     "gap_median": 0.03591691432614641,
+     "cal_enhanced": 0.5701943844492441,
+     "daily_enhanced": 0.550755939524838,
+     "formula": {
+      "n": 463,
+      "slope": 0.3480741665496415,
+      "r2_identity": -0.33426223655268306,
+      "median_abs_error": 0.08788307215258771
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 154,
+       "gap_median": -0.0672173096377908,
+       "ratio_median": 0.8513808646608618,
+       "cal_enhanced": 0.07792207792207792,
+       "daily_enhanced": 0.06493506493506493
+      },
+      {
+       "tercile": "middle",
+       "n": 154,
+       "gap_median": 0.057966966266712106,
+       "ratio_median": 1.0106388544164377,
+       "cal_enhanced": 0.6623376623376623,
+       "daily_enhanced": 0.5844155844155844
+      },
+      {
+       "tercile": "trend",
+       "n": 155,
+       "gap_median": 0.0663356981348493,
+       "ratio_median": 1.0737312379041097,
+       "cal_enhanced": 0.967741935483871,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "QQQP_3x_scaled",
+     "reset": "quarterly",
+     "L": 3.0,
+     "horizon_years": 5,
+     "n": 439,
+     "ratio_median": 1.0132183448123167,
+     "share_ratio_below_1": 0.48519362186788156,
+     "gap_median": 0.040463384459620944,
+     "cal_enhanced": 0.5193621867881549,
+     "daily_enhanced": 0.5740318906605922,
+     "formula": {
+      "n": 439,
+      "slope": 0.5253749663017443,
+      "r2_identity": -0.037316668566935496,
+      "median_abs_error": 0.14845480383238802
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 146,
+       "gap_median": -0.1452241359867394,
+       "ratio_median": 0.8318251694297731,
+       "cal_enhanced": 0.11643835616438356,
+       "daily_enhanced": 0.1232876712328767
+      },
+      {
+       "tercile": "middle",
+       "n": 146,
+       "gap_median": -0.05101841307384003,
+       "ratio_median": 1.0415751413386194,
+       "cal_enhanced": 0.4383561643835616,
+       "daily_enhanced": 0.5958904109589042
+      },
+      {
+       "tercile": "trend",
+       "n": 147,
+       "gap_median": 0.12715257415710512,
+       "ratio_median": 1.0389589536285049,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    },
+    {
+     "product": "QQQP_3x_scaled",
+     "reset": "quarterly",
+     "L": 3.0,
+     "horizon_years": 10,
+     "n": 379,
+     "ratio_median": 1.0105337449589344,
+     "share_ratio_below_1": 0.48021108179419525,
+     "gap_median": 0.002568935300153008,
+     "cal_enhanced": 0.6068601583113457,
+     "daily_enhanced": 0.5488126649076517,
+     "formula": {
+      "n": 379,
+      "slope": 0.3345782183003457,
+      "r2_identity": -0.679243109637913,
+      "median_abs_error": 0.19825827681180375
+     },
+     "by_trend": [
+      {
+       "tercile": "chop",
+       "n": 126,
+       "gap_median": -0.5090544531366265,
+       "ratio_median": 1.0803638920701233,
+       "cal_enhanced": 0.11904761904761904,
+       "daily_enhanced": 0.11904761904761904
+      },
+      {
+       "tercile": "middle",
+       "n": 126,
+       "gap_median": 0.13372143824045768,
+       "ratio_median": 0.7781482862348776,
+       "cal_enhanced": 0.6984126984126984,
+       "daily_enhanced": 0.5238095238095238
+      },
+      {
+       "tercile": "trend",
+       "n": 127,
+       "gap_median": 0.06392076681058967,
+       "ratio_median": 1.0573227094317654,
+       "cal_enhanced": 1.0,
+       "daily_enhanced": 1.0
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "planted": [
+  {
+   "path": "trend +0.05% a day",
+   "index": 2.5243115243969596,
+   "daily": 11.412956912521187,
+   "weekly": 11.381658778228353,
+   "monthly": 11.253448162928565,
+   "quarterly": 10.939453023137855
+  },
+  {
+   "path": "chop +-1% every other day",
+   "index": 0.0,
+   "daily": -0.2208328274434357,
+   "weekly": -0.04585090939694625,
+   "monthly": -0.006120415208961116,
+   "quarterly": -0.002176062451145322
+  },
+  {
+   "path": "AR(1) days, phi -0.2",
+   "index": 0.8360119082244182,
+   "daily": 1.5976228754121053,
+   "weekly": 1.8392113126113085,
+   "monthly": 1.9242243862353994,
+   "quarterly": 1.9338553657557793
+  },
+  {
+   "path": "AR(1) days, phi +0.2",
+   "index": -0.059804540911143955,
+   "daily": -0.31063508601706125,
+   "weekly": -0.39100459419663136,
+   "monthly": -0.4242595138461077,
+   "quarterly": -0.41614565795633873
+  }
+ ],
+ "worked_example": [
+  {
+   "vol": 0.1,
+   "L": 2.0,
+   "reset": "daily",
+   "median": 1.2264065667994621,
+   "p5": 1.2229437855536098,
+   "p95": 1.229431195985605,
+   "wiped": 0.0,
+   "L_times_index": 1.0
+  },
+  {
+   "vol": 0.1,
+   "L": 2.0,
+   "reset": "weekly",
+   "median": 1.2215982379602177,
+   "p5": 1.2142203761329142,
+   "p95": 1.2282300921421192,
+   "wiped": 0.0,
+   "L_times_index": 1.0
+  },
+  {
+   "vol": 0.1,
+   "L": 2.0,
+   "reset": "monthly",
+   "median": 1.2030247225544488,
+   "p5": 1.1866611396377733,
+   "p95": 1.2124665378650332,
+   "wiped": 0.0,
+   "L_times_index": 1.0
+  },
+  {
+   "vol": 0.1,
+   "L": 2.0,
+   "reset": "quarterly",
+   "median": 1.1576943052022988,
+   "p5": 1.1352071139484203,
+   "p95": 1.1659980795108669,
+   "wiped": 0.0,
+   "L_times_index": 1.0
+  },
+  {
+   "vol": 0.1,
+   "L": 3.0,
+   "reset": "daily",
+   "median": 2.270187560399048,
+   "p5": 2.2550648754619544,
+   "p95": 2.2836147871053134,
+   "wiped": 0.0,
+   "L_times_index": 1.5
+  },
+  {
+   "vol": 0.1,
+   "L": 3.0,
+   "reset": "weekly",
+   "median": 2.250417148006343,
+   "p5": 2.2186054535317123,
+   "p95": 2.2793282895612017,
+   "wiped": 0.0,
+   "L_times_index": 1.5
+  },
+  {
+   "vol": 0.1,
+   "L": 3.0,
+   "reset": "monthly",
+   "median": 2.174854982501408,
+   "p5": 2.1089083569787026,
+   "p95": 2.2136712851131235,
+   "wiped": 0.0,
+   "L_times_index": 1.5
+  },
+  {
+   "vol": 0.1,
+   "L": 3.0,
+   "reset": "quarterly",
+   "median": 2.00154681363599,
+   "p5": 1.9210891531574934,
+   "p95": 2.030959295791615,
+   "wiped": 0.0,
+   "L_times_index": 1.5
+  },
+  {
+   "vol": 0.2,
+   "L": 2.0,
+   "reset": "daily",
+   "median": 1.1614484958878577,
+   "p5": 1.1481415848434893,
+   "p95": 1.1730007064839993,
+   "wiped": 0.0,
+   "L_times_index": 1.0
+  },
+  {
+   "vol": 0.2,
+   "L": 2.0,
+   "reset": "weekly",
+   "median": 1.1596420063283854,
+   "p5": 1.1292839303180608,
+   "p95": 1.1831936222862234,
+   "wiped": 0.0,
+   "L_times_index": 1.0
+  },
+  {
+   "vol": 0.2,
+   "L": 2.0,
+   "reset": "monthly",
+   "median": 1.152113155451014,
+   "p5": 1.0914668185824572,
+   "p95": 1.1890635772942253,
+   "wiped": 0.0,
+   "L_times_index": 1.0
+  },
+  {
+   "vol": 0.2,
+   "L": 2.0,
+   "reset": "quarterly",
+   "median": 1.128552195343648,
+   "p5": 1.0450454488809195,
+   "p95": 1.1624780557134236,
+   "wiped": 0.0,
+   "L_times_index": 1.0
+  },
+  {
+   "vol": 0.2,
+   "L": 3.0,
+   "reset": "daily",
+   "median": 1.9928432826254785,
+   "p5": 1.938020882323345,
+   "p95": 2.040825892713464,
+   "wiped": 0.0,
+   "L_times_index": 1.5
+  },
+  {
+   "vol": 0.2,
+   "L": 3.0,
+   "reset": "weekly",
+   "median": 1.9882947317151576,
+   "p5": 1.8658204306206745,
+   "p95": 2.087085473411395,
+   "wiped": 0.0,
+   "L_times_index": 1.5
+  },
+  {
+   "vol": 0.2,
+   "L": 3.0,
+   "reset": "monthly",
+   "median": 1.9703021816784247,
+   "p5": 1.7310014461112186,
+   "p95": 2.118053754137778,
+   "wiped": 0.0,
+   "L_times_index": 1.5
+  },
+  {
+   "vol": 0.2,
+   "L": 3.0,
+   "reset": "quarterly",
+   "median": 1.8995249901500997,
+   "p5": 1.6033071404493673,
+   "p95": 2.018305860162315,
+   "wiped": 0.0,
+   "L_times_index": 1.5
+  },
+  {
+   "vol": 0.4,
+   "L": 2.0,
+   "reset": "daily",
+   "median": 0.918419413011495,
+   "p5": 0.8720684904474555,
+   "p95": 0.9625680801815303,
+   "wiped": 0.0,
+   "L_times_index": 1.0
+  },
+  {
+   "vol": 0.4,
+   "L": 2.0,
+   "reset": "weekly",
+   "median": 0.9287749545353698,
+   "p5": 0.8204687854605289,
+   "p95": 1.0180076012183021,
+   "wiped": 0.0,
+   "L_times_index": 1.0
+  },
+  {
+   "vol": 0.4,
+   "L": 2.0,
+   "reset": "monthly",
+   "median": 0.9621979609759046,
+   "p5": 0.7303243403316712,
+   "p95": 1.1035576578833832,
+   "wiped": 0.0,
+   "L_times_index": 1.0
+  },
+  {
+   "vol": 0.4,
+   "L": 2.0,
+   "reset": "quarterly",
+   "median": 1.0202590449530202,
+   "p5": 0.6649649528818268,
+   "p95": 1.1449987843719203,
+   "wiped": 0.0,
+   "L_times_index": 1.0
+  },
+  {
+   "vol": 0.4,
+   "L": 3.0,
+   "reset": "daily",
+   "median": 1.091318338177695,
+   "p5": 0.9419538680665747,
+   "p95": 1.2386068615654788,
+   "wiped": 0.0,
+   "L_times_index": 1.5
+  },
+  {
+   "vol": 0.4,
+   "L": 3.0,
+   "reset": "weekly",
+   "median": 1.1243697000465702,
+   "p5": 0.7717285334450604,
+   "p95": 1.440580228980573,
+   "wiped": 0.0,
+   "L_times_index": 1.5
+  },
+  {
+   "vol": 0.4,
+   "L": 3.0,
+   "reset": "monthly",
+   "median": 1.254844224200546,
+   "p5": 0.4512735407116799,
+   "p95": 1.7845701568654708,
+   "wiped": 0.0005,
+   "L_times_index": 1.5
+  },
+  {
+   "vol": 0.4,
+   "L": 3.0,
+   "reset": "quarterly",
+   "median": 1.5120643084530094,
+   "p5": 0.18042517247881168,
+   "p95": 1.9565693734393057,
+   "wiped": 0.023,
+   "L_times_index": 1.5
+  }
+ ],
+ "summary": {
+  "slope_min_2x_10y": 0.7680640886584269,
+  "slope_max_2x_10y": 1.3903885002806873,
+  "r2_min_2x_weekly_monthly_10y": 0.5271935188230977
+ }
+}

@@ -3,22 +3,26 @@
 **Inputs and conventions.**
 
 ```text
-Inputs: 11 files; prices from <external>/library, rates from <external>/rates
-  NASDAQ_SPYQ_daily.csv: 508 rows, 2024-10-01 to 2026-10-09, sha256 9e29f3f4a7f6
-  AMEX_SPY_daily.csv: 8482 rows, 1993-01-29 to 2026-10-09, sha256 38bb2ae821ff
-  SP_SPX_daily.csv: 19326 rows, 1950-01-03 to 2026-10-22, sha256 8b0c1596b57e
-  SP_SPXTR_daily.csv: 9780 rows, 1988-01-04 to 2026-10-23, sha256 ac309a0b90f5
-  NASDAQ_MQQQ_daily.csv: 528 rows, 2024-09-03 to 2026-10-09, sha256 f800ff51d54d
-  NASDAQ_QQQ_daily.csv: 6940 rows, 1999-03-10 to 2026-10-09, sha256 1bf106f83579
-  NASDAQ_NDX_daily.csv: 10504 rows, 1985-01-31 to 2026-10-09, sha256 4c3219bda720
-  NASDAQ_XNDX_daily.csv: 5004 rows, 2006-11-08 to 2026-10-09, sha256 a10dab98993e
-  NASDAQ_QQQP_daily.csv: 508 rows, 2024-10-01 to 2026-10-09, sha256 916e98537ab4
-  OBFR.csv: 2666 rows, 2016-03-01 to 2026-10-08, sha256 c84cb6b91ac3
-  DFF.csv: 26398 rows, 1954-07-01 to 2026-10-08, sha256 a93504210b53
-Reference tables (reference/): 3 files
+Inputs: 13 files; prices from <external>/library, rates from <external>/rates
+  NASDAQ_SPYQ_daily.csv: 508 rows, 2024-10-01 to 2026-10-09, sha256 124564fb1a3b
+  AMEX_SPY_daily.csv: 8498 rows, 1993-01-29 to 2026-11-02, sha256 643d6ef08b88
+  SP_SPX_daily.csv: 19333 rows, 1950-01-03 to 2026-11-02, sha256 b146c9af89cc
+  SP_SPXTR_daily.csv: 9787 rows, 1988-01-04 to 2026-11-03, sha256 edab5090825e
+  NASDAQ_MQQQ_daily.csv: 542 rows, 2024-09-03 to 2026-10-29, sha256 b71324843b8a
+  NASDAQ_QQQ_daily.csv: 6955 rows, 1999-03-10 to 2026-10-30, sha256 f096cd6c6b75
+  NASDAQ_NDX_daily.csv: 10519 rows, 1985-01-31 to 2026-10-30, sha256 79d8e8688fa3
+  NASDAQ_XNDX_daily.csv: 5019 rows, 2006-11-08 to 2026-10-30, sha256 d7dcc6dffa24
+  NASDAQ_QQQP_daily.csv: 522 rows, 2024-10-01 to 2026-10-29, sha256 233444f2dcc7
+  AMEX_SSO_daily.csv: 5103 rows, 2006-06-21 to 2026-10-02, sha256 0df3e43a82db
+  AMEX_QLD_daily.csv: 5123 rows, 2006-06-21 to 2026-10-30, sha256 9e5453cb02e0
+  OBFR.csv: 2683 rows, 2016-03-01 to 2026-11-03, sha256 bbef2a371e62
+  DFF.csv: 26424 rows, 1954-07-01 to 2026-11-03, sha256 e84a934a5014
+Reference tables (reference/): 5 files
   distributions.csv: 3 rows, 2024-12-23 to 2025-12-23, sha256 8b458ea8ed7c
   etf_distributions.csv: 20 rows, 2024-06-21 to 2026-09-21, sha256 bae169d11be1
   nav_anchors.csv: 23 rows, None to None, sha256 b1a6456897f7
+  daily_etf_distributions.csv: 20 rows, 2026-09-23 to 2024-06-26, sha256 e830b4cf86be
+  daily_etf_highlights.csv: 4 rows, None to None, sha256 f89a303f5fbf
 Fee timeline (annual expense ratio, ACT/365; SPYQ / MQQQ / QQQP):
   inception to 2025-03-31: 1.30 / 1.31 / 1.30%  [FILED: N-CSR FY2025 financial highlights (MQQQ includes 0.01% excise tax); reference/nav_anchors.csv rows 10-12]
   2025-04-01 to 2025-09-30: 1.30 / 1.30 / 1.30%  [FILED: N-CSRS to 2025-09-30, expense ratio annualized; reference/nav_anchors.csv rows 19-21]
@@ -31,7 +35,7 @@ Reset dates: last NYSE session of the week / month / quarter (calendar_letf/nyse
 MODELED: a live fund of this design traded 2024-08-30 to 2025-02-28; no live fund exists today (applies to the liquidated-fund section).
 ```
 
-Script `scripts/run_validate_live.py`. Data: TradingView exports via the local library (fund and ETF closes and lows, split-adjusted, no distributions); FRED OBFR to 2026-10-08 and DFF to 2026-10-08; fund payouts `reference/distributions.csv`; SPY / QQQ dividends `reference/etf_distributions.csv` (SECONDARY: vendor history, latest row cross-checked against a second vendor); NAV anchors `reference/nav_anchors.csv` (23 rows, each with its filing); swap terms `reference/nport_tradr_2026.json`.
+Script `scripts/run_validate_live.py`. Data: TradingView exports via the local library (fund and ETF closes and lows, split-adjusted, no distributions); FRED OBFR to 2026-11-03 and DFF to 2026-11-03; fund payouts `reference/distributions.csv`; SPY / QQQ dividends `reference/etf_distributions.csv` (SECONDARY: vendor history, latest row cross-checked against a second vendor); NAV anchors `reference/nav_anchors.csv` (23 rows, each with its filing); swap terms `reference/nport_tradr_2026.json`.
 
 **Provenance of the model inputs.**
 - Fee timeline (SPYQ / MQQQ / QQQP): inception to 2025-03-31: N-CSR FY2025 (reference/nav_anchors.csv rows 10-12); 2025-04-01 to 2025-09-30: N-CSRS (reference/nav_anchors.csv rows 19-21); fiscal year 2026 realized ratio 1.26 / 1.21 / 1.24%: N-CSR EDGAR 0001398344-26-010562 R2 (reference/nav_anchors.csv rows 16-18); 2026 ratio 1.00 / 1.03 / 1.00%: prospectus 2026-07-31. Inception to 2025-03-31: 1.30 / 1.31 / 1.30% (FILED: N-CSR FY2025 financial highlights (MQQQ includes 0.01% excise tax)). 2025-04-01 to 2025-09-30: 1.30 / 1.30 / 1.30% (FILED: N-CSRS to 2025-09-30, expense ratio annualized). 2025-10-01 to 2026-03-31: 1.22 / 1.12 / 1.18% (DERIVED from two filed figures: 2 x FY2026 realized ratio - first-half ratio, that is (12 x FY2026 - 6 x first half) / 6; the N-CSR reports 1.26 / 1.21 / 1.24% for the whole fiscal year). From 2026-04-01: the prospectus 1.00 / 1.03 / 1.00% (ASSUMED start date (the first document that shows the 1.00 / 1.03 / 1.00% is the 2026-07-31 prospectus)). Sensitivity: the FY2026 average 1.26 / 1.21 / 1.24% held from 2025-10-01 to 2026-07-31, then the prospectus fee.
@@ -161,3 +165,26 @@ SPYM (2x SPY monthly), SPYB (2x SPY weekly) and QQQW (2x QQQ weekly) launched 20
 SECONDARY liquidation values (brokerage corporate-actions record, not a filing; shown, not used): QQQW 2025-02-28 30.2606 per share from 25.00 (+21.04%); SPYM 2025-02-28 28.3384 per share from 25.00 (+13.35%); TLTQ 2025-02-28 20.9744 per share from 25.00 (-16.10%).
 
 Out of scope (underlying not in this kit): SOXM, SOXW (SOXX), NVDW (NVDA, 1.75x), TSLW (TSLA, 1.5x), TLTM, TLTQ (TLT); their one-month anchors are in `reference/nav_anchors.csv`.
+
+
+## Real calendar fund vs real daily fund, inception to 2026-09-30 (BACKLOG B19)
+
+The real 2x DAILY fund on the same index: SSO (S&P 500) and QLD (Nasdaq-100), on market prices plus payouts reinvested on the ex-date close, like the calendar funds. Hard test first: each daily fund's total return rebuilt this way against its own N-CSR market-price total return per fiscal year (within 0.02 points), and its payouts against the filed per-share total (within 0.005): **PASS**.
+
+| daily fund | fiscal year to | rebuilt % | N-CSR market % | N-CSR NAV % | payouts | filed | passed |
+|---|---|---|---|---|---|---|---|
+| SSO | 2025-05-31 | 15.68 | 15.68 | 16.03 | 0.38798 | 0.39 | True |
+| SSO | 2026-05-31 | 57.17 | 57.17 | 56.80 | 0.42632 | 0.43 | True |
+| QLD | 2025-05-31 | 17.80 | 17.80 | 18.10 | 0.12223 | 0.12 | True |
+| QLD | 2026-05-31 | 88.39 | 88.39 | 88.15 | 0.11820 | 0.12 | True |
+
+Fees: the calendar funds' fee timeline above; the daily funds' the N-CSR net expense ratio of each fiscal year (to May 31); the FY2026 ratio held after 2026-05-31 (ASSUMED: no later filing yet). The model gap runs both kernels at equal costs (zero fee, zero spread, (L - 1) x DFF) on the ETF's own total return; the calendar kernel keeps the fund's -35% trigger. Gaps are CAGR differences in pp a year; 'rest' = fee-adjusted gap minus model gap: everything else (cash yield, swap terms, price vs NAV at the ends).
+
+| calendar | daily | reset | window | years | CAGR calendar % | CAGR daily % | gap | log gap | fee difference | gap fee-adjusted | model gap (equal costs) | rest | residual cost calendar / daily, % of NAV a year | cost drag calendar / daily, pp a year | interval |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| SPYQ | AMEX:SSO | quarterly | 2024-10-01 to 2026-09-30 | 2.00 | +25.38 | +26.25 | -0.87 | -0.69 | +0.35 | -0.52 | +1.27 | -1.79 | +2.17 / +0.75 | +4.19 / +2.04 | two years: too few independent years for an interval (too noisy to test) |
+| MQQQ | AMEX:QLD | monthly | 2024-09-03 to 2026-09-30 | 2.07 | +43.11 | +43.70 | -0.59 | -0.41 | +0.28 | -0.30 | +2.25 | -2.55 | +2.36 / +0.66 | +5.13 / +2.29 | two years: too few independent years for an interval (too noisy to test) |
+| QQQP | AMEX:QLD | quarterly | 2024-10-01 to 2026-09-30 | 2.00 | +38.45 | +40.18 | -1.73 | -1.24 | +0.28 | -1.45 | +0.39 | -1.84 | +2.00 / +0.65 | +4.33 / +2.21 | two years: too few independent years for an interval (too noisy to test) |
+
+Residual cost: the spread per NAV a year, on top of (L - 1) x DFF and the filed fee, that makes each fund's own kernel grow as the fund did on the shared dates (validate.fit_spread), on the ETF's own total return for both funds (the daily funds track the index itself, so theirs also absorbs the ETF's fee). It is a residual: cash yield, swap terms and price vs NAV, not a filed term. Cost drag: the CAGR each fund's kernel loses to its fee plus its residual cost, against the same kernel at zero cost. Because each fit reproduces its fund, the gap splits exactly: gap = model gap - calendar drag + daily drag (to the fit's tolerance).
+

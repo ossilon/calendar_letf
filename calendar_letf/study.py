@@ -62,6 +62,8 @@ class CostEncoding:
                     rate series is multiplied by 1.3 before it reaches the kernel
     fee             None = the product's own expense ratio; a number overrides it (zero-cost runs only)
     status/source   every number says where it came from; both fitted encodings are ASSUMED
+    L               the leverage the encoding is set for: 2.0 for the fitted ones; encoding_at() carries them to
+                    another L (BACKLOG B17)
     """
     name: str
     spread_per_nav: float
@@ -70,11 +72,13 @@ class CostEncoding:
     source: str = ""
     fee: float | None = None
     label: str = ""
+    L: float = 2.0
 
     def describe(self):
         fee = "product fee" if self.fee is None else f"fee {self.fee:.2%}"
+        at = "" if abs(self.L - 2.0) < 1e-12 else f" (at L = {self.L:g})"
         return (f"{self.label or self.name}: spread {self.spread_per_nav:.2%} of NAV a year + {self.rate_turns:g} x reference "
-                f"rate on the borrowed turn + {fee} [{self.status}]")
+                f"rate on the borrowed turn + {fee} [{self.status}]{at}")
 
 
 _FIT = "FINDINGS F3/F5: residual of the filed costs fitted on 2024-26 (SPYQ/MQQQ/QQQP), not measured before 2024"
@@ -100,14 +104,41 @@ def kernel_kwargs(spec, enc):
     """The keyword arguments for kernel.run that express `enc` for `spec`.
 
     The rate multiplier cannot be passed through kernel.run (the kernel takes the rate Series itself), so use
-    `scaled_rate` for that part; `run_product` does both. A 2x-only guard: the encodings were fitted on 2x funds.
+    `scaled_rate` for that part; `run_product` does both. Guard: the encoding must be set for the product's L (the
+    fitted ones are 2x; encoding_at carries one to another L, with the structure stated). Definitions (zero, rate
+    only) hold at any L.
     """
-    if abs(spec.L - 2.0) > 1e-12:
-        raise ValueError(f"{spec.name}: cost encodings were fitted on 2x funds only (L = {spec.L:g})")
+    if enc.status != "DEFINITION" and abs(spec.L - enc.L) > 1e-12:
+        raise ValueError(f"{spec.name}: the cost encoding '{enc.name}' is set for L = {enc.L:g} but the product has "
+                         f"L = {spec.L:g}; carry it with encoding_at(enc, {spec.L:g}, basis)")
     out = {"spread_per_nav": enc.spread_per_nav}
     if enc.fee is not None:
         out["fee"] = enc.fee
     return out
+
+
+def encoding_at(enc, L, basis="notional"):
+    """A fitted 2x cost encoding carried to leverage L (BACKLOG B17). ASSUMED: no fund at another L was fitted here.
+
+    The spread scales with the swap turns that the balance-sheet structure implies (costs.expected_turns):
+      notional  all swap, turns = L:                the spread is L / 2 of the 2x spread
+      borrowed  the index held, a swap for the excess, turns = L - 1:   (L - 1) / 1 of it
+    At L = 2 both return the 2x numbers exactly; at L = 1 there is no swap and no spread. rate_turns is kept: the
+    kernel already charges (L - 1) x rate, so the multiplier stays per borrowed turn. Definitions (zero, rate only)
+    carry over unchanged.
+    """
+    L = float(L)
+    if enc.status == "DEFINITION":
+        return replace(enc, L=L)
+    if abs(enc.L - 2.0) > 1e-12:
+        raise ValueError(f"encoding_at carries a 2x encoding; '{enc.name}' is set for L = {enc.L:g}")
+    turns_L, turns_2 = products.expected_turns(L, basis), products.expected_turns(2.0, basis)
+    if turns_L is None:
+        raise ValueError("basis 'swaps' has no rule for turns at another leverage; use 'notional' or 'borrowed'")
+    f = turns_L / turns_2
+    return replace(enc, name=f"{enc.name}@{L:g}{basis[0]}", spread_per_nav=enc.spread_per_nav * f, L=L, status="ASSUMED",
+                   source=f"{enc.source}; carried to L = {L:g} on the {basis} basis (x{f:.4g} of the 2x spread)",
+                   label=f"{enc.label or enc.name}, carried to {L:g}x ({basis} basis)")
 
 
 def scaled_rate(rate, enc):
@@ -329,6 +360,23 @@ def splice_etf_trigger(idx_close, idx_low, etf, symbol, bad_low_tol=BAD_LOW_TOL)
     return trig, low, info
 
 
+def clean_lows(close, low, tol=BAD_LOW_TOL):
+    """The daily lows of a single price series with bad prints removed (BACKLOG B16; no second series to compare with).
+
+    A low more than `tol` (BAD_LOW_TOL, 10 percent) below BOTH the previous close and the day's own close is a bad print:
+    a real low sits near one of them (a crash day closes near its low; a rally day's low sits near the previous
+    close). NASDAQ:SOX on 1997-08-08 shows open = low = 184.53 against closes of 390.63 and 383.46 (a -52% low that did not
+    happen); a trigger would fire on it. A bad low is replaced by the day's close (no intraday information that day).
+    Returns (clean low Series, [ISO dates replaced])."""
+    close = close.astype("float64")
+    low = low.astype("float64").reindex(close.index)
+    floor = np.minimum(close.shift(1).fillna(close), close) * (1.0 - tol)
+    bad = (low < floor).to_numpy()
+    out = low.copy()
+    out[bad] = close[bad]
+    return out, [str(d.date()) for d in close.index[bad]]
+
+
 def trigger_series(name, basis="index", intraday=False, data_dir=None):
     """(trigger close, trigger low or None, info) for one underlying under one trigger convention.
 
@@ -373,18 +421,38 @@ def trigger_text(info):
 TRIGGER_FOR_SYMBOL = {"AMEX:SPY": "SP:SPX", "NASDAQ:QQQ": "NASDAQ:NDX"}
 
 
-def build_world(name, intraday_trigger=False, trigger_basis="index"):
+# The last close each underlying had in the v0.1.0 results (2026-10-31). The studies published then re-run in v0.1.1
+# on these ends, so a later top-up of the price library does not move their numbers (`build_world(..., end=...)`).
+V010_END = {"SPX": "2026-10-22", "NDX": "2026-10-09"}
+
+
+def cut_at(s, end):
+    """s up to and including `end`, keeping its attrs (None stays None)."""
+    if s is None:
+        return None
+    out = s.loc[:end].copy()
+    out.attrs = dict(s.attrs)
+    return out
+
+
+def build_world(name, intraday_trigger=False, trigger_basis="index", end=None):
     """Load one underlying (total return, price trigger, reference rate) and its products and twins.
 
     intraday_trigger=True also loads the daily LOW of the trigger series so the -35% trigger reads the low (BACKLOG B4);
     the default False keeps the close-only trigger of the published v1 results.
     trigger_basis="index" watches the index price (v1); "etf" watches the ETF's price from the day the ETF exists
     (R1 E4: the prospectus trigger is on SPY / QQQ; see `trigger_series`).
+    end="YYYY-MM-DD" cuts every series at that close (it must be a row); every series is causal, so the rows kept are
+    the rows a full load gives.
     Returns (world, provenance dict with the series banner and the rate attrs)."""
     u = series.underlying(name, "total_return")
     trigger, low, info = trigger_series(name, trigger_basis, intraday_trigger)
     if not trigger.index.equals(u.index):
         raise ValueError(f"{name}: the price index and the total-return series do not share a calendar")
+    if end is not None:
+        if pd.Timestamp(end) not in u.index:
+            raise ValueError(f"{name}: no close on the study end {end} (data {u.index[0].date()} to {u.index[-1].date()})")
+        u, trigger, low = cut_at(u, end), cut_at(trigger, end), cut_at(low, end)
     rate = loader.reference_rate(u.index)
     specs = [products.PRODUCTS[p] for p in PRODUCT_NAMES[name]]
     twins = {s.name: products.twin_of(s) for s in specs}
@@ -423,9 +491,15 @@ def inputs_for(worlds, provs, extra_symbols=(), extra_rates=()):
                                    list(dict.fromkeys(rates + list(extra_rates))))
     # Files inside the repository that a world reads (R4 review): the Shiller yields behind every S&P total return
     # before 1988. They ship with the repo, so tests/test_provenance.py fails a result whose copy no longer matches.
+    # Since v0.1.1 (B7b) the same holds for QQQ's income table behind every Nasdaq-100 total return of 1999-2006.
+    ref = []
     if any(w.u.attrs.get("pre_yield") == "shiller" for w in worlds.values()):
+        ref.append(series.SHILLER_FILE)
+    if any(w.u.attrs.get("qqq_yield") == "measured" for w in worlds.values()):
+        ref.append(series.QQQ_INCOME_FILE)
+    if ref:
         m["reference_dir"] = "reference"
-        m["reference_files"] = provenance.manifest([series.SHILLER_FILE])
+        m["reference_files"] = provenance.manifest(ref)
     return m
 
 
@@ -834,7 +908,7 @@ def margin_comparison(world, enc, horizons_years=HORIZONS_YEARS):
     position finishes counts as -100% CAGR for it (an automatic fund win), so each statistic is also given over the
     SURVIVING windows only (`*_survivors`); `margin_finished` is the number of such windows. The mean is next to the
     median because the margin payoff is linear and the fund's is convex: a median comparison favors the linear side,
-    a mean the convex one (R1 memo section 3.1; Wang 2025 eq. 10)."""
+    a mean the convex one (R1 memo section 3.1; Wang 2025 eq. 10 shows the mean side, under GBM only)."""
     rows = []
     for p in world.specs:
         fee = p.fee
@@ -1005,6 +1079,8 @@ def trigger_basis_table(world, products_=TRIGGER_TABLE_PRODUCTS, encodings=("fix
     for basis in ("index", "etf"):
         for intraday in (False, True):
             trig, low, info = trigger_series(world.name, basis, intraday)
+            end = world.dates[-1]                           # a world cut at a study end (build_world(end=...)) keeps its end
+            trig, low = cut_at(trig, end), cut_at(low, end)
             w0 = world.variant(trigger=trig, trigger_low=low, trigger_basis=basis, trigger_info=info)
             for drop in drops:
                 wv = w0.variant(early_drop=drop)

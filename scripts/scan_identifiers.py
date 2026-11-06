@@ -65,10 +65,12 @@ SELF_LISTS = {"scripts/scan_identifiers.py", "scripts/ste_check.py", "tests/test
 DATA_SUFFIXES = {".csv", ".json", ".jsonl", ".xls", ".xlsx", ".pdf", ".parquet"}
 # Published aggregates and small public reference tables. Their contents are still scanned like any text file.
 ALLOWED_DATA_DIRS = ("results/", "tests/golden/", "reference/")
-ALLOWED_DATA_FILES = {"tests/prose_pins.json"}               # single files allowed outside those folders (the prose-pin list: text anchors and key paths, no data)
+ALLOWED_DATA_FILES = {"tests/prose_pins.json",              # single files allowed outside those folders: the prose-pin list (text anchors and key paths, no data)
+                      "docs/theory_examples.json"}          # and the THEORY.md worked examples (planted inputs only, no market data; B18)
 DAILY_EXEMPT = {"reference/shiller_sp500_monthly.csv"}       # monthly public series (Shiller), not exchange data
 IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".gif", ".webp", ".bmp"}
 ALLOWED_IMAGE_DIRS = ("results/",)                           # charts the study scripts draw, aggregates only
+ALLOWED_IMAGE_FILES = ("docs/banner.png",)                   # the README banner: artwork (a synthetic ribbon), no data
 MAX_DATED_RUN = 4
 MAX_GAP_DAYS = 5
 
@@ -272,7 +274,7 @@ def scan(files=None, personal=(), repo=REPO):
         if suffix in DATA_SUFFIXES and not allowed_file:
             problems.append(f"{rel}: data file; git would publish it")
             continue
-        if suffix in IMAGE_SUFFIXES and not rel.startswith(ALLOWED_IMAGE_DIRS):
+        if suffix in IMAGE_SUFFIXES and not rel.startswith(ALLOWED_IMAGE_DIRS) and rel not in ALLOWED_IMAGE_FILES:
             problems.append(f"{rel}: image file; publish only images this code draws, under results/")
             continue
         if suffix in IMAGE_SUFFIXES:

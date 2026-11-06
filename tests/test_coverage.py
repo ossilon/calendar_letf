@@ -131,3 +131,22 @@ check("acf_null: deterministic for a seed; a regime shifts the distribution up",
 check("mc_p_value: the share of null draws at or above the observed value: 3 of [1, 2, 3, 4] -> 0.5; 5 -> 0.0; 0 -> 1.0; NaN -> NaN",
       coverage.mc_p_value([1.0, 2.0, 3.0, 4.0], 3.0) == 0.5 and coverage.mc_p_value([1.0, 2.0, 3.0, 4.0], 5.0) == 0.0
       and coverage.mc_p_value([1.0, 2.0, 3.0, 4.0], 0.0) == 1.0 and math.isnan(coverage.mc_p_value([1.0, 2.0], float("nan"))) and math.isnan(coverage.mc_p_value([], 1.0)))
+
+# ---- yearly_t_coverage (BACKLOG B19): the t(k-1) interval on k yearly values, two simulated worlds ----
+alt = np.array([1.0, -1.0] * 6)                                  # k = 12, lag-1 autocorrelation negative -> phi floored at 0
+yc = coverage.yearly_t_coverage(alt, seed=5, runs=4000)
+t11 = stats.t975(11)
+exact = sum(math.comb(12, j) / 2 ** 12 for j in range(13)       # the bootstrap world by enumeration: j draws of +1 out of 12
+            if abs((2 * j - 12) / 12) <= t11 * math.sqrt(max(12 / 11 * (1 - ((2 * j - 12) / 12) ** 2), 0.0)) / math.sqrt(12))
+check("yearly_t_coverage: the bootstrap world on a +/-1 population matches its exact binomial coverage (to 3 Monte Carlo errors)",
+      abs(yc["coverage_bootstrap"] - exact) < 3 * yc["mc_se"], (yc["coverage_bootstrap"], exact))
+check("yearly_t_coverage: phi floored at 0 for a negative lag-1 autocorrelation, and normal iid years cover 0.95 (the t interval is exact)",
+      yc["phi"] == 0.0 and abs(yc["coverage_ar1"] - 0.95) < 3 * yc["mc_se"], (yc["phi"], yc["coverage_ar1"]))
+trend = np.linspace(-1.0, 1.0, 12) + np.array([0.05, -0.05] * 6)  # persistent years: lag-1 autocorrelation near 0.75
+yt = coverage.yearly_t_coverage(trend, seed=5, runs=4000)
+check("yearly_t_coverage BREAK: persistent years (phi about 0.75) make the AR(1) world undercover badly (< 0.80)",
+      yt["phi"] > 0.6 and yt["coverage_ar1"] < 0.80, (yt["phi"], yt["coverage_ar1"]))
+check("yearly_t_coverage: deterministic for a seed; a different seed moves it by Monte Carlo error only",
+      coverage.yearly_t_coverage(alt, seed=5, runs=4000) == yc
+      and abs(coverage.yearly_t_coverage(alt, seed=6, runs=4000)["coverage_ar1"] - yc["coverage_ar1"]) < 4 * yc["mc_se"])
+raises("yearly_t_coverage: fewer than 3 years is refused", lambda: coverage.yearly_t_coverage([1.0, 2.0], seed=1), "at least 3")

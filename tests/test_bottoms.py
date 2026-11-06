@@ -259,3 +259,53 @@ tr_rows = dict(b.timing_rows(world, s_reset))
 check("timing_rows: offset 0 is the bottom itself; other offsets are month-end rows", tr_rows[0] == s_reset and all(r in set(world.me.tolist()) for k, r in tr_rows.items() if k))
 check("timing_rows: -1 month is earlier than the bottom and +1 month later, -6 earlier than -3",
       tr_rows[-3] < tr_rows[-1] < s_reset < tr_rows[1] < tr_rows[3] < tr_rows[6] and tr_rows[-6] < tr_rows[-3])
+
+
+# ---- leverage_series (re-grade 2026-11-06: B10 and B15 re-based at the close after an early reset) ----
+from types import SimpleNamespace as _NS  # noqa: E402
+
+_d = pd.bdate_range("2024-01-02", "2024-03-29")            # a monthly fund; resets on the NYSE month ends
+_u = np.full(len(_d), 100.0)
+_jan = np.flatnonzero(_d.month == 1)
+_feb = np.flatnonzero(_d.month == 2)
+_u[_jan[3]:_jan[-1] + 1] = 90.0                            # January: -10% after three days, held to the month end
+_u[_feb[0]:] = 90.0
+_u[_feb[5]] = 60.0                                         # February: a -33.3% close, past the 35% line by its low below
+_lo = _u.copy()
+_lo[_feb[5]] = 55.0                                        # the low touches -38.9%: the level fill resets at 58.5 (-35%)
+_u[_feb[6]:] = 63.0
+_w = _NS(dates=_d, u_arr=_u, trigger=pd.Series(_u, index=_d), trigger_low=pd.Series(_lo, index=_d),
+         rate_arr=np.zeros(len(_d)), accrual_fin=np.zeros(len(_d)), accrual_fee=np.zeros(len(_d)))
+_sp = _NS(L=2.0, reset="monthly", fee=0.0, early_drop=0.35)
+_enc = _NS(spread_per_nav=0.0, fee=None, rate_turns=1.0)
+_lev = b.leverage_series(_w, _sp, _enc)
+_pe = periods.period_end_flags(_d, "monthly")
+
+
+def _hand(R):
+    return 2.0 * (1 + R) / (1 + 2.0 * R)
+
+
+_want_jan = _hand(90.0 / 100.0 - 1)                        # 2.25 between the fall and the month end
+_base = 90.0 * (1 - 0.35)                                   # the level-fill base: the trigger level 58.5, not the close 60
+_want_after = _hand(63.0 / _base - 1)                       # on the new base after the early reset
+check("leverage_series: L at every month end, L(1+R)/(1+LR) between, 2.25 after a -10% in-month fall (no costs)",
+      all(abs(_lev[i] - 2.0) < 1e-9 for i in np.flatnonzero(_pe)) and abs(_lev[_jan[10]] - _want_jan) < 1e-6
+      and abs(_lev[_jan[1]] - 2.0) < 1e-6, (_lev[_jan[10]], _want_jan))
+check("leverage_series: after a level-fill early reset the base is the trigger level 58.5, not the close 60 "
+      "(the close would give a different leverage)",
+      abs(_lev[_feb[8]] - _want_after) < 1e-6 and abs(_lev[_feb[8]] - _hand(63.0 / 60.0 - 1)) > 0.01, (_lev[_feb[8]], _want_after))
+# with a real rate and 1.3 rate turns: the leverage is the exposure L x U_t / U_0 over the NAV of a kernel run at 1.3 x the
+# rate (no early reset in January), so a series that dropped the rate turns would read a different NAV
+_d2 = pd.bdate_range("2024-01-02", "2024-01-31")
+_u2 = np.linspace(100.0, 92.0, len(_d2))
+_w2 = _NS(dates=_d2, u_arr=_u2, trigger=pd.Series(_u2, index=_d2), trigger_low=None, rate_arr=np.full(len(_d2), 0.05),
+          accrual_fin=periods.accrual_fraction(_d2, 360), accrual_fee=periods.accrual_fraction(_d2, 365))
+_enc2 = _NS(spread_per_nav=0.01, fee=None, rate_turns=1.3)
+_sp2 = _NS(L=2.0, reset="monthly", fee=0.01, early_drop=0.35)
+_lev2 = b.leverage_series(_w2, _sp2, _enc2)
+_nav2 = kernel.periodic_reset_nav(_u2, _u2, _u2, 0.05 * 1.3 * np.ones(len(_d2)), _w2.accrual_fin, _w2.accrual_fee,
+                                  np.zeros(len(_d2), bool), 2.0, 0.01, np.full(len(_d2), 0.01), 0.35, kernel.EARLY_LEVEL)[0]
+_want2 = 2.0 * (_u2 / _u2[0]) / _nav2
+check("leverage_series with costs: equals 2 x (U_t / U_0) / NAV_t of a kernel run at 1.3 x the rate (no reset inside the "
+      "month) to 1e-6", float(np.max(np.abs(_lev2[1:-1] - _want2[1:-1]))) < 1e-6, float(np.max(np.abs(_lev2[1:-1] - _want2[1:-1]))))

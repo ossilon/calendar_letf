@@ -95,7 +95,7 @@ tradretfs.com does not publish on the fund pages).
 | S&P 500 total return | SP:SPXTR | 1988-01-04 | total return | VERIFIED (no MCP feed; checked against SPX for plausibility) |
 | S&P 500 total return before 1988 | SPX + Shiller's monthly dividend yield (trailing 12-month dividends / price) | 1950-1987 | constructed | **MEASURED** (B7, 2026-10-13): Robert J. Shiller, "Irrational Exuberance" data, `ie_data.xls` from econ.yale.edu/~shiller/data, downloaded 2026-10-13 (sha256 0df9392b...40db68; data to 2023-06; the file's only notice is an accuracy disclaimer). Derived file `reference/shiller_sp500_monthly.csv`. Mean 4.10%/yr over 1950-87 (by decade 4.9 / 3.2 / 4.0 / 4.2%); the source interpolates quarterly dividends to months. Sensitivities kept: decade map (ASSUMED, mean 3.8%) and flat 0 / 3 / 4%. Effect: pre-1988 2x CAGRs +0.3-0.4 pp/yr against the map; the reset gap unchanged |
 | Nasdaq-100 price | NASDAQ:NDX | 1985-01-31 | price | VERIFIED |
-| Nasdaq-100 total return | NASDAQ:XNDX from 2010-01-04; 2006-2010 NDX + 0.73% MEASURED; before 2006 NDX + 0.3% | constructed | the convention of an earlier private kit | ASSUMED pre-2006; sensitivity 0 / 0.3 / 1.0% |
+| Nasdaq-100 total return | NASDAQ:XNDX from 2010-01-04; 2006-2010 NDX + 0.73% MEASURED; 1999-03-05 to 2006-11-07 NDX + QQQ's gross income yield of each fiscal year; before 1999 NDX + 0.3% | constructed | **MEASURED** 1999-2006 (B7b, v0.1.1): `reference/qqq_income_ratios.csv`, parsed from two SEC 485BPOS filings (0001206774-04-000023 and 0001206774-07-000279). Yield = expense ratio + net-investment-income ratio. A fee waiver moves both by the same amount, so the sum does not depend on it. The 2004 filing prints fiscal 1999-2001 net of the waiver, with the before-waiver pair in its footnote 2 Mean 0.35%/yr (FINDINGS F30). `qqq_yield=None` gives the v0.1.0 series | ASSUMED before 1999 (the convention of an earlier private kit); sensitivity 0 / 0.3 / 1.0% |
 | SPY, QQQ, SSO, QLD, MQQQ, QQQP prices | library | various | price, split-adjusted, no dividends | VERIFIED |
 | SPYQ price | NASDAQ:SPYQ | 2024-10-01 (first bar; inception 2024-09-30) | price, split-adjusted, no dividends | VERIFIED 2026-10-12: 508 rows = MCP full history, anchor exact at both ends. Thin: ~4.5k shares/day |
 
@@ -130,7 +130,7 @@ Calendar quirks in the exports (MEASURED 2026-10-12, re-checked by hand; `series
   and no 2008 episode.
 - Any conclusion on quarterly against monthly resets rests on these few days. The 2008 episodes sit within one point
   of the line. So the drop (34 / 35 / 36%) and the price watched (ETF or index, low or close) decide whether they
-  exist. The fill variant changes fund value by between -16% and +27% per episode relative to the level fill. In
+  exist. The fill variant changes fund value by between -17% and +27% per episode relative to the level fill. In
   the passive study's JSON (`fill_effect_vs_level`, section 6 of each underlying), SPYQ's 2008 episode gives +2%
   at the close and +18% at the next close. QQQP's 2000 episode gives -16% at the close, and its 2008 episode gives
   +27% at the next close.
@@ -140,8 +140,8 @@ Calendar quirks in the exports (MEASURED 2026-10-12, re-checked by hand; `series
 - The 35% early reset has never fired in a live fund.
 - Financing spreads in a crisis. An earlier private kit found that the model understates them by 2-3%/yr for a 2x
   fund in 2008. This project has not re-derived that figure, so it is unverified here.
-- S&P dividends before 1988 are Shiller's measured monthly series (MEASURED, section 2). Nasdaq-100 dividends before
-  2006 use an assumed yield (0.3% a year).
+- S&P dividends before 1988 are Shiller's measured monthly series (MEASURED, section 2). Nasdaq-100 dividends of
+  1999-2006 are QQQ's measured yields (F30); before 1999 they use an assumed yield (0.3% a year).
 - 1929-32 is out of scope: only monthly S&P data exists before 1950 (backlog: TVC:DJI daily).
 
 ## 6. What the funds actually hold (SEC Form N-PORT, read 2026-10-12; raw copy in `reference/nport_tradr_2026.json`)
@@ -265,7 +265,7 @@ measured input.
 
 | Item | Convention | Status | Source / test |
 |---|---|---|---|
-| Interval for a headline gap (THE headline, since R2 step 10) | the phase-pooled interval from independent windows (row below). Every horizon-th start gives one set of non-overlapping windows (a phase). The method pools the phases. Mean +/- t(df, 0.975) x SE with df = smallest phase minus 1 | CONVENTION | Simulated coverage on the project's own overlap structure: the gap at start s = constant + mean of h consecutive iid monthly shocks. `scripts/run_coverage_sim.py` writes `results/coverage_sim.md`, and `tests/test_stats.py` recomputes three entries. Coverage is 0.94-1.00 over the eight published configurations (S&P 10-year 0.983, Nasdaq-100 10-year 0.998, 1-year rows 0.968 and 0.945). At ten years the multiplier the sampling distribution needs is 2.12 (S&P) and 2.21 (Nasdaq-100) against the t(5) = 2.57 and t(2) = 4.30 used. So those intervals are conservative. LIMIT (R2 steps 11-12): the convention takes windows that do not overlap as independent. A test checks this against the simulated distribution of the same statistic under independent months (4,000 iid series per configuration, `coverage.acf_null`). The statistic is negative on average because few windows share one mean. On this test, the S&P monthly design is persistent at 3, 5 and 10 years (lag-h autocorrelation +0.48 / +0.58 / +0.54). These lie 3.4 / 3.6 / 3.2 null standard deviations above the mean. One-sided p is 0.0003 at 3 years; no draw is as high at 5 and 10. Undetermined: its 1-year row (p 0.06), the S&P weekly design (p 0.0517-0.18, borderline at 5 years and noisy on the headline interval regardless). Also undetermined: MQQQ at 1-3 years (p 0.10-0.12) and QQQP at 1 year (p 0.08). MQQQ at 10 years reads p 0.01 on three windows per phase (fragile). SPYQ and the Nasdaq-100 weekly design sit on the independent value (p 0.39-0.61). The rule-of-thumb se 1 / sqrt(n / h) printed beside these is 1.2-3.3 times the simulated SD. So it is a conservative screen only (section 4 of the same file). In regime stresses that give lag-h autocorrelations of +0.08 to +0.34 the pooled interval covers 0.45-0.86 instead of 0.95 (section 3). So where persistence is present, the interval is too SHORT by an amount one history cannot pin down. A too-short interval that already covers zero stays noisy when widened, so no noisy verdict changes. The only clear rows are Nasdaq-100 weekly at 1, 3 and 5 years (t ratios 2.35 / 2.77 / 2.94). They carry two labels: clear under independent windows (2.06 / 2.15 / 2.05 needed). Under the mildest regime stress run they are noisy at 1 year and too close to call at 3 and 5 years. That stress is a 2% persistent share with a 34-month half-life: 3.01 / 2.88 / 2.84 needed. Each is the 95th percentile of 400 runs. Its 95% Monte Carlo interval at 3 and 5 years ([2.60, 3.48] and [2.63, 3.08]) holds the t ratio. The measured persistence cannot rule out that stress |
+| Interval for a headline gap (THE headline, since R2 step 10) | the phase-pooled interval from independent windows (row below). Every horizon-th start gives one set of non-overlapping windows (a phase). The method pools the phases. Mean +/- t(df, 0.975) x SE with df = smallest phase minus 1 | CONVENTION | Simulated coverage on the project's own overlap structure: the gap at start s = constant + mean of h consecutive iid monthly shocks. `scripts/run_coverage_sim.py` writes `results/coverage_sim.md`, and `tests/test_stats.py` recomputes three entries. Coverage is 0.94-1.00 over the eight published configurations (S&P 10-year 0.983, Nasdaq-100 10-year 0.998, 1-year rows 0.968 and 0.945). At ten years the multiplier the sampling distribution needs is 2.12 (S&P) and 2.21 (Nasdaq-100) against the t(5) = 2.57 and t(2) = 4.30 used. So those intervals are conservative. LIMIT (R2 steps 11-12): the convention takes windows that do not overlap as independent. A test checks this against the simulated distribution of the same statistic under independent months (4,000 iid series per configuration, `coverage.acf_null`). The statistic is negative on average because few windows share one mean. On this test, the S&P monthly design is persistent at 3, 5 and 10 years (lag-h autocorrelation +0.48 / +0.58 / +0.54). These lie 3.4 / 3.6 / 3.2 null standard deviations above the mean. One-sided p is 0.0003 at 3 years; no draw is as high at 5 and 10. Undetermined: its 1-year row (p 0.06), the S&P weekly design (p 0.0517-0.18, borderline at 5 years and noisy on the headline interval regardless). Also undetermined: MQQQ at 1-3 years (p 0.10-0.12) and QQQP at 1 year (p 0.08). MQQQ at 10 years reads p 0.01 on three windows per phase (fragile). SPYQ and the Nasdaq-100 weekly design sit on the independent value (p 0.39-0.61). The rule-of-thumb se 1 / sqrt(n / h) printed beside these is 1.2-3.3 times the simulated SD. So it is a conservative screen only (section 4 of the same file). In regime stresses that give lag-h autocorrelations of +0.08 to +0.34 the pooled interval covers 0.45-0.86 instead of 0.95 (section 3). So where persistence is present, the interval is too SHORT by an amount one history cannot pin down. A too-short interval that already covers zero stays noisy when widened, so no noisy verdict changes. The only clear rows are Nasdaq-100 weekly at 1, 3 and 5 years (t ratios 2.35 / 2.77 / 2.95). They carry two labels: clear under independent windows (2.06 / 2.15 / 2.05 needed). Under the mildest regime stress run they are noisy at 1 year and too close to call at 3 and 5 years. That stress is a 2% persistent share with a 34-month half-life: 3.01 / 2.88 / 2.84 needed. Each is the 95th percentile of 400 runs. Its 95% Monte Carlo interval at 3 and 5 years ([2.60, 3.48] and [2.63, 3.08]) holds the t ratio. The measured persistence cannot rule out that stress |
 | Block-bootstrap interval (secondary; shown beside the headline, never the flag) | mean (or median) of the per-start gaps +/- t(k-1, 0.975) x SE. SE = standard deviation of 10,000 circular block-bootstrap means (or medians; seed 0). Block = the horizon in months, k = n // block | CONVENTION, with a known bias | the bootstrap SE has a LOW bias with block = window length. A block bootstrap sees only the dependence inside one block. Let the gap be the mean of h shocks. Then blocks of length h lose about a third of the variance of the series mean at ANY block count. With 201 blocks of 12, for example, the SE is 0.83 of the truth and coverage is 0.89. Few blocks add a further loss: at the eight published configurations (k = 3-75) the SE is 0.52-0.86 of the truth. The "95%" intervals cover 0.85-0.92 (mean) and 0.86-0.93 (median) over 400 runs (`results/coverage_sim.md` sections 1-2). Source: an R2 step 10 audit finding; step 11 corrected the stated mechanism. On iid data the same code covers 0.950 (n = 252, block 21; percentile interval 0.922). On AR(1) with phi 0.5 it covers 0.915 (0.877). That is why the earlier coverage tests missed it. Monte Carlo error of a bound: its movement over seeds 0-3 at 10,000 draws for all 24 rows. Sources: `bb_seed_spread` in `results/coverage_sim.json` (fixed encoding) and `results/coverage_sim.md` section 5. Of these movements, the largest is 0.17 pp, the Nasdaq-100 quarterly median at 3 years. That fund's medians also move 0.06 pp at 5 years and 0.11 at 10 (where t(2) = 4.30 amplifies the SE's own noise). Its means move up to 0.04. Every other row's bounds move by at most 0.026 pp (MQQQ's mean at 3 years) |
 | Interval for the median of the gaps (secondary) | the same circular block bootstrap applied to the MEDIAN. Interval: median +/- t(k-1, 0.975) x bootstrap SE of the median. The bootstrap SE of a median is a reasonable device, not an exact one on skewed data. It carries the same low bias at 3-7 blocks as the mean version (row above: coverage 0.86-0.93 at the published configurations) | CONVENTION (R2 step 9; demoted to secondary in step 10) | `stats.block_bootstrap_median`. Coverage test, 400 runs, n = 252, block 21: 0.948 on iid normal data, 0.955 on a skewed (lognormal) sample. A second plain-loop implementation in the tests |
 | Block length | the horizon in months (12, 36, 60, 120) | CONVENTION | starts one month apart share all but one month of a window, so a block of `horizon` consecutive starts is about one independent window |
@@ -325,3 +325,127 @@ both are too short. The table states the measured persistence per product and th
 clear verdict in this project rests on a row with measured persistence.
 What this section cannot show: the win shares (descriptive, no interval). Nor can it show any uncertainty from the
 cost encodings or the early-reset fill. The sensitivity tables show that uncertainty, but the intervals do not include it.
+
+## 8. The live check on monthly-reset mutual funds (B19, v0.1.1)
+
+Code: `calendar_letf/navtr.py` (the total-return rebuild), `scripts/run_live_monthly.py` (the study), section 7 of
+`scripts/run_validate_live.py` (Tradr against ProShares). Tests: `tests/test_navtr.py`, `tests/test_live_monthly.py`,
+`tests/test_real_vs_daily.py`. Result: FINDINGS F22.
+
+| Item | Convention | Status | Source / test |
+|---|---|---|---|
+| Fund facts (leverage, reset, regime dates, splits, fees, report returns, prospectus returns) | read from SEC filings into `reference/mutual_funds/`, with an accession number on every row | FILED | `tests/test_live_monthly.py` reads the tables with the csv module and re-derives the hard test |
+| Ex-dates | no filing gives them. The rebuild finds each payout's day in the NAV. It is the day the NAV falls by the payout beyond the move that the leverage explains. The leverage drifts inside a calendar month (F17). The largest payout of a window goes first. A payout splits over days when the part left over is too large to be noise (`split_floor` of `navtr.locate_ex_dates`) | DERIVED | `navtr.locate_ex_dates`, `navtr.rebuild`; planted cases and break cases in `tests/test_navtr.py` |
+| Payouts too small to date | a payout under 0.5% of NAV cannot be dated, because ordinary days move the residual by almost as much. Such a payout widens the tolerance of each prospectus return whose start or end falls inside its window by its own size | CONVENTION | `navtr.anchor_bound` |
+| Hard-test tolerances | a report period passes within 0.10 points (the NAV prints to the cent, and the report reinvests on the ex-date). A prospectus return passes within 0.05 points, plus the NAV's cent at both ends, plus the bound above | CONVENTION | `PERIOD_TOL_PP`, `ANCHOR_PRINT_PP`; the test checks that each tolerance equals its stated parts |
+| Vendor data | a vendor close more than 0.2% (log) from a report NAV is VENDOR NAV DIFFERS. A close equal to the day before while the index moved is a stale close. A large daily miss that the next day undoes is a glitch pair. The labels set rows aside by rule, never by hand | CONVENTION | `vendor_nav_differs`, `stale_days`, `glitch_days`; planted cases in `tests/test_live_monthly.py` |
+| Fitted residual cost | one spread per NAV a year on top of (L - 1) x DFF and the filed net fee. The fit makes the model grow as the fund did. It is a residual, not a filed term | FITTED | `validate.fit_spread` |
+| Yearly intervals | t(k-1) x SE over the full calendar years of the window. Each year ends on its last clean close. A simulation checks the coverage at the row's own k in two worlds (the observed years resampled; AR(1) years at the measured lag-1 autocorrelation). An interval is valid only when both worlds reach `COVERAGE_FLOOR` | CONVENTION | `coverage.yearly_t_coverage`; exact binomial case and a persistence break case in `tests/test_coverage.py` |
+| SSO and QLD payouts | vendor history (SECONDARY). Each fiscal year's sum matches the N-CSR per-share total (`PEER_DIST_TOL`), and the rebuild gives the N-CSR market-price return (`PEER_TR_TOL_PP`) | SECONDARY, checked against FILED | `reference/daily_etf_distributions.csv`, `reference/daily_etf_highlights.csv`; `tests/test_real_vs_daily.py` |
+| End of the Tradr validation | 2026-10-09, the common data end of the three Tradr funds at v0.1.0, fixed so a longer price file cannot move the published figures | CONVENTION | `VALIDATE_END` in `scripts/run_validate_live.py` |
+
+## 9. Leverage below 2x and the best L (B17, v0.1.1)
+
+Code: `calendar_letf/leverage.py` (yearly growth, the plateau, the break-even fee, the Kelly form, walk-forward),
+`products.at_leverage`, `study.encoding_at`, `scripts/run_sub2x.py` (the study). Tests: `tests/test_leverage.py`,
+`tests/test_sub2x.py`. Result: FINDINGS F23.
+
+| Item | Convention | Status | Source / test |
+|---|---|---|---|
+| Funds below 2x | every design at L other than 2 is HYPOTHETICAL: no index fund below 2x with a calendar reset exists | ASSUMED | `products.at_leverage` |
+| Fee | the Tradr fee on every design (`FEE_BASE`); the 1.2x weekly design also at the WeeklyPay fee (`FEE_WEEKLYPAY`) | VERIFIED for the funds that charge it, ASSUMED at other L | the Tradr prospectus; Roundhill 497K filings (BACKLOG C12) |
+| Balance sheet | base: all swap, so the spread falls on L turns. Shown next to it: the index held, with a swap for the excess only (L - 1 turns). A 1x fund holds the index and pays no spread | ASSUMED | `costs.expected_turns`; `tests/test_leverage.py` |
+| Cost anchors | the 2x spread per NAV carried to L in proportion to the turns. The B19 anchor is the median residual of the primary monthly-fund fits (from `results/live_monthly.json`). The Tradr anchor is the 2024-26 fit. The sensitivities are no spread and twice the Tradr fit | ASSUMED | `study.encoding_at`; the test re-derives the B19 anchor from the current file |
+| Trigger rules | none: an in-period fall of 1/L wipes the fund out. Scaled: an early reset at an index fall of `SCALED_FUND_LOSS` / L, the fund loss that a 35% fall gives at 2x. Fixed: 35% at any L | ASSUMED | `products.trigger_for` |
+| Growth | the mean yearly log return over full NYSE years, so each year counts once and the intervals have no overlap | CONVENTION | `leverage.yearly_log_returns` |
+| Best L | a plateau: every L whose mean yearly difference from the best L lies within `PLATEAU_SE` standard errors of zero. It is a paired test: both funds see the same years. The headline searches L at or under 2x and states when growth still rises at 2x | CONVENTION | `leverage.plateau`; planted cases and break cases in `tests/test_sub2x.py` |
+| Break-even fee | the largest fee at which the fund's full-history growth equals the index's (total return, no fee). A real index fund costs a little, so add its fee. The interval moves the yearly fund-minus-index interval by the fee: an approximation, since growth falls about one for one with the fee | CONVENTION | `leverage.break_even_fee`; the second-order form in `tests/test_sub2x.py` |
+| Out of sample | the study chooses L at or under 2x on the early era (to `IN_SAMPLE_LAST`) and scores it on the later one. The walk-forward choice comes every `WALK_STEP` years, on all earlier years. The era test uses Newey-West errors at lags `ERA_LAGS` | CONVENTION | `leverage.best_L`, `leverage.walk_forward`, `leverage.era_split_z` |
+| End of the study | 2026-09-30, a quarter end inside every input, fixed so a longer price file cannot move the published figures | CONVENTION | `STUDY_END` in `scripts/run_sub2x.py` |
+
+## 10. Simulated decades (B11, v0.1.1)
+
+Code: `calendar_letf/montecarlo.py` (paths and the parallel kernel batch), `scripts/run_montecarlo.py` (the study).
+Tests: `tests/test_montecarlo.py`. Result: FINDINGS F24.
+
+| Item | Convention | Status | Source / test |
+|---|---|---|---|
+| Path calendar | the real NYSE sessions of the ten years to the study end. So resets fall on real period ends, and every day accrues its real calendar days | CONVENTION | `montecarlo.path_calendar`; the test checks the first and last session and the 121 month ends |
+| Block bootstrap | each path copies real history days in blocks of consecutive days, with the block starts drawn uniformly. A copied day keeps its index move, price move, intraday low and the rate known before it | CONVENTION | `montecarlo.block_pick`, `montecarlo.build_paths`; a path that copies the history in order gives the history back |
+| Block lengths | 21, 63, 126 and 252 days, all reported. A seam between blocks breaks the order of days, and the gap lives in that order | CONVENTION | `montecarlo.BLOCKS` |
+| Kernel on paths | the project's own numba kernels, run in parallel over paths | DERIVED | `montecarlo.simulate_batch` equals `kernel.run` path by path to 1e-12 |
+| Monte Carlo error | the mean carries a normal interval from its standard error. The median carries a distribution-free interval from the order statistics. Both describe the error of the simulation, not the uncertainty of the true gap | CONVENTION | `montecarlo.describe`; the test checks their coverage on skewed samples of the study's size |
+| AR(1) paths | daily log returns with the drift and volatility of each index and a chosen lag-1 autocorrelation | PARAMETRIC | `montecarlo.ar1_log_returns`; mean, SD and autocorrelation checked in the test |
+| Flat decade | every daily move less the mean daily move of the history | ASSUMED | `build_paths(..., shift)` |
+| Rate shock | blocks drawn only from eras of high or rising rates while the S&P 500 fell (`RATE_SHOCK_ERAS`, the author's choice) | ASSUMED | `montecarlo.block_starts` with allowed days |
+| 1929-39 path (B11) | Shiller's monthly prices as month-end levels, with Brownian-bridge daily moves between them. The daily SD comes from the monthly moves. The rate is unknown here before 1934, so two values bracket it (`DEPRESSION_RATES`) | PARAMETRIC, ASSUMED | `montecarlo.bridge_log_levels`; the test checks the anchors and the step variance |
+
+## 11. Leverage of 3x (B1, v0.1.1)
+
+Code: `products.at_leverage_filed`, `leverage.fill_losses`, `leverage.era_of`, `scripts/run_3x.py` (the study). Tests:
+`tests/test_3x.py`, `tests/test_leverage.py`. Result: FINDINGS F25.
+
+| Item | Convention | Status | Source / test |
+|---|---|---|---|
+| Funds | every 3x calendar design is HYPOTHETICAL: no 3x calendar fund has existed, to the author's knowledge | ASSUMED | `products.at_leverage_filed` |
+| Swap terms | the spread per turn and the swap turns that the real 3x daily fund on the same index filed (UPRO, TQQQ; SEC N-PORT). They apply over the whole history | VERIFIED for the real funds in 2026, ASSUMED for a calendar design and for earlier years | `products.MODELS_3X`; the test checks that the design copies them |
+| Fee | the calendar designs' fee (`FEE_BASE`); the daily twin pays the same | ASSUMED | `scripts/run_sub2x.py` |
+| Trigger rules | none; scaled (an early reset at `SCALED_FUND_LOSS` / 3); fixed drops of 20%, 25% and 30% (sensitivities). The 35% rule shows that it never fires first | ASSUMED | `TRIGGERS` in `scripts/run_3x.py`; planted cases in `tests/test_3x.py` |
+| Wipeout | with no trigger the kernel ends the fund when the close falls to 1/3 below the base. A rule with a drop reads the day's low. The difference on the simulated decades is in FINDINGS F25 | CONVENTION | `kernel.periodic_reset_nav` |
+| Fills | the level fill (the base case) and the close and next-close fills; the fill loss counts from the last reset | CONVENTION | `leverage.fill_losses`; planted fills against 1 + 3R |
+| Real funds | UPRO and TQQQ as price-only overlays from their first bar | SECONDARY | `loader.close` |
+
+## 12. Semiconductors (B16, v0.1.1)
+
+Code: `study.clean_lows`, `scripts/run_semis.py` (the study). Tests: `tests/test_semis.py`. Result: FINDINGS F26.
+
+| Item | Convention | Status | Source / test |
+|---|---|---|---|
+| Index | the PHLX Semiconductor Sector Index (NASDAQ:SOX), price only, from 1994-05-04. No total-return series of it is on hand, so the fund, its twin and the index all leave out the dividends | ASSUMED | `BASIS_LABEL` in `scripts/run_semis.py`; the test checks that every row carries it |
+| SOXX's index | three indexes over its life (`SOXX_INDEX_BASIS`). The dates come from a secondary source, so the long history uses SOX itself | SECONDARY | `soxx_index_on`; boundary cases in the test |
+| Bad daily lows | a low more than `BAD_LOW_TOL` below both the previous close and the day's close is a bad print. The study replaces it by the close and lists it | CONVENTION | `study.clean_lows`; planted and break cases in the test |
+| Fee | the net expense ratio that SOXM and SOXW filed (`reference/nav_anchors.csv`) on every design | VERIFIED for those funds, ASSUMED elsewhere | `filed_fee` |
+| Spread | USD's notional-weighted spread over fed funds (SEC N-PORT, `reference/nport_semis_2026.json`) per swap turn, on L turns | VERIFIED for USD in 2026, ASSUMED for a calendar design and for earlier years | `filed_spread` |
+| SOXX payouts | vendor history from 2021-09 (`reference/soxx_distributions.csv`). The study divides each payout before SOXX's split of 2026-11-05 by the split ratio. The price library carries that split, and the saved page did not yet | SECONDARY payouts, PRIMARY split (`reference/soxx_splits.csv`, SEC Form 497) | the test re-derives every factor from the split file |
+| SOXM / SOXW check | as in FINDINGS F1b. The model runs on SOXX's own total return. Swaps on 2 x NAV pay the filed spread over OBFR, and cash earns c x OBFR (c from the live funds' fits). The fund pays its filed fee, and the study fits nothing | CONVENTION | `validation` in `scripts/run_semis.py` |
+| SOXL | a price-only overlay. Its filing does not state the units of its spread, so it sets no cost | SECONDARY | `reference/nport_semis_2026.json` |
+
+## 13. The reset day and entry on any day (B12, B10, v0.1.1)
+
+Code: `periods.anchored_period_end_flags`, `montecarlo.block_pick(random_phase=True)`, `scripts/run_reset_day.py`. Tests:
+`tests/test_reset_day.py`. Result: FINDINGS F27.
+
+| Item | Convention | Status | Source / test |
+|---|---|---|---|
+| Anchored reset | the close of the last NYSE session on or before the anchor day of each period. From 1970 a stray row on a closure day never carries a reset. A period with no session before its anchor has no reset | CONVENTION | `periods.anchored_period_end_flags`; planted holidays and the 1985-09-27 closure in the test |
+| Anchors | weekly: Monday to Thursday. Monthly: the 5th, 10th, 15th, 20th. Quarterly: the 5th to 20th of the last month, or the 15th of the middle month | CONVENTION | `ANCHORS` in `scripts/run_reset_day.py` |
+| Seams | each simulated path gets a random seam position, so a shifted reset day straddles a seam no more often than the standard day | CONVENTION | `block_pick(random_phase=True)`; the test checks the seam spread and that the plain draw stays the B11 draw |
+| Entry leverage | the leverage after the entry close, read from the kernel's state with the run's own costs. Without costs it is L (1 + R) / (1 + L R), R the index return since the last reset. After a level-fill early reset the base is the trigger level, not the close (fix after the 2026-11-06 audit) | CONVENTION | `bottoms.leverage_series`; a planted early reset in `tests/test_bottoms.py` |
+| Many comparisons | each anchor against the standard day gets the two-sided p-value of its yearly t statistic (k - 1 df). Holm's adjustment runs over all 26 comparisons of both indexes. The indexes overlap in time, so they are not two independent tests | CONVENTION | `stats.t_two_sided_p`, `stats.holm`; closed forms, scipy and planted families in `tests/test_stats.py` |
+
+## 14. The compounding decomposition (B14, v0.1.1)
+
+Code: `scripts/run_compounding.py`. Tests: `tests/test_compounding.py`. Result: FINDINGS F28.
+
+| Item | Convention | Status | Source / test |
+|---|---|---|---|
+| Costs | zero (no rate, spread or fee), so the gap is the reset mechanism alone | DEFINITION | `study.ZERO_COSTS` |
+| Period returns | the index return between consecutive resets inside the window, early resets included; the window's ends cut the first and last period | CONVENTION | `ss_windows`; a hand case in the test |
+| Trend score | the squared log index return of the window over its sum of squared daily returns. It uses the whole window, so a split by it is a mechanism | CONVENTION | `window_rows` |
+| Worked example | daily log moves at the stated annual volatility, shifted so the year ends at exactly +50%; no trigger | PARAMETRIC | `worked_example` |
+
+## 15. The LEAP comparator (B15, v0.1.1)
+
+Code: `calendar_letf/options.py`, `scripts/run_leap.py`. Tests: `tests/test_options.py`, `tests/test_leap.py` (a
+planted flat index and a second implementation of the roll loop). Result: FINDINGS F29.
+
+| Item | Convention | Status | Source / test |
+|---|---|---|---|
+| Option model | Black-Scholes-Merton with a continuous dividend yield; the call is on the price index | CONVENTION | `options.call`, `options.put`; parity with the yield to 1e-10 and a second implementation by integration in the test |
+| Dividend yield | the trailing one-year log difference between the total-return and the price series | DERIVED | `inputs` in `scripts/run_leap.py` |
+| Rate | effective fed funds known the day before, the fund's own reference rate. The option formula takes a continuous rate, so the study passes 365 ln(1 + r / 360), the daily-compounded value of the ACT/360 rate | CONVENTION | `loader.reference_rate`; `inputs` in `scripts/run_leap.py` |
+| Implied volatility | VIX, carried to two years by mean reversion of variance (`TERM_KAPPA`) toward theta. Theta is the mean of VIX squared from 1990 up to the day: an expanding mean, so it uses no later data. Until 2026-11-06 it was the mean over the whole sample, which moved the LEAP CAGR by at most 0.05 pp. A skew for low strikes multiplies it (`SKEWS`: flat, base, steep) | ASSUMED | `options.term_vol`, `options.skewed_vol`; the theta column in `inputs` |
+| LEAP against the fund | yearly paired log differences over the full NYSE years both cover, with the t(k-1) interval and its simulated coverage | CONVENTION | `vs_fund` in `results/leap.json`; `run_sub2x.interval_with_coverage` |
+| Strike | the strike at which delta x S / C equals L at each roll | CONVENTION | `options.strike_for_leverage`; the target to 1e-8 and the limit at L -> 1 in the test |
+| Trading cost | a round-trip share of the option's value at each roll (`ROLL_COSTS`) | ASSUMED | sensitivity 0, 0.5% and 1% |
+| Traded strikes | the study flags a strike under `STRIKE_TRADED` of the index UNTRADED | ASSUMED | `STRIKE_TRADED` |

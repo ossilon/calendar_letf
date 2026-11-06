@@ -57,6 +57,70 @@ def t975(df):
             + (3.0 * z ** 7 + 19.0 * z ** 5 + 17.0 * z ** 3 - 15.0 * z) / (384.0 * df ** 3))
 
 
+def _betacf(a, b, x, max_iter=300, eps=1e-15):
+    """Continued fraction of the incomplete beta function (modified Lentz), as in Numerical Recipes section 6.4."""
+    tiny = 1e-300
+    qab, qap, qam = a + b, a + 1.0, a - 1.0
+    c, d = 1.0, 1.0 - qab * x / qap
+    d = 1.0 / (d if abs(d) > tiny else tiny)
+    h = d
+    for m in range(1, max_iter + 1):
+        m2 = 2 * m
+        aa = m * (b - m) * x / ((qam + m2) * (a + m2))
+        d = 1.0 + aa * d
+        d = 1.0 / (d if abs(d) > tiny else tiny)
+        c = 1.0 + aa / c
+        c = c if abs(c) > tiny else tiny
+        h *= d * c
+        aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2))
+        d = 1.0 + aa * d
+        d = 1.0 / (d if abs(d) > tiny else tiny)
+        c = 1.0 + aa / c
+        c = c if abs(c) > tiny else tiny
+        delta = d * c
+        h *= delta
+        if abs(delta - 1.0) < eps:
+            return h
+    raise ValueError("incomplete beta: the continued fraction did not converge")
+
+
+def betainc_regularized(a, b, x):
+    """The regularized incomplete beta function I_x(a, b) for a, b > 0 and 0 <= x <= 1."""
+    if not 0.0 <= x <= 1.0:
+        raise ValueError(f"betainc_regularized: x must lie in [0, 1], got {x}")
+    if x == 0.0 or x == 1.0:
+        return float(x)
+    front = math.exp(math.lgamma(a + b) - math.lgamma(a) - math.lgamma(b) + a * math.log(x) + b * math.log1p(-x))
+    if x < (a + 1.0) / (a + b + 2.0):
+        return front * _betacf(a, b, x) / a
+    return 1.0 - front * _betacf(b, a, 1.0 - x) / b
+
+
+def t_two_sided_p(t, df):
+    """Two-sided p-value of a Student t statistic with `df` degrees of freedom: P(|T| >= |t|) = I_{df/(df+t^2)}(df/2, 1/2).
+    No scipy: the tests compare it with closed forms (df 1 and 2) and with scipy where installed."""
+    if not df > 0:
+        raise ValueError(f"t_two_sided_p: df must be positive, got {df}")
+    if not np.isfinite(t):
+        return float("nan")
+    return float(betainc_regularized(df / 2.0, 0.5, df / (df + t * t)))
+
+
+def holm(pvals):
+    """Holm's step-down adjustment of a family of p-values (strong control of the familywise error): sort ascending,
+    adjusted p_(i) = max over j <= i of min(1, (m - j + 1) p_(j)), returned in the input order. NaN stays NaN and does
+    not count toward m."""
+    p = np.asarray(pvals, dtype=np.float64)
+    out = np.full(len(p), np.nan)
+    ok = np.flatnonzero(np.isfinite(p))
+    m = len(ok)
+    run = 0.0
+    for rank, i in enumerate(ok[np.argsort(p[ok], kind="stable")]):
+        run = max(run, min(1.0, (m - rank) * p[i]))
+        out[i] = run
+    return out
+
+
 def covers_zero(lo, hi):
     """True when the interval [lo, hi] contains 0 (or is undefined): the headline is 'noisy'."""
     if lo is None or hi is None or not (np.isfinite(lo) and np.isfinite(hi)):

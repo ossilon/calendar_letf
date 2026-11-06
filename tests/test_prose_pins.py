@@ -107,11 +107,11 @@ raises("resolve: a where-selector that matches two rows is refused", lambda: P.r
 spec = P.load_pins(ROOT / "tests" / "prose_pins.json")
 pins = spec["pins"]
 ids = [p["id"] for p in pins]
-PROSE_FILES = ("FINDINGS.md", "ASSUMPTIONS.md", "README.md")
+PROSE_FILES = ("FINDINGS.md", "ASSUMPTIONS.md", "README.md", "THEORY.md")      # THEORY.md since B18 (docs/theory_examples.json)
 check("prose pins: ids are unique and every pin has a file, an anchor, a mode and items",
       len(ids) == len(set(ids)) and all(p.get("file") in PROSE_FILES and p.get("anchor") and p.get("mode") in ("after", "cell")
                                         and p.get("items") for p in pins), [i for i in ids if ids.count(i) > 1][:3])
-check("prose pins: the pin list covers all three prose files (FINDINGS, ASSUMPTIONS, README)", {p["file"] for p in pins} == set(PROSE_FILES))
+check("prose pins: the pin list covers all four prose files (FINDINGS, ASSUMPTIONS, README, THEORY)", {p["file"] for p in pins} == set(PROSE_FILES))
 texts, results, skipped = {}, {}, set()
 for p in pins:
     texts.setdefault(p["file"], (ROOT / p["file"]).read_text(encoding="utf-8"))

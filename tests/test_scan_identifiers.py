@@ -84,6 +84,9 @@ with tempfile.TemporaryDirectory() as tmp:
         return scan_ids.scan(one(rel, text), personal=personal)
 
     check("a clean file passes", hits("notes.md", "Run the tests. The result is 0 failure(s).\n") == [])
+    check("data files (B18): docs/theory_examples.json (planted examples) is allowed; any other JSON under docs/ is flagged",
+          hits("docs/theory_examples.json", '{"x": 1}\n') == []
+          and any("data file" in p for p in hits("docs/other.json", '{"x": 1}\n')))
     check("a Windows home path is caught", any("home directory path" in p for p in hits("notes.md", f"see {home}\n")))
     check("a JSON-escaped Windows home path is caught", any("home directory path" in p for p in hits("a.md", f'"{home_json}"\n')))
     check("a Unix home path is caught", any("home directory path" in p for p in hits("a.md", "/ho" + "me/someone/x\n")))
@@ -118,6 +121,8 @@ with tempfile.TemporaryDirectory() as tmp:
     check("a JSON file outside the allowed folders is refused", any("data file" in x for x in hits("notes/x.json", "{}")))
     check("an image outside results/ is refused", any("image file" in x for x in hits("docs/shot.png", "\x89PNG")))
     check("an image under results/ passes", hits("results/chart.png", "\x89PNG") == [])
+    check("the README banner docs/banner.png is the one named exception; a second image in docs/ is still refused",
+          hits("docs/banner.png", "\x89PNG") == [] and any("image file" in x for x in hits("docs/banner2.png", "\x89PNG")))
     check("an aggregate JSON under results/ passes", hits("results/study.json", '{"gap": 0.012, "wins": 61}') == [])
     check("a golden JSON under tests/golden/ passes", hits("tests/golden/study.json", '{"keys": {"a": 1.5}}') == [])
     check("a price series saved as results JSON is refused", any("daily series" in x for x in hits("results/leak.json", js_series)))

@@ -35,13 +35,28 @@ def load_scanner():
     return mod
 
 
+BINARY_SUFFIXES = (".pdf", ".png")               # `binary` in .gitattributes; every other file is text=auto eol=lf
+
+
+def as_checked_out(data, rel):
+    """The bytes a git clone gives for a file under this repository's .gitattributes: `* text=auto eol=lf`, so a text
+    file (no NUL byte in its first 8,000 bytes, git's own test, and not marked binary) comes out with LF line endings.
+    The working tree may hold CR LF (a Windows script wrote it), and a check on the working-tree bytes would miss what a
+    stranger gets (re-grade of 2026-11-06, finding T1)."""
+    if Path(rel).suffix.lower() in BINARY_SUFFIXES or b"\0" in data[:8000]:
+        return data
+    return data.replace(b"\r\n", b"\n")
+
+
 def copy_publishable(dest, repo=REPO):
-    """Copy the publishable files into `dest`; return their relative paths."""
+    """Copy the publishable files into `dest` as a git checkout would write them (as_checked_out); return their
+    relative paths."""
     files = load_scanner().published_files(repo)
     for rel, path in files:
         target = Path(dest) / rel
         target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(path, target)
+        target.write_bytes(as_checked_out(Path(path).read_bytes(), rel))
+        shutil.copystat(path, target)
     return [rel for rel, _ in files]
 
 

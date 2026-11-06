@@ -23,8 +23,20 @@ with tempfile.TemporaryDirectory() as tmp:
           and "/" not in rec["file"], rec["file"])
     check("record counts data rows (header excluded)", rec["rows"] == 3, rec["rows"])
     check("record gives first and last date", (rec["first_date"], rec["last_date"]) == ("2020-01-02", "2020-01-06"), rec)
-    check("record sha256 equals hashlib on the same bytes", rec["sha256"] == hashlib.sha256(clean.read_bytes()).hexdigest())
-    check("record bytes equals the file size", rec["bytes"] == clean.stat().st_size)
+    _lf = clean.read_bytes().replace(b"\r\n", b"\n")
+    check("record sha256 equals hashlib on the bytes with CR LF folded to LF", rec["sha256"] == hashlib.sha256(_lf).hexdigest())
+    check("record bytes counts the same LF bytes", rec["bytes"] == len(_lf))
+    # T1 (re-grade 2026-11-06): a Windows CR LF copy and a git LF checkout of the same text hash alike; a binary does not fold
+    (tmp / "lf.json").write_bytes(b"{\n \"a\": 1\n}\n")
+    (tmp / "crlf.json").write_bytes(b"{\r\n \"a\": 1\r\n}\r\n")
+    (tmp / "blob.xls").write_bytes(b"x\r\ny")
+    check("sha256_of: the CR LF and LF forms of a text file hash the same, and their byte counts agree",
+          provenance.sha256_of(tmp / "lf.json") == provenance.sha256_of(tmp / "crlf.json")
+          and provenance.byte_count(tmp / "lf.json") == provenance.byte_count(tmp / "crlf.json") == 12)
+    check("sha256_of: a non-text file is hashed as its raw bytes (no folding)",
+          provenance.sha256_of(tmp / "blob.xls") == hashlib.sha256(b"x\r\ny").hexdigest())
+    check("sha256_of BREAK: one changed character in the text still changes the hash",
+          provenance.sha256_of(tmp / "lf.json") != hashlib.sha256(b"{\n \"a\": 2\n}\n").hexdigest())
     check("record keys are exactly the contract", set(rec) == {"file", "sha256", "bytes", "rows", "first_date", "last_date"})
 
     # the fingerprint changes when one byte changes
@@ -186,6 +198,10 @@ for _path in _json_files:
     if any(r["file"] == "SP_SPX_daily.csv" for r in _inp.get("files", [])) and _path.name != "validate_live.json":
         check(f"{_path.name}: an S&P result names the Shiller yield file it read in its manifest",
               any(r["file"] == "shiller_sp500_monthly.csv" for r in _inp.get("reference_files", [])), _inp.get("reference_files"))
+    # B7b: a Nasdaq-100 total return reads QQQ's income table for 1999-2006 (validate_live reads XNDX only as a fund benchmark)
+    if any(r["file"] == "NASDAQ_XNDX_daily.csv" for r in _inp.get("files", [])) and _path.name != "validate_live.json":
+        check(f"{_path.name}: a Nasdaq-100 result names the QQQ income file it read in its manifest",
+              any(r["file"] == "qqq_income_ratios.csv" for r in _inp.get("reference_files", [])), _inp.get("reference_files"))
 with tempfile.TemporaryDirectory() as _tmp:
     (Path(_tmp) / "reference").mkdir()
     (Path(_tmp) / "reference" / "t.csv").write_text("month,y\n2000-01,1\n", encoding="utf-8")

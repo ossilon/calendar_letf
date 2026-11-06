@@ -1,3 +1,5 @@
+<p align="center"><img src="docs/banner.png" alt="calendar_letf" width="100%"></p>
+
 # calendar_letf
 
 This is a small, fast, tested engine for one question. **Does a 2x leveraged ETF that resets its leverage once a
@@ -9,13 +11,16 @@ daily-reset "twin" of each fund, on the same index and with the same costs. The 
 
 Research tooling. Hypothetical results. **General information only: not financial product advice and not a
 recommendation to buy, sell or hold any fund.** It does not take into account anyone's objectives, financial
-situation or needs. This project has no affiliation with, endorsement by or connection to Tradr ETFs, AXS
-Investments or any fund issuer. Fund names and tickers appear only to identify the products that the project models.
+situation or needs.
+
+This project has no affiliation with, endorsement by or connection to any fund sponsor or index provider it names. The sponsors are Tradr ETFs / AXS Investments, Direxion, Rydex / Guggenheim, ProFunds, ProShares,
+Roundhill, GraniteShares, iShares / BlackRock, Invesco and SPDR / State Street (SSGA). Fund names and tickers appear
+only to identify the products that the project models.
 
 ## The answer, in short
 
 Monthly and weekly resets beat daily resets by about **+0.3 percentage points a year** on the S&P 500 (1950-2026,
-every month-end start, 10-year holds). On the Nasdaq-100 (1985-2026) they beat daily resets by **+1.1 to +1.4
+every month-end start, 10-year holds). On the Nasdaq-100 (1985-2026) they beat daily resets by **+1.1 to +1.3
 pp/yr**. **Quarterly resets do not beat daily resets** (S&P -0.5 pp/yr; Nasdaq-100 -2.1 pp/yr). The Nasdaq-100
 result uses the trigger that the prospectus describes: the ETF's own price during the day. That sign rests on one
 day in 2008.
@@ -40,7 +45,7 @@ The edge exists only when daily returns tend to *reverse* from one day to the ne
 the monthly design in every decade. The often-quoted "+1.15 pp/yr since 1990" holds up here (base case +1.16), but it
 is that regime, not a law.
 
-The cost level does not change the answer. The cost encoding moves the monthly and weekly gaps by at most 0.07 pp and
+The cost level does not change the answer. The cost encoding moves the monthly and weekly gaps by at most 0.06 pp and
 the quarterly ones by up to 0.14. The leverage, not the reset rule, sets the risk. On the S&P 500, every 2x series had
 an 89-93% maximum drawdown, and on the Nasdaq-100 the figure was about 99%.
 
@@ -54,10 +59,42 @@ interval, every rule's 10-year edge is noisy. On SPYQ the 200-day moving-average
 Nasdaq-100 funds, the volatility-threshold rule has the largest median (+2.3 on MQQQ, +5.9 on QQQP). Findings
 F13-F16.
 
+Leverage below 2x (hypothetical funds, B17): on the S&P 500, the daily, weekly and monthly designs grow fastest at
+2x. Their growth still rises at 2x. On the Nasdaq-100 the best L is 1.65 to 2.00, and one history cannot separate 1x
+from 2x. On bad-case measures 1x wins. A 1.2x weekly index fund at a fee of 0.99% grew more slowly than the index, but only
+one of four cases clears its interval.
+Detail: FINDINGS F23.
+
+Simulated decades (B11): the study builds 5000 ten-year paths from blocks of real days. On them the Nasdaq-100 weekly design
+leads its daily twin by a median +0.61 pp a year, and the quarterly design trails by 0.92. On the S&P 500 the median gaps run
+from -0.01 to +0.19 pp (252-day blocks). The paths also show how the gap grows with volatility, with a fan chart in
+[results/montecarlo_fan.png](results/montecarlo_fan.png). Detail: FINDINGS F24.
+
+Leverage of 3x (hypothetical funds, B1): a fall of 1/3 inside a period ends a 3x fund. So the live funds' 35% trigger
+can never fire first. With no trigger, the quarterly S&P 500 design died on 2008-11-20, and the monthly and quarterly
+Nasdaq-100 designs on 1987-10-26. An early reset at 23.33% prevents every wipeout. Only the weekly Nasdaq-100 design
+leads its 3x daily twin (a median +2.80 pp a year over 10 years; every 10-year interval covers zero). Detail:
+FINDINGS F25.
+
+Semiconductors (hypothetical funds, B16, the PHLX Semiconductor index, price only): from 1994 to 2026 no fund from
+1.2x to 3x kept up with the index. That holds even with no fee. Below 2x the weekly and monthly resets beat daily resets, and every
+yearly interval of that lead excludes zero. Detail: FINDINGS F26.
+
+The reset day (B12): another reset day moves the simulated 10-year gap by at most 0.09 pp a year. In history a Monday reset trailed the Friday one. The lag does not survive an adjustment for the 26
+comparisons, and the simulated paths do not show it. Detail: FINDINGS F27.
+
+Why the gap exists (B14): the calendar fund gains when the days inside a period reverse, and the daily fund gains in a
+smooth trend. On the S&P 500 a second-order formula explains the weekly and monthly 2x gaps (R^2 0.93-0.99). Detail:
+FINDINGS F28.
+
+A rolling LEAP instead (B15, S&P 500, model prices): below 2x a deep in-the-money call is the index plus a loan near
+the risk-free rate. But no exchange lists such strikes. With no trading cost it beats the calendar fund. A 0.5% cost per
+quarterly roll leaves the two indistinguishable below 2x. Detail: FINDINGS F29.
+
 ## Headline facts (every one computed here and audited; sources in FINDINGS.md)
 
 - **Monthly resets beat daily resets by +0.3 pp/yr on the S&P 500 over 799 ten-year windows since 1950. The
-  Nasdaq-100 gap since 1985 is +1.4 pp/yr. Quarterly resets do not beat daily: -0.5 pp/yr on the S&P, -2.1 on the
+  Nasdaq-100 gap since 1985 is +1.3 pp/yr. Quarterly resets do not beat daily: -0.5 pp/yr on the S&P, -2.1 on the
   Nasdaq-100. None of the six ten-year gaps is distinguishable from zero on one history.** (F6)
 - **The famous "+1.15 pp/yr since 1990" holds up: the base case gives +1.16 (rate encoding +1.15), ahead in 321 of
   321 windows. The same edge was negative in every decade of the 1950s, 60s and 70s.** Whether calendar resets help depends on whether daily returns follow through or
@@ -66,7 +103,7 @@ F13-F16.
   1.993 / 2.005 for SPYQ / MQQQ / QQQP. The intercepts are -1.3 pp per quarter, -0.55 pp per month and -1.6 pp per
   quarter. (F4)
 - **Costs do not change the reset answer.** Across the six cost encodings, the gap between calendar and daily resets
-  moves by at most 0.07 pp/yr for the monthly and weekly designs. The limit for the quarterly ones is 0.14. The
+  moves by at most 0.06 pp/yr for the monthly and weekly designs. The limit for the quarterly ones is 0.14. The
   leverage sets the risk. On the S&P 500, every 2x structure had an 89-93% maximum drawdown since 1950 and spent 94%
   of the time below its previous peak. The Nasdaq-100 2x series fell about 99% (F8, F12).
 - **Bought mid-period after a 30% fall, a calendar fund is a 3.5x position, not a 2x one.** At the 2020 bottom SPYQ
@@ -118,13 +155,19 @@ the label MODELED everywhere they appear (FINDINGS F1b).
 | `calendar_letf/metrics.py`, `study.py` | risk metrics; the multi-start study (every window is a ratio of one full-history run) |
 | `calendar_letf/indicators.py` | SMA, TradingView-exact EMA (`ta.ema`), Guppy ribbon states, week-end closes |
 | `calendar_letf/backtest.py`, `strategies/` | the plugin contract, the wealth loop with fill delay and costs, seven example rules |
-| `scripts/` | the four studies: live-fund validation, calendar against daily, timing rules, entries from bottoms. `run_gfc_oracle.py` adds one hindsight entry at the 2007-2009 low. `run_coverage_sim.py` simulates the coverage of the interval conventions. `plot_guppy.py` draws candles with the Guppy ribbons for any symbol. `fresh_clone_check.py`, `scan_identifiers.py`, `ste_check.py` and `refreeze_golden.py` check and pin a release |
+| `calendar_letf/navtr.py`, `leverage.py`, `coverage.py` | the total-return rebuild of the mutual-fund NAVs (B19); yearly growth, the plateau of the best L and the break-even fee (B17); the coverage simulations |
+| `calendar_letf/montecarlo.py` | block-bootstrap, AR(1) and bridge paths on a real trading calendar, and the parallel kernel batch that runs every fund on every path (B11) |
+| `scripts/` | the four studies: live-fund validation, calendar against daily, timing rules, entries from bottoms. `run_gfc_oracle.py` adds one hindsight entry at the 2007-2009 low. `run_live_monthly.py` checks the model on real monthly-reset mutual funds. `run_sub2x.py` runs every design from 1x to 3x. `run_montecarlo.py` runs the funds on simulated decades. `run_3x.py` runs the 3x designs. `run_semis.py` runs the designs on semiconductors. `run_reset_day.py` moves the reset day and tests entry on any day. `run_compounding.py` splits the gap into drag and compounding. `run_leap.py` compares a rolling LEAP. `run_coverage_sim.py` simulates the coverage of the interval conventions. `plot_guppy.py` draws candles with the Guppy ribbons for any symbol. `fresh_clone_check.py`, `scan_identifiers.py`, `ste_check.py` and `refreeze_golden.py` check and pin a release |
 | `tests/run_tests.py` | known-answer checks, plus the golden files in `tests/golden/` that pin the published numbers; must print `0 failure(s)` |
 | `results/` | the studies' tables (markdown + JSON; aggregates, never daily series) and charts |
 | `reference/` | SEC N-PORT extract of the funds' swaps, their payouts, Shiller's monthly S&P dividends (derived) |
 | `ASSUMPTIONS.md`, `FINDINGS.md` | every input with its status; every result with its provenance |
+| [THEORY.md](THEORY.md), `docs/theory_examples.py` | the mathematics of calendar-reset funds and of this engine, with a formula, code and test map; the script computes every number the document quotes |
 
 ## How the model works
+
+[THEORY.md](THEORY.md) gives the full mathematics: the payoff inside a period, the daily drag, the exact
+calendar-minus-daily gap and the choice of leverage. It ties every formula the engine uses to its code and its test.
 
 Between resets the fund is a fixed levered position: `NAV_t = NAV_0 x (2 x U_t/U_0 - 1)` minus financing and fees
 accrued since the reset. At each period end (or at -35%), the model sets the base to the current NAV and level. The
@@ -236,10 +279,14 @@ No price data ships with this repository (see below). You need:
 1. **TradingView daily exports** (split-adjusted, not dividend-adjusted, full history), saved as
    `<EXCHANGE>_<TICKER>_daily.csv`. You need `SP:SPX`, `SP:SPXTR`, `NASDAQ:NDX`, `NASDAQ:XNDX`, `AMEX:SPY`,
    `NASDAQ:QQQ`, `NASDAQ:SPYQ`, `NASDAQ:MQQQ` and `NASDAQ:QQQP`. The bottoms study also needs `AMEX:UPRO` and
-   `NASDAQ:TQQQ`; the GFC oracle entry also needs `AMEX:SSO` and `AMEX:QLD`. The loader reads raw exports (a `time` column) and the clean `date` format. Details and symbols:
+   `NASDAQ:TQQQ`; the GFC oracle entry also needs `AMEX:SSO` and `AMEX:QLD`. The live monthly check also needs the
+   mutual-fund NAVs `NASDAQ:DXSLX`, `NASDAQ:DXQLX`, `NASDAQ:RMQHX`, `NASDAQ:ULPIX`, `NASDAQ:UOPIX`, `NASDAQ:RYVYX` and
+   `NASDAQ:RYNVX`. The loader reads raw exports (a `time` column) and the clean `date` format. Details and symbols:
    [data/README.md](data/README.md).
 2. **FRED CSVs** in `data/rates/`: `DFF`, `DTB3`, `TB3MS`, `OBFR` (fred.stlouisfed.org, public).
 3. Python 3.10+, `numpy`, `pandas`, `numba` and `matplotlib`. `pip install -e .`
+   The tested versions are Python 3.13.15, numpy 2.5.3, pandas 3.0.6, numba 0.68.0 and matplotlib 3.11.2.
+   `constraints.txt` holds them. If a newer release breaks a test, run `pip install -c constraints.txt -e .`.
 
 ```
 set CALENDAR_LETF_DATA=path\to\your\exports        (defaults to data/)
@@ -252,10 +299,22 @@ py scripts\run_calendar_vs_daily.py                 the passive study again: its
 py scripts\run_strategies.py                        the timing rules (under 30 s)
 py scripts\run_from_bottoms.py                      entries from major bottoms (under 10 s)
 py scripts\run_gfc_oracle.py                        the GFC oracle entry (seconds)
+py scripts\run_live_monthly.py                      real monthly-reset mutual funds (seconds)
+py scripts\run_sub2x.py                             leverage from 1x to 3x (about 2 minutes; reads results/live_monthly.json)
+py scripts\run_montecarlo.py                        simulated decades (about 1 minute on 24 threads; reads results/sub2x.json)
+py scripts\run_3x.py                                the 3x designs (under 1 minute)
+py scripts\run_semis.py                             the semiconductor designs (under 1 minute; needs NASDAQ:SOX, NASDAQ:SOXX, AMEX:SOXL, AMEX:USD)
+py scripts\run_reset_day.py                         the reset day and entry on any day (under 1 minute; reads results/montecarlo.json)
+py scripts\run_compounding.py                       the compounding decomposition (about 2 minutes)
+py scripts\run_leap.py                              the LEAP comparator (seconds; needs CBOE:VIX)
 ```
 Run them in that order on your own data. The coverage simulation reads the passive study's per-start gaps from
 `results/raw/`, so they must be yours, not the shipped ones. The passive study quotes the coverage file in one
 sentence of its banner. The test suite checks the raw-file hashes and the code fingerprints.
+
+The golden files pin the published numbers to the published inputs. A study that you re-run on your own data has
+other inputs. The golden test then skips that study and names the files that differ. Other tests still check your
+results.
 
 The first run compiles the numba kernels (a few seconds); later runs use the cached kernels. The whole passive study
 is 3,972 full-history simulations in about a second of kernel time; the bootstraps and the charts take the rest.
@@ -303,16 +362,22 @@ exports, a local check that needs those exports. The public tests check the form
 - The 35% early reset has never fired live. The model's trigger watches the ETF's daily low (the index before the
   ETF existed), so an intraday touch fires it. The three fill modes (reset at the level, at the close, next close)
   bracket where a fill lands once the price crosses the line. SPYQ's negative S&P result rests on one such episode
-  (2008-11-20). Per historical episode, the fill rule changes fund value by between -16% and +27%:
+  (2008-11-20). Per historical episode, the fill rule changes fund value by between -17% and +27%:
   - SPYQ's 2008 episode: +2% at the close, +18% at the next close.
   - QQQP's 2000 episode: -16% at the close.
   - QQQP's 2008 episode: +27% at the next close.
 - The gap between daily and calendar resets depends on day-to-day autocorrelation. That autocorrelation has changed
   sign over decades and may change sign again.
-- S&P dividends before 1988 are Shiller's monthly series. Nasdaq-100 dividends before 2006 are an assumption
-  (0.3%/yr). Rates before July 1954 are a monthly proxy. The fit uses the funds' prices, not NAVs.
+- S&P dividends before 1988 are Shiller's monthly series. Nasdaq-100 dividends of 1999-2006 come from QQQ's filings;
+  before 1999 they are an assumption (0.3%/yr). Rates before July 1954 are a monthly proxy. The fit uses the funds'
+  prices, not NAVs.
 - Windows that overlap are not independent samples. The findings give the independent-window counts.
 - The timing-rule costs use assumed half-spreads; thin funds may cost more.
+- Short (inverse) calendar funds, such as Tradr's MSPY and DQQQ, are out of scope. The engine finances (L - 1) turns at
+  the reference rate for L of 1 or more. An inverse fund earns the rate on its short proceeds, resets early on a RISE
+  and dies at a rise of 1/L. Multi-year rolling windows are also the wrong test for funds meant for short holds. So v0.1.1 leaves them
+  out.
+- The LEAP comparator covers the S&P 500 only: the price library holds no Nasdaq-100 volatility index (VXN).
 
 ## Data, licenses, attribution
 
@@ -325,9 +390,12 @@ exports, a local check that needs those exports. The public tests check the form
 - **SEC EDGAR**: the funds' N-PORT filings (public) are the source of `reference/nport_tradr_2026.json`.
 - The Guppy Multiple Moving Average is Daryl Guppy's method. The ribbon lengths follow ChrisMoody's "CM Super
   Guppy". `strategies/guppy.py` is a Python port, verified against TradingView's own EMA output.
-- **Fund names and tickers** (SPYQ, MQQQ, QQQP, UPRO, TQQQ, SSO, QLD, SPY, QQQ) belong to their issuers. This
-  project uses them only to identify the products it models. This project has no affiliation with any of them, and
-  none of them endorses it. The calendar funds, the daily twins and the 3x rows are models, not the issuer's data.
+- **Fund names and tickers** belong to their sponsors, the ones named at the top of this file. The ETFs are SPYQ,
+  MQQQ, QQQP, SOXM, SOXW, UPRO, TQQQ, SSO, QLD, SOXL, USD, SOXX, SPY and QQQ. The mutual funds are DXSLX, DXQLX,
+  RMQHX, ULPIX, UOPIX, RYVYX and RYNVX. This project uses the names only to identify the products it models. It has
+  no affiliation with any sponsor, and none of them endorses it. S&P 500, Nasdaq-100, PHLX Semiconductor and VIX are
+  trademarks of their index providers.
+- **Models, not issuer data.** The calendar funds, the daily twins and the 3x rows are models, not the issuer's data.
   The SSO, QLD, UPRO and TQQQ rows are the real funds' market prices, price only.
 - **General information only.** Nothing here is financial product advice or a recommendation; past and modeled
   performance is not a reliable indicator of future performance. Leveraged funds can lose most or all of the money invested.

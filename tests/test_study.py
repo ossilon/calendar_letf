@@ -209,3 +209,46 @@ check("match_fills: an unmatched reset ON the window's last row misaligns; one r
       and study.match_fills(trig=[100], fills=[100, 171], period_ends=[], stops=[170]) == [(100, "early", True)])
 check("match_fills: an unmatched reset two sessions before the trigger is outside the window and does not misalign",
       study.match_fills(trig=[100], fills=[98, 100], period_ends=[], stops=[170]) == [(100, "early", True)])
+
+
+# ---- build_world(end=...) (v0.1.1): the older studies re-run on their v0.1.0 data ends ----
+check("V010_END: the v0.1.0 data ends of the passive study (S&P 2026-10-22, Nasdaq-100 2026-10-09)",
+      study.V010_END == {"SPX": "2026-10-22", "NDX": "2026-10-09"})
+_ix = pd.bdate_range("2026-01-02", "2026-11-05")
+_u = pd.Series(np.linspace(1.0, 1.1, len(_ix)), index=_ix, name="SPX_TR")
+_u.attrs = dict(symbols=["SP:SPX", "SP:SPXTR"], basis="constructed", series="planted")
+_tr = pd.Series(np.linspace(100.0, 110.0, len(_ix)), index=_ix)
+_lo = _tr * 0.99
+_saved = (study.series.underlying, study.trigger_series, study.loader.reference_rate, study.series.banner)
+_seen = {}
+
+
+def _rate(index):
+    _seen["rate_last"] = index[-1]
+    r = pd.Series(0.04, index=index)
+    r.attrs = dict(source="planted", proxy_rows=0, proxy_until=None, proxy_rule="none", rate_last_date="2026-11-04", stale_rows=0)
+    return r
+
+
+try:
+    study.series.underlying = lambda name, basis: _u
+    study.trigger_series = lambda name, basis, intraday: (_tr, _lo, dict(basis="index", symbol="SP:SPX", intraday=True))
+    study.loader.reference_rate = _rate
+    study.series.banner = lambda s: "planted"
+    _wf, _pf = study.build_world("SPX", True)
+    _wc, _pc = study.build_world("SPX", True, end="2026-10-22")
+    check("build_world end: every series stops at the end close; the rows kept equal the full load's rows",
+          _wc.dates[-1] == pd.Timestamp("2026-10-22") and _wc.u.equals(_wf.u.loc[:"2026-10-22"])
+          and _wc.trigger.equals(_wf.trigger.loc[:"2026-10-22"]) and _wc.trigger_low.equals(_wf.trigger_low.loc[:"2026-10-22"]))
+    check("build_world end: the rate is built on the cut calendar and the provenance says the cut end",
+          _seen["rate_last"] == pd.Timestamp("2026-10-22") and _pc["last"] == "2026-10-22" and _pf["last"] == "2026-11-05")
+    check("build_world end: the series keep their provenance attrs", _wc.u.attrs.get("series") == "planted")
+    try:
+        study.build_world("SPX", True, end="2026-10-24")          # a Saturday: no close
+        _ok = False
+    except ValueError as e:
+        _ok = "no close on the study end 2026-10-24" in str(e)
+    check("build_world end: an end with no close raises and names the date", _ok)
+finally:
+    study.series.underlying, study.trigger_series, study.loader.reference_rate, study.series.banner = _saved
+check("cut_at: None stays None", study.cut_at(None, "2026-10-22") is None)

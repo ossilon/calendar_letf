@@ -15,6 +15,7 @@ Not in this module: reading results (test_golden.py does) or writing them (the s
 import hashlib
 import json
 import math
+import os
 import re
 from datetime import date
 from pathlib import Path
@@ -22,7 +23,8 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 RESULTS = ROOT / "results"
 GOLDEN = ROOT / "tests" / "golden"
-STUDIES = ("calendar_vs_daily", "strategies", "from_bottoms", "validate_live", "coverage_sim", "gfc_oracle")
+STUDIES = ("calendar_vs_daily", "strategies", "from_bottoms", "validate_live", "coverage_sim", "gfc_oracle", "live_monthly", "sub2x",
+           "montecarlo", "three_x", "semis", "reset_day", "compounding", "leap")
 REL_TOL = 1e-9
 ABS_TOL = 1e-12
 
@@ -60,8 +62,42 @@ SELECT = {
                      "exclude": []},
     # the GFC oracle entry: entry and end dates, every row's dollars, return, CAGR, drawdown and entry leverage
     "gfc_oracle": {"include": [r"worlds\..*"], "exclude": []},
+    # B19, the real monthly-reset mutual funds: the hard test, every fit (cost, interval, coverage), every real-vs-real
+    # row, the erratum, and each fund's counts. Not selected: the per-period and per-anchor check rows and the payout logs
+    "live_monthly": {"include": [r"hard_test\..*", r"fits\..*", r"real_vs_real\..*", r"errata\..*",
+                                 r"funds\.\w+\.(splits|ex_dates|payouts|undatable_payouts|unplaced_payouts_\w+|stale_closes_\w+|"
+                                 r"window_start|periods_gated|periods_passed|anchors_gated|anchors_passed)(\..*)?"],
+                     "exclude": []},
+    # B17, sub-2x leverage: the index row, every optimum (best L, plateau, intervals), the named points, the 1.2x weekly
+    # design, every break-even fee, out of sample, walk-forward, C10 / C13 / C14 and the wipeouts. Not selected: the
+    # 4,920 curve rows (the chart's points; every published number above is read from them and pinned here) and the
+    # coverage simulation details beyond the two coverages and the verdict.
+    "sub2x": {"include": [r"worlds\.\w+\.(years|index|optimum|named|weeklypay|break_even|out_of_sample|walk_forward|c10|c13|c14|wipeouts_base|wipe_first_L)(\..*)?"],
+              "exclude": [r"\.coverage\.(k|runs|phi|mc_se)$", r"\.rule$"]},
+    # B11, the Monte Carlo paths: every bootstrap row, C5, the best-L distributions, the mechanism and its fit, every stress
+    # case, the real decade's rank and the path calendar. Not selected: the fan chart's percentile arrays and the real
+    # decade's monthly levels (chart data), the sample-path list and the run times.
+    "montecarlo": {"include": [r"worlds\.\w+\.(calendar|history|bootstrap|c5|lstar|mechanism|mechanism_fit|stress_flat|stress_rate_shock|"
+                               r"stress_1929)(\..*)?", r"worlds\.\w+\.real_decade\.\w*share\w*"],
+                   "exclude": []},
+    # B1, 3x calendar resets: every design row, the multi-start gaps, the fills, the costs, C13, the key periods, the real-fund
+    # overlay, the simulated decades and the trigger checks. Not selected: the run time.
+    "three_x": {"include": [r"worlds\.\w+\.(cost_cases|cost_effect|designs|multi_start|fills|cost_sensitivity|c13|key_periods|overlay|montecarlo|"
+                            r"fixed35_never_fires|intraday_wipe_extra|history_none_equals_fixed35)(\..*)?"],
+                "exclude": []},
+    # B16, semiconductors: every named row, the multi-start gaps, the 0.05 curve and its plateaus, the break-even fees, C13,
+    # the costs, the key periods, the SOXL overlay, the simulated decades, the validation status and the index basis.
+    "semis": {"include": [r"world\.(index|named|multi_start|curve|plateau|break_even|c13|cost_sensitivity|key_periods|overlay|montecarlo|"
+                          r"validation|soxx_index_basis)(\..*)?"],
+              "exclude": []},
+    # B12 + B10: every anchor's history row, the simulated anchors, entry on every trading day, the seam check, the summary.
+    "reset_day": {"include": [r"worlds\.\w+\.(history|simulated|every_day|seam_alignment)(\..*)?", r"summary(\..*)?"], "exclude": []},
+    # B14: every window row (ratio, gap, enhancement shares, formula fit, trend split), the planted paths, the worked example.
+    "compounding": {"include": [r"worlds\.\w+\.windows(\..*)?", r"planted(\..*)?", r"worked_example(\..*)?", r"summary(\..*)?"], "exclude": []},
+    # B15: the index, every LEAP and fund row, every episode.
+    "leap": {"include": [r"index(\..*)?", r"rows(\..*)?", r"episodes(\..*)?"], "exclude": []},
 }
-NEVER = ("meta",)          # run dates and captions: not numbers to pin (the first path segment)
+NEVER = ("meta",)         # run dates and captions: not numbers to pin (the first path segment)
 
 
 # ---------------------------------------------------------------- flatten
@@ -145,7 +181,7 @@ def differences(golden_keys, current_flat):
 # ---------------------------------------------------------------- files
 
 def sha256_file(path):
-    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    return hashlib.sha256(Path(path).read_bytes().replace(b"\r\n", b"\n")).hexdigest()     # CR LF folded, as git checks out LF
 
 
 def load_golden(study, golden_dir=GOLDEN):
@@ -156,6 +192,45 @@ def write_golden(path, rec):
     """One key per line so a diff of two golden files reads line by line. LF line endings."""
     text = json.dumps(rec, indent=1, ensure_ascii=True, allow_nan=True) + "\n"
     Path(path).write_bytes(text.encode("ascii"))
+
+
+STRICT_ENV = "CALENDAR_LETF_GOLDEN_STRICT"     # set to 1: compare even when the inputs differ (the author's release check)
+
+
+def input_fingerprints(doc):
+    """{"<kind>/<file>": sha256} of every input a results file names in its manifest (price and rate files, reference
+    tables). {} for a study with no manifest (a simulation that reads no data)."""
+    inp = (doc.get("meta") or {}).get("inputs") or (doc.get("provenance") or {}).get("inputs") or {}
+    out = {}
+    for kind in ("files", "reference_files", "reference_json"):
+        for rec in inp.get(kind, []) or []:
+            out[f"{kind}/{rec['file']}"] = rec.get("sha256")
+    return out
+
+
+def inputs_differ(gold, doc):
+    """Sorted names of the inputs whose fingerprint differs between the frozen run and this results file (added and
+    removed ones too). An older golden file without an `inputs` record gives []: it is compared as before."""
+    frozen = gold.get("inputs")
+    if frozen is None:
+        return []
+    now = input_fingerprints(doc)
+    return sorted(k.split("/", 1)[1] for k in set(frozen) | set(now) if frozen.get(k) != now.get(k))
+
+
+def compare(gold, doc, strict=None):
+    """("skip", message) when the results come from other inputs than the frozen run and strict mode is off;
+    otherwise ("compare", differences). A stranger who re-runs a study on their own data gets the skip and its reason;
+    the published results, read from the published inputs, stay pinned."""
+    strict = os.environ.get(STRICT_ENV) == "1" if strict is None else strict
+    diffs = differences(gold["keys"], flatten(doc))
+    moved = inputs_differ(gold, doc)
+    if moved and not strict:
+        shown = ", ".join(moved[:4]) + (f" and {len(moved) - 4} more" if len(moved) > 4 else "")
+        return "skip", (f"inputs differ from the frozen run ({shown}), so {len(diffs)} of {len(gold['keys'])} pinned "
+                        f"numbers differ; the golden file pins the published inputs. Re-run the study on the published "
+                        f"inputs to compare, or set {STRICT_ENV}=1")
+    return "compare", diffs
 
 
 class NothingChanged(ValueError):
@@ -177,7 +252,9 @@ def refreeze(study, reason, results_dir=RESULTS, golden_dir=GOLDEN, today=None):
     src = Path(results_dir) / f"{study}.json"
     if not src.exists():
         raise FileNotFoundError(f"{src.name} not found; run the study first")
-    keys = select(flatten(json.loads(src.read_text(encoding="utf-8"))), study)
+    doc = json.loads(src.read_text(encoding="utf-8"))
+    keys = select(flatten(doc), study)
+    inputs = input_fingerprints(doc)
     if not keys:
         raise ValueError(f"{study}: the selection matched no keys; the results layout changed, update SELECT")
     today = today or date.today().isoformat()
@@ -191,11 +268,15 @@ def refreeze(study, reason, results_dir=RESULTS, golden_dir=GOLDEN, today=None):
         removed = sum(1 for k in old_keys if k not in keys)
         moved = sum(1 for k in keys if k in old_keys and not same(old_keys[k], keys[k]))
         changed = added + removed + moved
-        if changed == 0:
+        n_inputs = len(inputs_differ(old, doc)) if "inputs" in old else len(inputs)
+        if changed == 0 and n_inputs == 0:
             raise NothingChanged(f"{study}: nothing changed against the current golden file; a re-freeze would only add a no-op history entry")
-        history.append({"date": today, "reason": reason.strip(), "keys_changed": changed, "added": added, "removed": removed, "moved": moved})
+        entry = {"date": today, "reason": reason.strip(), "keys_changed": changed, "added": added, "removed": removed, "moved": moved}
+        if n_inputs:
+            entry["inputs_changed"] = n_inputs     # B20: the inputs moved (a new manifest), whether or not a number did
+        history.append(entry)
     rec = {"study": study, "frozen_on": today, "reason": reason.strip(), "source_json_sha256": sha256_file(src),
-           "n_keys": len(keys), "refrozen": history, "keys": keys}
+           "n_keys": len(keys), "inputs": inputs, "refrozen": history, "keys": keys}
     Path(golden_dir).mkdir(parents=True, exist_ok=True)
     write_golden(target, rec)
     return len(keys), changed

@@ -1,14 +1,16 @@
 cff-version: 1.2.0
 message: "If you use this software, please cite it as below."
-title: "calendar_letf: calendar-reset versus daily-reset 2x leveraged funds"
-version: 0.1.0
+title: "calendar_letf: calendar-reset versus daily-reset leveraged funds"
+version: 0.1.1
 license: MIT
 authors:
   - name: "calendar_letf contributors"
 abstract: >-
-  A tested engine that models calendar-reset 2x leveraged funds (weekly, monthly and quarterly resets with a 35%
-  early reset) against daily-reset twins at identical costs, validates the model against the live Tradr funds, and
-  tests timing rules without look-ahead. Research tooling, not investment advice.
+  A tested engine that models calendar-reset leveraged funds from 1x to 3x (weekly, monthly and quarterly resets with
+  an early reset) against daily-reset twins at identical costs on the S&P 500, the Nasdaq-100 and the semiconductor
+  index. It validates the model against live calendar-reset ETFs and monthly-reset mutual funds, chooses leverage with
+  intervals, runs block-bootstrap Monte Carlo, and tests timing rules without look-ahead. THEORY.md gives the
+  mathematics, each formula tied to its code and a test. Research tooling, not investment advice.
 keywords:
   - leveraged ETF
   - calendar reset

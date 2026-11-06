@@ -4,7 +4,7 @@ kernels to each other and to the published formulas. Made-up data, except three 
 
     P1  Bessembinder's exact identity: calendar minus daily period return = sum_{k>=2} (beta - beta^k) e_k
     P2  Avellaneda-Zhang / Leung-Santoli log formula for the daily twin on a GBM path, and its convergence
-    P3  planted serial correlation (Bessembinder Figure 1): the sign of the mean calendar-minus-daily gap
+    P3  planted serial correlation (the design of Bessembinder's Figure 1 caption): the sign of the mean calendar-minus-daily gap
     P4  properties: finite outputs, monotone in each cost, scale invariance, calendar = margin inside a period
     P5  a second, vectorized implementation of the calendar NAV, equal to the numba kernel
 
@@ -112,7 +112,8 @@ if spx is not None:
           [(x[0], x[1]) for x in real if x[5]] == [("2008-12-31", 3.0)])
 
 # =================================================================================================================
-# P2. Avellaneda-Zhang (2010) eq. (1)/(3) = Leung-Santoli (2016) eq. (2.7)-(2.8): a daily LETF with return
+# P2. Avellaneda-Zhang (2010) eqs. (4)-(6), p. 591 = Leung-Santoli (2016) eq. (2.8), p. 14 (R0 read 2026-11-06; both
+#     write V_T demeaned, while the raw sum is the true second-order term: THEORY.md section 5): a daily LETF with return
 #     beta R_i - ((beta-1) r + f) dt has
 #         ln(L_T/L_0) ~ beta ln(S_T/S_0) - ((beta-1) r + f) T + 0.5 beta (1 - beta) V_T,   V_T = sum (R_i - Rbar)^2.
 #     GBM: mu 8%, sigma 25%, r 4%, f 1%, beta 2, T = 1 year, accrual exactly dt per row (so the kernel's cost per row
@@ -155,7 +156,8 @@ check(f"P2: on the same Brownian paths the error falls at least sqrt(10) = 3.16 
       f"(observed {ratio_p2:.2f}: between 7 and 14, i.e. first order in dt)", 7.0 < ratio_p2 < 14.0, ratio_p2)
 
 # =================================================================================================================
-# P3. Planted serial correlation, Bessembinder (2026) Figure 1: r_t = mu + e_t + 0.75 MA e_{t-1} + 0.50 MA e_{t-2}
+# P3. Planted serial correlation in the design of Bessembinder (2026) Figure 1's caption (an independent check of his
+#     eq. (13) at this project's settings, not a replication of his plotted values): r_t = mu + e_t + 0.75 MA e_{t-1} + 0.50 MA e_{t-2}
 #     + 0.25 MA e_{t-3}, e_t iid normal sd 1%, mu = 0.04%, T = 21, zero costs, 20,000 paths per MA value (fixed seed;
 #     three extra e's before each path so every path is stationary). His eq. (13), second order, beta = 2:
 #         E[calendar - daily] = (beta - beta^2) [C(T,2) mu^2 + T sigma^2/2 (VR_T - 1)] = -2 [210 mu^2 + 10.5 sigma^2 (VR - 1)]

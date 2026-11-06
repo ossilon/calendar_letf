@@ -3,6 +3,7 @@
 Each test writes small CSVs into a temporary folder and points `data_dir` at it. Test code runs when this file is
 imported, like the other test files; `check` and `raises` come from tests/_harness.py.
 """
+import csv
 import os
 import sys
 import tempfile
@@ -227,16 +228,97 @@ ratio = nt.loc[x_start:].drop(sandy) / xn
 check("NDX TR: equals the published XNDX times a constant from 2010-01-04 (1e-12)", (ratio / ratio.iloc[0] - 1).abs().max(skipna=False) < 1e-12)
 check("NDX TR: Sandy-style missing day is filled and listed", nt.attrs["days_filled_from_ndx"] == [str(sandy.date())])
 check("NDX TR: on NDX's calendar and starts at 1.0", nt.index.equals(ndx.index) and nt.iloc[0] == 1.0)
-nz = series.ndx_total_return(pre_yield=0.0, mid_yield=0.0, data_dir=d3)
+nz = series.ndx_total_return(pre_yield=0.0, mid_yield=0.0, data_dir=d3, qqq_yield=None)
 rz = nz.loc[:x_start] / ndx.loc[:x_start]
 check("NDX TR: zero yields -> pre-splice part is the price index times a constant (1e-12)", (rz / rz.iloc[0] - 1).abs().max(skipna=False) < 1e-12)
 # one expected value by hand: between 2006-11-08 and the splice the growth is price x (1 + 0.73% x days/365)
 seg = nt.loc["2008-03-03":"2008-03-04"]
 expect = ndx.loc["2008-03-04"] / ndx.loc["2008-03-03"] * (1 + series.MID_YIELD * 1 / 365)
 check("NDX TR: mid-period daily growth = price move x (1 + 0.73% x days/365)", abs(seg.iloc[1] / seg.iloc[0] - expect) < 1e-12)
-seg = nt.loc["2005-03-03":"2005-03-04"]
+n0 = series.ndx_total_return(data_dir=d3, qqq_yield=None)          # the v0.1.0 series (a sensitivity since B7b)
+seg = n0.loc["2005-03-03":"2005-03-04"]
 expect = ndx.loc["2005-03-04"] / ndx.loc["2005-03-03"] * (1 + series.NDX_PRE_YIELD * 1 / 365)
-check("NDX TR: early daily growth = price move x (1 + 0.3% x days/365)", abs(seg.iloc[1] / seg.iloc[0] - expect) < 1e-12)
+check("NDX TR, qqq_yield=None: early daily growth = price move x (1 + 0.3% x days/365)", abs(seg.iloc[1] / seg.iloc[0] - expect) < 1e-12)
+# B7b: QQQ's measured fiscal-year income yields, 1999-03-05 .. 2006-11-07. The expected yields come from the CSV read
+# with the csv module and summed by hand (expense + net income, on one basis: the sum does not depend on the fee waiver), not from series.qqq_income_table.
+with open(series.QQQ_INCOME_FILE, newline="", encoding="utf-8") as _f:
+    _qrows = list(csv.DictReader(_f))
+_qy = {int(r["fiscal_year"]): float(r["gross_income_yield_pct"]) / 100 for r in _qrows}
+check("QQQ table: fiscal 1999-2006, all PRIMARY, from the two 485BPOS filings",
+      sorted(_qy) == list(range(1999, 2007)) and all(r["status"] == "PRIMARY" for r in _qrows)
+      and {r["accession"] for r in _qrows} == {"0001206774-04-000023", "0001206774-07-000279"})
+check("QQQ table: gross yield = expense ratio + net-investment-income ratio on every row (1e-9)",
+      all(abs(float(r["expense_ratio_pct"]) + float(r["nii_ratio_pct"]) - float(r["gross_income_yield_pct"])) < 1e-9 for r in _qrows))
+check("QQQ table: fiscal years run October to September; the first starts on QQQ's launch, 1999-03-05",
+      all(r["first_day"] == (f"{int(r['fiscal_year']) - 1}-10-01" if r["fiscal_year"] != "1999" else "1999-03-05")
+          and r["last_day"] == f"{r['fiscal_year']}-09-30" for r in _qrows))
+
+
+def day_growth(level, a, b):
+    """Growth of level from row a to row b, divided by NDX's price move: the dividend factor of that step."""
+    return level.loc[b] / level.loc[a] / (ndx.loc[b] / ndx.loc[a])
+
+
+for _a, _b, _fy in (("2005-03-03", "2005-03-04", 2005), ("2004-01-05", "2004-01-06", 2004), ("2006-03-02", "2006-03-03", 2006),
+                    ("2006-10-16", "2006-10-17", 2006)):      # the last one is after fiscal 2006 ends: it keeps 2006's yield
+    _d = (pd.Timestamp(_b) - pd.Timestamp(_a)).days
+    check(f"NDX TR, measured: {_b} grows by price x (1 + fiscal {_fy} yield x days/365)",
+          abs(day_growth(nt, _a, _b) - (1 + _qy[_fy] * _d / 365)) < 1e-12, day_growth(nt, _a, _b))
+_d = (pd.Timestamp("2004-10-01") - pd.Timestamp("2004-09-30")).days
+check("NDX TR, measured: the step into 2004-10-01 takes fiscal 2005's yield (yield of the row's own day)",
+      abs(day_growth(nt, "2004-09-30", "2004-10-01") - (1 + _qy[2005] * _d / 365)) < 1e-12)
+check("NDX TR, measured: from 2006-11-08 the mid yield applies, as before",
+      abs(day_growth(nt, "2006-11-08", "2006-11-09") - (1 + series.MID_YIELD / 365)) < 1e-12)
+_r = nt.loc["2006-11-08":] / n0.loc["2006-11-08":]
+check("NDX TR, measured vs None: after 2006-11-08 the two differ only by a constant factor (1e-12)", (_r / _r.iloc[0] - 1).abs().max() < 1e-12)
+check("NDX TR, measured: attrs record the file, the status and the first measured day",
+      nt.attrs["qqq_yield"] == "measured" and nt.attrs["qqq_file"] == "qqq_income_ratios.csv"
+      and nt.attrs["qqq_yield_status"].startswith("MEASURED") and nt.attrs["qqq_from"] == "2004-01-02"
+      and n0.attrs["qqq_yield"] is None and nt.attrs["pre_yield_status"] == "ASSUMED")
+check("NDX TR, measured: the banner names QQQ's yields; the None banner does not",
+      "QQQ's fiscal-year income yield" in series.banner(nt) and "QQQ" not in series.banner(n0))
+raises("NDX TR: an unknown qqq_yield raises", lambda: series.ndx_total_return(data_dir=d3, qqq_yield="flat"), "qqq_yield")
+# a series that starts before QQQ: rows before 1999-03-05 keep the ASSUMED 0.3%; 1999-03-05 itself is measured
+ndx_long = walk("1998-01-02", "2010-06-30", 12, level=1000.0)
+d3b = TMP / "ndx_long"
+write_clean(d3b, "NASDAQ:NDX", ndx_long)
+write_clean(d3b, "NASDAQ:XNDX", ndx_long.loc["2010-01-04":] * 2.0)
+ntl = series.ndx_total_return(data_dir=d3b)
+_g = lambda a, b: ntl.loc[b] / ntl.loc[a] / (ndx_long.loc[b] / ndx_long.loc[a])  # noqa: E731
+check("NDX TR, measured: 1999-03-04 still grows by the ASSUMED 0.3%; 1999-03-05 by fiscal 1999's yield",
+      abs(_g("1999-03-03", "1999-03-04") - (1 + series.NDX_PRE_YIELD / 365)) < 1e-12
+      and abs(_g("1999-03-04", "1999-03-05") - (1 + _qy[1999] / 365)) < 1e-12 and ntl.attrs["qqq_from"] == "1999-03-05")
+_bad = TMP / "qqq_gap.csv"
+_bad.write_text("fiscal_year,first_day,last_day,gross_income_yield_pct\n2000,1999-10-01,2000-09-30,0.03\n2001,2000-10-02,2001-09-30,0.05\n", encoding="utf-8")
+raises("QQQ table: a gap between fiscal years raises", lambda: series.qqq_income_table(_bad), "follow each other")
+_bad.write_text("fiscal_year,first_day,last_day,gross_income_yield_pct\n2000,1999-10-01,2000-09-30,0.03\n2001,2000-09-30,2001-09-30,0.05\n", encoding="utf-8")
+raises("QQQ table: overlapping fiscal years raise", lambda: series.qqq_income_table(_bad), "follow each other")
+
+
+def qqq_effect_from_table(rows, end="2006-11-08", flat=series.NDX_PRE_YIELD):
+    """(time-weighted mean yield, level effect against the flat yield), both in percent, from the CSV rows alone:
+    calendar days of each fiscal year (the last one runs on to `end`, exclusive), no trading calendar, no series code."""
+    rows = sorted(rows, key=lambda r: r["first_day"])
+    spans = []
+    for k, r in enumerate(rows):
+        hi = pd.Timestamp(r["last_day"]) + pd.Timedelta(days=1) if k < len(rows) - 1 else pd.Timestamp(end)
+        spans.append(((hi - pd.Timestamp(r["first_day"])).days / 365.0, float(r["gross_income_yield_pct"]) / 100))
+    years = sum(s for s, _ in spans)
+    mean = sum(s * y for s, y in spans) / years
+    effect = np.exp(sum(s * (y - flat) for s, y in spans)) - 1
+    return mean * 100, effect * 100
+
+
+_mean, _eff = qqq_effect_from_table(_qrows)
+_f30 = (HERE.parent / "FINDINGS.md").read_text(encoding="utf-8")
+_f30 = _f30[_f30.index("**F30."):_f30.index("Could not test (B7b)")]
+_pins = [f"averaged {_mean:.2f}% a year", f"{min(_qy[y] for y in range(1999, 2004)) * 100:.2f}% to "
+         f"{max(_qy[y] for y in range(1999, 2004)) * 100:.2f}% a year in fiscal 1999-2003",
+         f"{_qy[2004] * 100:.2f}% in 2004", f"{_qy[2005] * 100:.2f}% in 2005", f"Fiscal 2006 gave {_qy[2006] * 100:.2f}%",
+         f"stands {_eff:.2f}% above the v0.1.0 level", f"assumed {series.NDX_PRE_YIELD * 100:.1f}%"]
+_flat = " ".join(_f30.split())
+check("F30 prose pins: every number quoted in FINDINGS F30 matches qqq_income_ratios.csv", all(p in _flat for p in _pins),
+      [p for p in _pins if p not in _flat])
 raises("NDX TR: trust_from must be an XNDX trading day", lambda: series.ndx_total_return(trust_from="2010-01-02", data_dir=d3), "trading day")
 check("underlying(): names and basis", series.underlying("NDX", "total_return", d3).name == "NDX_TR"
       and series.underlying("SPX", "total_return", d2).name == "SPX_TR" and series.underlying("NDX", "price", d3).name == "NDX")
@@ -351,8 +433,6 @@ check("fresher XNDX file: rows after the NDX file's end are dropped and listed (
 # 9f. the splice day itself earns its month's dividend under the default (Shiller) yield. Flat price, flat published
 #     level: the step from the last pre-splice row (Friday 2000-02-04) into the splice day (Monday 2000-02-07) must grow
 #     by 1 + y(Feb 2000) x 3/365, with y read from the Shiller file by a second route (the csv module).
-import csv  # noqa: E402
-
 with open(series.SHILLER_FILE, newline="", encoding="utf-8") as _f:
     _y_feb2000 = next(float(r["dividend_yield"]) for r in csv.DictReader(_f) if r["month"] == "2000-02")
 sd_ix = pd.bdate_range("2000-01-03", "2000-03-31")

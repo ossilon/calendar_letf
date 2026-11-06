@@ -1,0 +1,23 @@
+ticker,ex_date,amount_as_published,split_factor,amount_per_share,source,status
+SOXX,2021-09-24,0.38557,3,0.1285233333,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2021-12-13,0.29106,3,0.09702,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2021-12-30,0.05152,3,0.01717333333,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2022-03-24,0.29172,3,0.09724,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2022-06-09,0.20932,3,0.06977333333,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2022-09-26,0.6006,3,0.2002,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2022-12-13,0.35413,3,0.1180433333,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2023-03-23,0.35747,3,0.1191566667,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2023-06-07,0.2169,3,0.0723,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2023-09-26,0.55525,3,0.1850833333,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2023-12-20,0.37443,3,0.12481,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2024-03-21,0.22495,3,0.07498333333,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2024-06-11,0.31033,3,0.1034433333,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2024-09-25,0.55238,3,0.1841266667,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2024-12-17,0.35783,3,0.1192766667,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2025-03-18,0.26112,3,0.08704,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2025-06-16,0.48328,3,0.1610933333,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2025-09-16,0.54075,3,0.18025,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2025-12-16,0.43627,3,0.1454233333,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2026-03-17,0.20794,3,0.06931333333,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2026-06-15,0.28273,3,0.09424333333,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY
+SOXX,2026-09-15,0.32505,3,0.10835,stockanalysis.com/etf/soxx/dividend (saved 2026-11-06); split factor from reference/soxx_splits.csv,SECONDARY

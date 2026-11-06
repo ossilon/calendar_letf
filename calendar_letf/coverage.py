@@ -196,3 +196,37 @@ def measured_persistence(csv_path, lags=(1, 2, 3)):
             rec[f"acf_lag_{m}h"] = autocorr(g, m * h)
         out.append(rec)
     return out
+
+
+def yearly_t_coverage(values, seed, runs=4000):
+    """Simulated coverage of the t(k-1) x SE interval on k yearly values (BACKLOG B19: the live-fund intervals),
+    in two worlds at the interval's own k:
+
+      bootstrap  draws of k from the observed values less their mean (true mean 0), with replacement: keeps the real
+                 values' skew and fat tails, but treats the years as independent;
+      ar1        normal years with the lag-1 autocorrelation measured in the values (floored at 0: a negative one
+                 would only widen the interval), started from the stationary law: keeps the dependence between years.
+
+    Each run is covered when |mean| <= t975(k - 1) x sd / sqrt(k). Coverage is scale-free, so the AR(1) world needs no
+    variance. Returns dict(k, runs, phi, coverage_bootstrap, coverage_ar1, mc_se) where mc_se is the Monte Carlo
+    error of a coverage near 0.95 at this many runs."""
+    v = np.asarray(list(values), dtype=np.float64)
+    k = len(v)
+    if k < 3:
+        raise ValueError(f"yearly_t_coverage: k = {k}; an interval needs at least 3 years to test")
+    rng = np.random.default_rng(seed)
+    t = stats.t975(k - 1)
+
+    def covered(x):                                # x: runs x k
+        m, s = x.mean(axis=1), x.std(axis=1, ddof=1)
+        return float(np.mean(np.abs(m) <= t * s / math.sqrt(k)))
+
+    boot = rng.choice(v - v.mean(), size=(runs, k), replace=True)
+    phi = max(0.0, autocorr(v, 1)) if np.isfinite(autocorr(v, 1)) else 0.0
+    z = rng.standard_normal((runs, k))
+    ar = np.empty((runs, k))
+    ar[:, 0] = z[:, 0]                             # the stationary law of a unit-variance AR(1)
+    for j in range(1, k):
+        ar[:, j] = phi * ar[:, j - 1] + math.sqrt(1.0 - phi * phi) * z[:, j]
+    return dict(k=k, runs=runs, phi=phi, coverage_bootstrap=covered(boot), coverage_ar1=covered(ar),
+                mc_se=math.sqrt(0.95 * 0.05 / runs))

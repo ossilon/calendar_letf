@@ -6,17 +6,17 @@ A HINDSIGHT entry: the close of the lowest index close from 2007-01-01 to 2009-1
 
 ```text
 Inputs: 12 files; prices from <external>/library, rates from <external>/rates
-  SP_SPX_daily.csv: 19326 rows, 1950-01-03 to 2026-10-22, sha256 8b0c1596b57e
-  SP_SPXTR_daily.csv: 9780 rows, 1988-01-04 to 2026-10-23, sha256 ac309a0b90f5
-  AMEX_SPY_daily.csv: 8482 rows, 1993-01-29 to 2026-10-09, sha256 38bb2ae821ff
-  NASDAQ_NDX_daily.csv: 10504 rows, 1985-01-31 to 2026-10-09, sha256 4c3219bda720
-  NASDAQ_XNDX_daily.csv: 5004 rows, 2006-11-08 to 2026-10-09, sha256 a10dab98993e
-  NASDAQ_QQQ_daily.csv: 6940 rows, 1999-03-10 to 2026-10-09, sha256 1bf106f83579
-  AMEX_SSO_daily.csv: 5103 rows, 2006-06-21 to 2026-10-02, sha256 9f248b1bedac
-  AMEX_UPRO_daily.csv: 4345 rows, 2009-06-25 to 2026-10-02, sha256 2462a547956a
-  AMEX_QLD_daily.csv: 5108 rows, 2006-06-21 to 2026-10-09, sha256 298046184b2f
-  NASDAQ_TQQQ_daily.csv: 4191 rows, 2010-02-11 to 2026-10-09, sha256 d3dc0fa8dc69
-  DFF.csv: 26398 rows, 1954-07-01 to 2026-10-08, sha256 a93504210b53
+  SP_SPX_daily.csv: 19333 rows, 1950-01-03 to 2026-11-02, sha256 b146c9af89cc
+  SP_SPXTR_daily.csv: 9787 rows, 1988-01-04 to 2026-11-03, sha256 edab5090825e
+  AMEX_SPY_daily.csv: 8498 rows, 1993-01-29 to 2026-11-02, sha256 643d6ef08b88
+  NASDAQ_NDX_daily.csv: 10519 rows, 1985-01-31 to 2026-10-30, sha256 79d8e8688fa3
+  NASDAQ_XNDX_daily.csv: 5019 rows, 2006-11-08 to 2026-10-30, sha256 d7dcc6dffa24
+  NASDAQ_QQQ_daily.csv: 6955 rows, 1999-03-10 to 2026-10-30, sha256 f096cd6c6b75
+  AMEX_SSO_daily.csv: 5103 rows, 2006-06-21 to 2026-10-02, sha256 0df3e43a82db
+  AMEX_UPRO_daily.csv: 4345 rows, 2009-06-25 to 2026-10-02, sha256 17d862355823
+  AMEX_QLD_daily.csv: 5123 rows, 2006-06-21 to 2026-10-30, sha256 9e5453cb02e0
+  NASDAQ_TQQQ_daily.csv: 4206 rows, 2010-02-11 to 2026-10-30, sha256 ae88fcb39ab3
+  DFF.csv: 26424 rows, 1954-07-01 to 2026-11-03, sha256 e84a934a5014
   TB3MS.csv: 1112 rows, 1934-01-01 to 2026-08-01, sha256 ebf04b1ae5bc
 SPX early-reset trigger: the AMEX:SPY price (daily low) from 1993-01-29, scaled to the SP:SPX price index before that; trigger basis 'etf'; drop 35% from the fund's base; fill mode 'level'.
 SPX day counts: financing (reference rate and swap spread) ACT/360; expense ratio ACT/365 (calendar days between rows, so weekends and holidays accrue).
@@ -181,7 +181,7 @@ Entry: the close of 2008-11-20, after a fall of 53.7% from the highest close sin
 |---|---|---|---|---|
 | MQQQ (monthly) | 1.268 (+21) | 1.474 (-18) | none | none |
 | QQQP (quarterly) | 0.834 (-12) | 1.175 (+4) | -400 to -2 | -400 to -2 |
-| HYP_NDX_W (weekly) | 1.129 (+21) | 1.199 (-397) | none | none |
+| HYP_NDX_W (weekly) | 1.129 (+20) | 1.199 (-397) | none | none |
 
 **Sensitivity: the other index's low date (2009-03-09), fixed encoding.**
 

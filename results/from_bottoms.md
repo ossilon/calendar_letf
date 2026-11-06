@@ -1,20 +1,20 @@
 # Entries from major bottoms: what a calendar-reset 2x fund is after a crash (B13)
 
-Run 2026-10-29. Script `scripts/run_from_bottoms.py`, math in `calendar_letf/bottoms.py`; numbers in `from_bottoms.json`; per-entry tables in `results/raw/` (git-ignored). **Every fund series is synthetic or a model: SPYQ, MQQQ and QQQP are modeled, HYP_* are MODELED designs (MODELED: a live fund of this design traded 2024-08-30 to 2025-02-28; no live fund exists today), the 3x series are MODELS of UPRO / TQQQ at their filed terms, and the real UPRO / TQQQ are price-only overlays. Research tooling, not investment advice.**
+Run 2026-11-06. Script `scripts/run_from_bottoms.py`, math in `calendar_letf/bottoms.py`; numbers in `from_bottoms.json`; per-entry tables in `results/raw/` (git-ignored). **Every fund series is synthetic or a model: SPYQ, MQQQ and QQQP are modeled, HYP_* are MODELED designs (MODELED: a live fund of this design traded 2024-08-30 to 2025-02-28; no live fund exists today), the 3x series are MODELS of UPRO / TQQQ at their filed terms, and the real UPRO / TQQQ are price-only overlays. Research tooling, not investment advice.**
 
 ## Inputs and conventions
 
 ```text
 Inputs: 10 files; prices from <external>/library, rates from <external>/rates
-  SP_SPX_daily.csv: 19326 rows, 1950-01-03 to 2026-10-22, sha256 8b0c1596b57e
-  SP_SPXTR_daily.csv: 9780 rows, 1988-01-04 to 2026-10-23, sha256 ac309a0b90f5
-  AMEX_SPY_daily.csv: 8482 rows, 1993-01-29 to 2026-10-09, sha256 38bb2ae821ff
-  NASDAQ_NDX_daily.csv: 10504 rows, 1985-01-31 to 2026-10-09, sha256 4c3219bda720
-  NASDAQ_XNDX_daily.csv: 5004 rows, 2006-11-08 to 2026-10-09, sha256 a10dab98993e
-  NASDAQ_QQQ_daily.csv: 6940 rows, 1999-03-10 to 2026-10-09, sha256 1bf106f83579
-  AMEX_UPRO_daily.csv: 4345 rows, 2009-06-25 to 2026-10-02, sha256 2462a547956a
-  NASDAQ_TQQQ_daily.csv: 4191 rows, 2010-02-11 to 2026-10-09, sha256 d3dc0fa8dc69
-  DFF.csv: 26398 rows, 1954-07-01 to 2026-10-08, sha256 a93504210b53
+  SP_SPX_daily.csv: 19333 rows, 1950-01-03 to 2026-11-02, sha256 b146c9af89cc
+  SP_SPXTR_daily.csv: 9787 rows, 1988-01-04 to 2026-11-03, sha256 edab5090825e
+  AMEX_SPY_daily.csv: 8498 rows, 1993-01-29 to 2026-11-02, sha256 643d6ef08b88
+  NASDAQ_NDX_daily.csv: 10519 rows, 1985-01-31 to 2026-10-30, sha256 79d8e8688fa3
+  NASDAQ_XNDX_daily.csv: 5019 rows, 2006-11-08 to 2026-10-30, sha256 d7dcc6dffa24
+  NASDAQ_QQQ_daily.csv: 6955 rows, 1999-03-10 to 2026-10-30, sha256 f096cd6c6b75
+  AMEX_UPRO_daily.csv: 4345 rows, 2009-06-25 to 2026-10-02, sha256 17d862355823
+  NASDAQ_TQQQ_daily.csv: 4206 rows, 2010-02-11 to 2026-10-30, sha256 ae88fcb39ab3
+  DFF.csv: 26424 rows, 1954-07-01 to 2026-11-03, sha256 e84a934a5014
   TB3MS.csv: 1112 rows, 1934-01-01 to 2026-08-01, sha256 ebf04b1ae5bc
 SPX early-reset trigger: the AMEX:SPY price (daily low) from 1993-01-29, scaled to the SP:SPX price index before that; trigger basis 'etf'; drop 35% from the fund's base; fill mode 'level'.
 SPX day counts: financing (reference rate and swap spread) ACT/360; expense ratio ACT/365 (calendar days between rows, so weekends and holidays accrue).
@@ -42,9 +42,9 @@ MODELED: a live fund of this design traded 2024-08-30 to 2025-02-28; no live fun
 - **Cost encodings (ASSUMED, F5).** The 2x products are run under both: `fixed` (2.6% of NAV a year) and `rate` (1.4% + 1.3 x the reference rate). Tables show `fixed`; `rate` is in the JSON, the raw tables and the timing section. The 3x models use the plain rate and the filed costs (no residual encoding).
 - **UPRO_MODEL** (L=3, daily reset, kernel convention: 2 turns of the reference rate): spread 0.9218% over fed funds [VERIFIED_NPORT_2026-05-31] on 2.4215 swap turns [VERIFIED_NPORT_2026-05-31, swaps basis] + fee 0.89% [VERIFIED_issuer_page_2026-09-25_RECHECK]. Source: SEC N-PORT 0002071691-26-017443 (period end 2026-05-31), over fed funds; fee: UPRO issuer page 2026-09-25 (re-check).
 - **TQQQ_MODEL** (L=3, daily reset, kernel convention: 2 turns of the reference rate): spread 1.0576% over fed funds [VERIFIED_NPORT_2026-05-31] on 2.563 swap turns [VERIFIED_NPORT_2026-05-31, swaps basis] + fee 0.82% [ASSUMED]. Source: SEC N-PORT 0002071691-26-017348 (period end 2026-05-31), over fed funds; fee: 0.82% as given in the B13 brief (issuer page); no TQQQ expense ratio is on file, so not re-verified here.
-- **S&P 500**: total return 1950-01-03 to 2026-10-22 (19326 rows); entries on the price index `SP:SPX`; early-reset trigger (base case): the AMEX:SPY price (daily low) from 1993-01-29, scaled to the SP:SPX price index before that, drop 35%, mode level. [SPX_TR] symbols: SP:SPX, SP:SPXTR; basis: constructed; published 1988-01-04 on (PUBLISHED (SP:SPXTR as exported)); before that price + Shiller's measured monthly dividend yield (mean 4.10%/yr over the pre-splice years) (MEASURED (Shiller monthly D/P; quarterly dividends interpolated to months by the source)); splice date 1988-01-04; days missing from the published series carried by the price move: ['1994-04-27']; stale published rows on non-trading days dropped: ['2001-09-11', '2001-09-12', '2001-09-13', '2001-09-14']; published rows after the price file's last date dropped: ['2026-10-23'] (top up the price file) Rate: FRED DFF (effective fed funds), lagged one row; TB3MS proxy where DFF is not yet published (proxy rows 1125, stale rows 10).
-- **Nasdaq-100**: total return 1985-01-31 to 2026-10-09 (10504 rows); entries on the price index `NASDAQ:NDX`; early-reset trigger (base case): the NASDAQ:QQQ price (daily low) from 1999-03-10, scaled to the NASDAQ:NDX price index before that, drop 35%, mode level. [NDX_TR] symbols: NASDAQ:NDX, NASDAQ:XNDX; basis: constructed; published 2010-01-04 on (VERIFIED (NASDAQ:XNDX, anchor-checked)); 2006-11-08..2010-01-04 price + 0.73%/yr (MEASURED (level change of mis-dated XNDX block)); before 2006-11-08 price + 0.30%/yr (ASSUMED); splice date 2010-01-04; days missing from the published series carried by the price move: ['2012-10-31'] Rate: FRED DFF (effective fed funds), lagged one row; TB3MS proxy where DFF is not yet published (proxy rows 0, stale rows 1).
-- **Effective leverage** (entry day) is read from the kernel's own state: exactly L if the entry close is itself a reset close, otherwise the kernel is re-run from the last reset and the exposure is read from the NAV's slope in the index level (`bottoms.effective_leverage`); it equals 2 x (U_t/U_0) / (NAV_t/NAV_0) wherever the base is the last reset's close (cross-check below: SPX 208 cases, max difference 7.1e-10; NDX 142 cases, max difference 7.4e-10). Daily twins are exactly 2, the 3x models exactly 3.
+- **S&P 500**: total return 1950-01-03 to 2026-10-22 (19326 rows); entries on the price index `SP:SPX`; early-reset trigger (base case): the AMEX:SPY price (daily low) from 1993-01-29, scaled to the SP:SPX price index before that, drop 35%, mode level. [SPX_TR] symbols: SP:SPX, SP:SPXTR; basis: constructed; published 1988-01-04 on (PUBLISHED (SP:SPXTR as exported)); before that price + Shiller's measured monthly dividend yield (mean 4.10%/yr over the pre-splice years) (MEASURED (Shiller monthly D/P; quarterly dividends interpolated to months by the source)); splice date 1988-01-04; days missing from the published series carried by the price move: ['1994-04-27']; stale published rows on non-trading days dropped: ['2001-09-11', '2001-09-12', '2001-09-13', '2001-09-14']; published rows after the price file's last date dropped: ['2026-11-03'] (top up the price file) Rate: FRED DFF (effective fed funds), lagged one row; TB3MS proxy where DFF is not yet published (proxy rows 1125, stale rows 0).
+- **Nasdaq-100**: total return 1985-01-31 to 2026-10-09 (10504 rows); entries on the price index `NASDAQ:NDX`; early-reset trigger (base case): the NASDAQ:QQQ price (daily low) from 1999-03-10, scaled to the NASDAQ:NDX price index before that, drop 35%, mode level. [NDX_TR] symbols: NASDAQ:NDX, NASDAQ:XNDX; basis: constructed; published 2010-01-04 on (VERIFIED (NASDAQ:XNDX, anchor-checked)); 2006-11-08..2010-01-04 price + 0.73%/yr (MEASURED (level change of mis-dated XNDX block)); 1999-03-05..2006-11-08 price + QQQ's fiscal-year income yield (mean 0.35%/yr; MEASURED (QQQ gross income / average net assets by fiscal year; SEC 485BPOS financial highlights)); before 1999-03-05 price + 0.30%/yr (ASSUMED); splice date 2010-01-04; days missing from the published series carried by the price move: ['2012-10-31'] Rate: FRED DFF (effective fed funds), lagged one row; TB3MS proxy where DFF is not yet published (proxy rows 0, stale rows 0).
+- **Effective leverage** (entry day) is read from the kernel's own state: exactly L if the entry close is itself a reset close, otherwise the kernel is re-run from the last reset and the exposure is read from the NAV's slope in the index level (`bottoms.effective_leverage`); it equals 2 x (U_t/U_0) / (NAV_t/NAV_0) wherever the base is the last reset's close (cross-check below: SPX 208 cases, max difference 7.1e-10; NDX 142 cases, max difference 6.9e-10). Daily twins are exactly 2, the 3x models exactly 3.
 - **Returns** are NAV ratios of full-history runs (DESIGN section 8), CAGR in calendar days / 365.25; the end is the last close on or before the entry date plus h years; n/a where the data end first. Max drawdown is measured from the entry level and any later high.
 
 ## S&P 500
@@ -439,7 +439,7 @@ Entry leverage = the fund's effective leverage after the entry close. A `*` mark
 |---|---|---|---|---|---|---|---|---|
 | 1987-10-26 | -40% | 2.08x | +60.8% | +60.8% | +84.7% | n/a | +63.4% | +37.7% |
 | 1990-10-11 | -33% | 2.17x | +152% | +153% | +273% | n/a | +130% | +70.9% |
-| 2002-10-07 | -83% | 2.07x | +166% | +161% | +271% | n/a | +141% | +73.6% |
+| 2002-10-07 | -83% | 2.07x | +165% | +160% | +270% | n/a | +141% | +73.4% |
 | 2008-11-20 | -54% | 2.82x | +192% | +157% | +263% | n/a | +138% | +71.5% |
 | 2009-03-09 * | -53% | 2.15x | +211% | +208% | +412% | n/a | +162% | +83.5% |
 | 2020-03-20 | -28% | 2.54x | +226% | +206% | +383% | +387% | +166% | +85.5% |
@@ -451,7 +451,7 @@ Entry leverage = the fund's effective leverage after the entry close. A `*` mark
 |---|---|---|---|---|---|---|---|---|
 | 1987-10-26 | -40% | 2.08x | +12.4% (+4.0%/yr) | +16.2% (+5.1%/yr) | -1.8% (-0.6%/yr) | n/a | +29.8% (+9.1%/yr) | +36.9% (+11.0%/yr) |
 | 1990-10-11 | -33% | 2.17x | +280% (+56.0%/yr) | +277% (+55.6%/yr) | +509% (+82.6%/yr) | n/a | +234% (+49.5%/yr) | +133% (+32.5%/yr) |
-| 2002-10-07 | -83% | 2.07x | +188% (+42.2%/yr) | +178% (+40.6%/yr) | +281% (+56.1%/yr) | n/a | +169% (+39.1%/yr) | +95.1% (+25.0%/yr) |
+| 2002-10-07 | -83% | 2.07x | +193% (+43.1%/yr) | +183% (+41.5%/yr) | +292% (+57.6%/yr) | n/a | +173% (+39.8%/yr) | +97.0% (+25.3%/yr) |
 | 2008-11-20 | -54% | 2.82x | +326% (+62.2%/yr) | +267% (+54.4%/yr) | +460% (+77.8%/yr) | n/a | +229% (+48.9%/yr) | +123% (+30.7%/yr) |
 | 2009-03-09 * | -53% | 2.15x | +441% (+75.5%/yr) | +423% (+73.6%/yr) | +923% (+117%/yr) | n/a | +303% (+59.1%/yr) | +160% (+37.5%/yr) |
 | 2020-03-20 | -28% | 2.54x | +157% (+37.0%/yr) | +137% (+33.3%/yr) | +174% (+39.9%/yr) | +180% (+40.9%/yr) | +149% (+35.5%/yr) | +84.0% (+22.6%/yr) |
@@ -463,7 +463,7 @@ Entry leverage = the fund's effective leverage after the entry close. A `*` mark
 |---|---|---|---|---|---|---|---|---|
 | 1987-10-26 | -40% | 2.08x | +207% (+25.2%/yr) | +220% (+26.1%/yr) | +289% (+31.2%/yr) | n/a | +246% (+28.2%/yr) | +159% (+20.9%/yr) |
 | 1990-10-11 | -33% | 2.17x | +587% (+47.0%/yr) | +561% (+45.9%/yr) | +1,165% (+66.1%/yr) | n/a | +435% (+39.9%/yr) | +247% (+28.2%/yr) |
-| 2002-10-07 | -83% | 2.07x | +359% (+35.7%/yr) | +334% (+34.1%/yr) | +581% (+46.9%/yr) | n/a | +299% (+31.9%/yr) | +172% (+22.2%/yr) |
+| 2002-10-07 | -83% | 2.07x | +371% (+36.4%/yr) | +345% (+34.8%/yr) | +608% (+48.0%/yr) | n/a | +306% (+32.4%/yr) | +176% (+22.5%/yr) |
 | 2008-11-20 | -54% | 2.82x | +799% (+55.1%/yr) | +667% (+50.3%/yr) | +1,544% (+75.1%/yr) | n/a | +453% (+40.8%/yr) | +242% (+27.9%/yr) |
 | 2009-03-09 * | -53% | 2.15x | +907% (+58.8%/yr) | +864% (+57.4%/yr) | +2,400% (+90.5%/yr) | n/a | +516% (+43.9%/yr) | +274% (+30.2%/yr) |
 | 2020-03-20 | -28% | 2.54x | +420% (+39.1%/yr) | +371% (+36.4%/yr) | +588% (+47.1%/yr) | +594% (+47.3%/yr) | +340% (+34.5%/yr) | +193% (+24.0%/yr) |
@@ -474,8 +474,8 @@ Entry leverage = the fund's effective leverage after the entry close. A `*` mark
 | bottom | fall | entry leverage | MQQQ | 2x daily twin | TQQQ_MODEL (3x) | TQQQ (price only) | margin 2x (buy once) | 1x index (TR) |
 |---|---|---|---|---|---|---|---|---|
 | 1987-10-26 | -40% | 2.08x | +1,764% (+34.0%/yr) | +1,727% (+33.7%/yr) | +3,676% (+43.8%/yr) | n/a | +1,326% (+30.5%/yr) | +748% (+23.9%/yr) |
-| 1990-10-11 | -33% | 2.17x | +8,181% (+55.5%/yr) | +7,190% (+53.5%/yr) | +18,376% (+68.5%/yr) | n/a | +3,439% (+42.8%/yr) | +1,834% (+34.5%/yr) |
-| 2002-10-07 | -83% | 2.07x | +423% (+18.0%/yr) | +344% (+16.1%/yr) | +329% (+15.7%/yr) | n/a | +461% (+18.8%/yr) | +271% (+14.0%/yr) |
+| 1990-10-11 | -33% | 2.17x | +8,113% (+55.4%/yr) | +7,130% (+53.4%/yr) | +18,146% (+68.3%/yr) | n/a | +3,423% (+42.8%/yr) | +1,826% (+34.4%/yr) |
+| 2002-10-07 | -83% | 2.07x | +437% (+18.3%/yr) | +355% (+16.4%/yr) | +346% (+16.1%/yr) | n/a | +470% (+19.0%/yr) | +276% (+14.2%/yr) |
 | 2008-11-20 | -54% | 2.82x | +2,687% (+39.5%/yr) | +2,197% (+36.8%/yr) | +7,490% (+54.2%/yr) | n/a | +1,111% (+28.3%/yr) | +603% (+21.5%/yr) |
 | 2009-03-09 * | -53% | 2.15x | +2,836% (+40.2%/yr) | +2,601% (+39.1%/yr) | +10,087% (+58.8%/yr) | n/a | +1,203% (+29.3%/yr) | +652% (+22.4%/yr) |
 | 2020-03-20 | -28% | 2.54x | n/a | n/a | n/a | n/a | n/a | n/a |
@@ -499,8 +499,8 @@ Entry leverage = the fund's effective leverage after the entry close. A `*` mark
 | bottom | entry leverage | 1y MQQQ | 1y twin | 3y MQQQ | 3y twin | 5y MQQQ | 5y twin | 10y MQQQ | 10y twin |
 |---|---|---|---|---|---|---|---|---|---|
 | 1987-10-26 | 2.08x | +59.2% | +59.3% | +8.1% (+2.6%/yr) | +11.8% (+3.8%/yr) | +194% (+24.1%/yr) | +206% (+25.0%/yr) | +1,665% (+33.3%/yr) | +1,628% (+33.0%/yr) |
-| 1990-10-11 | 2.17x | +150% | +151% | +279% (+55.8%/yr) | +275% (+55.4%/yr) | +582% (+46.8%/yr) | +556% (+45.7%/yr) | +7,944% (+55.1%/yr) | +6,974% (+53.1%/yr) |
-| 2002-10-07 | 2.07x | +168% | +163% | +194% (+43.2%/yr) | +184% (+41.6%/yr) | +366% (+36.1%/yr) | +340% (+34.6%/yr) | +458% (+18.8%/yr) | +374% (+16.8%/yr) |
+| 1990-10-11 | 2.17x | +150% | +151% | +279% (+55.8%/yr) | +275% (+55.4%/yr) | +582% (+46.8%/yr) | +556% (+45.7%/yr) | +7,878% (+54.9%/yr) | +6,915% (+53.0%/yr) |
+| 2002-10-07 | 2.07x | +167% | +163% | +199% (+44.1%/yr) | +189% (+42.5%/yr) | +378% (+36.8%/yr) | +352% (+35.2%/yr) | +472% (+19.1%/yr) | +386% (+17.1%/yr) |
 | 2008-11-20 | 2.81x | +195% | +160% | +340% (+64.1%/yr) | +280% (+56.2%/yr) | +851% (+56.9%/yr) | +713% (+52.1%/yr) | +3,002% (+41.0%/yr) | +2,463% (+38.3%/yr) |
 | 2009-03-09 | 2.15x | +214% | +212% | +460% (+77.5%/yr) | +442% (+75.6%/yr) | +966% (+60.6%/yr) | +923% (+59.3%/yr) | +3,162% (+41.7%/yr) | +2,908% (+40.6%/yr) |
 | 2020-03-20 | 2.54x | +230% | +209% | +164% (+38.2%/yr) | +144% (+34.6%/yr) | +432% (+39.7%/yr) | +382% (+37.0%/yr) | n/a | n/a |
@@ -513,7 +513,7 @@ Entry leverage = the fund's effective leverage after the entry close. A `*` mark
 |---|---|---|---|---|---|---|---|---|---|
 | 1987-10-26 | 40% | 2.08x | 2.08x | 2.31x | +12.4% | +5.7% | +17.7% | +16.2% | +36.9% |
 | 1990-10-11 | 33% | 2.17x | 2.17x | 2.18x | +280% | +281% | +285% | +277% | +133% |
-| 2002-10-07 | 83% | 2.07x | 2.07x | 2.03x | +188% | +194% | +188% | +178% | +95.1% |
+| 2002-10-07 | 83% | 2.07x | 2.07x | 2.03x | +193% | +200% | +193% | +183% | +97.0% |
 | 2008-11-20 | 78% | 2.82x | 4.40x | 2.32x | +326% | +279% | +285% | +267% | +123% |
 | 2009-03-09 | 78% | 2.15x | 2.40x | 2.04x | +441% | +448% | +428% | +423% | +160% |
 | 2020-03-20 | 28% | 2.54x | 2.70x | 2.00x | +157% | +151% | +148% | +137% | +84.0% |
@@ -524,7 +524,7 @@ Entry leverage = the fund's effective leverage after the entry close. A `*` mark
 
 | trough | fall | MQQQ lev | MQQQ 1y | MQQQ 3y | twin 3y | 3x model 3y | margin 3y | 1x 3y |
 |---|---|---|---|---|---|---|---|---|
-| 1998-10-08 | -23% | 2.48x | +353% | -49.7% | -51.5% | -88.9% | -8.5% | +14.4% |
+| 1998-10-08 | -23% | 2.48x | +352% | -50.4% | -52.2% | -89.2% | -10.0% | +13.6% |
 | 2018-12-24 | -23% | 2.44x | +108% | +542% | +474% | +954% | +349% | +184% |
 | 2025-04-08 | -23% | 2.30x | +98.7% | n/a | n/a | n/a | n/a | n/a |
 
@@ -539,7 +539,7 @@ Same major bottoms, fixed encoding, every calendar product. Base case: the NASDA
 |---|---|---|---|---|---|---|
 | 1987-10-26 | 2.08x / 2.08x | 2.08x / 2.08x | 2.31x / 2.31x | +12.4% / +12.4% | +5.7% / +5.7% | +17.7% / +17.7% |
 | 1990-10-11 | 2.17x / 2.17x | 2.17x / 2.17x | 2.18x / 2.18x | +280% / +280% | +281% / +281% | +285% / +285% |
-| 2002-10-07 | 2.07x / 2.07x | 2.07x / 2.07x | 2.03x / 2.03x | +188% / +188% | +194% / +194% | +188% / +188% |
+| 2002-10-07 | 2.07x / 2.07x | 2.07x / 2.07x | 2.03x / 2.03x | +193% / +193% | +200% / +200% | +193% / +193% |
 | 2008-11-20 | 2.82x / 2.82x | 4.40x / 4.40x | 2.32x / 2.32x | +326% / +326% | +279% / +407% | +285% / +285% |
 | 2009-03-09 * | 2.15x / 2.15x | 2.40x / 2.40x | 2.04x / 2.04x | +441% / +441% | +448% / +448% | +428% / +428% |
 | 2020-03-20 | 2.54x / 2.54x | 2.70x / 2.70x | 2.00x / 2.00x | +157% / +157% | +151% / +151% | +148% / +148% |
@@ -558,11 +558,11 @@ Every level triggered at least once.
 |---|---|---|---|---|---|---|---|---|---|---|
 | 20% | 8 | 1987-10-19, 1990-08-17, 1998-08-31, 2000-04-12, 2018-12-21, 2020-03-12, 2022-03-14, 2025-04-04 | 2.34x | +74.3% | +65.7% | +60.6% | +58.2% | +83.1% | +54.9% | 4 of 7 |
 | 30% | 4 | 1987-10-20, 1990-10-10, 2000-04-14, 2022-06-13 | 2.74x | +35.1% | +73.8% | +73.7% | +92.9% | +82.9% | +59.4% | 2 of 4 |
-| 40% | 1 | 2000-11-20 | 2.44x | -81.7% | -89.3% | -89.0% | -98.5% | -100% | -50.7% | 0 of 1 |
-| 50% | 1 | 2000-12-20 | 2.33x | -67.7% | -79.3% | -79.8% | -96.0% | -100% | -34.9% | 0 of 1 |
-| 60% | 1 | 2001-03-02 | 2.03x | -57.1% | -64.7% | -67.2% | -90.6% | -100% | -21.0% | 0 of 1 |
-| 70% | 1 | 2001-04-03 | 2.29x | -21.8% | -30.1% | -36.4% | -72.6% | -1.4% | +7.5% | 0 of 1 |
-| 80% | 1 | 2002-07-22 | 2.28x | +57.8% | +121% | +106% | +126% | +125% | +72.0% | 1 of 1 |
+| 40% | 1 | 2000-11-20 | 2.44x | -81.8% | -89.4% | -89.1% | -98.5% | -100% | -51.0% | 0 of 1 |
+| 50% | 1 | 2000-12-20 | 2.33x | -67.9% | -79.6% | -80.1% | -96.1% | -100% | -35.3% | 0 of 1 |
+| 60% | 1 | 2001-03-02 | 2.03x | -57.3% | -65.1% | -67.6% | -90.7% | -100% | -21.4% | 0 of 1 |
+| 70% | 1 | 2001-04-03 | 2.29x | -22.2% | -30.8% | -37.0% | -73.0% | -2.5% | +7.0% | 0 of 1 |
+| 80% | 1 | 2002-07-22 | 2.28x | +57.3% | +124% | +109% | +130% | +128% | +73.2% | 1 of 1 |
 
 **Every rule entry (MQQQ, fixed encoding)**
 
@@ -570,21 +570,21 @@ Every level triggered at least once.
 |---|---|---|---|---|---|---|---|---|---|---|
 | 20% | 1987-10-19 | 1987-10-05 | 27.2% | 2.98x | -14.0% | -40.0% | -23.4% | -50.5% | -15.7% | +13.2% |
 | 20% | 1990-08-17 | 1990-07-16 | 20.0% | 2.33x | +70.3% | +150% | +151% | +223% | +154% | +91.8% |
-| 20% | 1998-08-31 | 1998-07-20 | 22.2% | 2.00x | +269% | -33.9% | -37.5% | -83.8% | +22.7% | +30.0% |
-| 20% | 2000-04-12 | 2000-03-27 | 22.8% | 2.54x | -86.2% | -96.8% | -96.9% | -99.8% | -100% | -71.5% |
+| 20% | 1998-08-31 | 1998-07-20 | 22.2% | 2.00x | +268% | -34.7% | -38.3% | -84.1% | +21.0% | +29.2% |
+| 20% | 2000-04-12 | 2000-03-27 | 22.8% | 2.55x | -86.3% | -96.8% | -97.0% | -99.8% | -100% | -71.7% |
 | 20% | 2018-12-21 | 2018-08-29 | 21.1% | 2.36x | +95.5% | +481% | +425% | +820% | +325% | +172% |
 | 20% | 2020-03-12 | 2020-02-19 | 25.3% | 2.40x | +200% | +108% | +88.5% | +83.8% | +115% | +66.8% |
 | 20% | 2022-03-14 | 2021-11-19 | 21.3% | 2.20x | -23.0% | +65.7% | +60.6% | +58.2% | +83.1% | +54.9% |
 | 20% | 2025-04-04 | 2025-02-19 | 21.5% | 2.24x | +78.2% | n/a | n/a | n/a | n/a | n/a |
 | 30% | 1987-10-20 | 1987-10-05 | 32.7% | 3.55x | +15.1% | -22.7% | -9.8% | -36.1% | +2.1% | +22.4% |
 | 30% | 1990-10-10 | 1990-07-16 | 31.2% | 2.10x | +134% | +261% | +259% | +466% | +223% | +127% |
-| 30% | 2000-04-14 | 2000-03-27 | 31.9% | 3.21x | -80.3% | -95.2% | -95.8% | -99.7% | -100% | -67.0% |
+| 30% | 2000-04-14 | 2000-03-27 | 31.9% | 3.21x | -80.4% | -95.3% | -95.9% | -99.7% | -100% | -67.2% |
 | 30% | 2022-06-13 | 2021-11-19 | 31.9% | 2.28x | +55.0% | +170% | +157% | +222% | +164% | +96.5% |
-| 40% | 2000-11-20 | 2000-03-27 | 40.6% | 2.44x | -81.7% | -89.3% | -89.0% | -98.5% | -100% | -50.7% |
-| 50% | 2000-12-20 | 2000-03-27 | 53.0% | 2.33x | -67.7% | -79.3% | -79.8% | -96.0% | -100% | -34.9% |
-| 60% | 2001-03-02 | 2000-03-27 | 60.0% | 2.03x | -57.1% | -64.7% | -67.2% | -90.6% | -100% | -21.0% |
-| 70% | 2001-04-03 | 2000-03-27 | 70.3% | 2.29x | -21.8% | -30.1% | -36.4% | -72.6% | -1.4% | +7.5% |
-| 80% | 2002-07-22 | 2000-03-27 | 80.0% | 2.28x | +57.8% | +121% | +106% | +126% | +125% | +72.0% |
+| 40% | 2000-11-20 | 2000-03-27 | 40.6% | 2.44x | -81.8% | -89.4% | -89.1% | -98.5% | -100% | -51.0% |
+| 50% | 2000-12-20 | 2000-03-27 | 53.0% | 2.33x | -67.9% | -79.6% | -80.1% | -96.1% | -100% | -35.3% |
+| 60% | 2001-03-02 | 2000-03-27 | 60.0% | 2.03x | -57.3% | -65.1% | -67.6% | -90.7% | -100% | -21.4% |
+| 70% | 2001-04-03 | 2000-03-27 | 70.3% | 2.29x | -22.2% | -30.8% | -37.0% | -73.0% | -2.5% | +7.0% |
+| 80% | 2002-07-22 | 2000-03-27 | 80.0% | 2.28x | +57.3% | +124% | +109% | +130% | +128% | +73.2% |
 
 
 ### C. Guppy-confirmed entries after each entry (Clean Guppy v1 slow ribbon; fill at the next close)
@@ -607,7 +607,7 @@ A signal is the first bar after the entry on which the daily (or weekly, on week
 
 | confirmation (hindsight bottoms, major) | entries | confirmed in 2y | median trading days waited (to the fill) | median index move while waiting | median MQQQ 3y return, confirmed entry | median 3y return, parent entry | confirmed beats parent (own 3y windows) | confirmed beats parent (same end date) | median gap, same end date |
 |---|---|---|---|---|---|---|---|---|---|
-| daily red->gray | 7 | 7 | 20 | +21.7% | +207% | +280% | 0 of 7 | 0 of 7 | -92.4% |
+| daily red->gray | 7 | 7 | 20 | +21.7% | +207% | +280% | 0 of 7 | 0 of 7 | -94.2% |
 | daily gray->green | 7 | 7 | 38 | +31.6% | +195% | +280% | 1 of 7 | 0 of 7 | -126% |
 | weekly red->gray | 7 | 5 | 87 | +38.7% | +171% | +326% | 0 of 5 | 0 of 5 | -202% |
 | weekly gray->green | 7 | 6 | 180 | +63.5% | +83.3% | +303% | 1 of 6 | 0 of 6 | -206% |
@@ -617,21 +617,21 @@ A signal is the first bar after the entry on which the daily (or weekly, on week
 
 | confirmation (hindsight bottoms, shallow) | entries | confirmed in 2y | median trading days waited (to the fill) | median index move while waiting | median MQQQ 3y return, confirmed entry | median 3y return, parent entry | confirmed beats parent (own 3y windows) | confirmed beats parent (same end date) | median gap, same end date |
 |---|---|---|---|---|---|---|---|---|---|
-| daily red->gray | 3 | 3 | 22 | +17.4% | +109% | +246% | 0 of 2 | 0 of 2 | -84.4% |
-| daily gray->green | 3 | 3 | 35 | +24.1% | +70.5% | +246% | 0 of 2 | 0 of 2 | -114% |
+| daily red->gray | 3 | 3 | 22 | +17.4% | +109% | +246% | 0 of 2 | 0 of 2 | -84.3% |
+| daily gray->green | 3 | 3 | 35 | +24.1% | +70.3% | +246% | 0 of 2 | 0 of 2 | -114% |
 | weekly red->gray | 3 | 0 | n/a | n/a | n/a | n/a | 0 of 0 | 0 of 0 | n/a |
 | weekly gray->green | 3 | 2 | 42 | +24.8% | +218% | +542% | 0 of 1 | 0 of 1 | -229% |
-| daily green & close > 200 EMA | 3 | 3 | 35 | +24.1% | +70.5% | +246% | 0 of 2 | 0 of 2 | -114% |
+| daily green & close > 200 EMA | 3 | 3 | 35 | +24.1% | +70.3% | +246% | 0 of 2 | 0 of 2 | -114% |
 
 **Summary: rule entries, MQQQ fixed encoding**
 
 | confirmation (rule entries) | entries | confirmed in 2y | median trading days waited (to the fill) | median index move while waiting | median MQQQ 3y return, confirmed entry | median 3y return, parent entry | confirmed beats parent (own 3y windows) | confirmed beats parent (same end date) | median gap, same end date |
 |---|---|---|---|---|---|---|---|---|---|
-| daily red->gray | 17 | 17 | 43 | +10.8% | +2.8% | -26.4% | 6 of 16 | 6 of 16 | -6.6% |
-| daily gray->green | 17 | 17 | 95 | +18.3% | +34.8% | -26.4% | 9 of 16 | 6 of 16 | -6.0% |
+| daily red->gray | 17 | 17 | 43 | +10.8% | +2.8% | -26.8% | 6 of 16 | 6 of 16 | -6.5% |
+| daily gray->green | 17 | 17 | 95 | +18.3% | +34.8% | -26.8% | 9 of 16 | 6 of 16 | -5.8% |
 | weekly red->gray | 17 | 5 | 206 | +18.5% | +93.2% | +150% | 2 of 5 | 1 of 5 | -47.0% |
-| weekly gray->green | 17 | 9 | 163 | +27.4% | +97.1% | +136% | 4 of 8 | 1 of 8 | -89.2% |
-| daily green & close > 200 EMA | 17 | 14 | 82 | +17.3% | +88.0% | +65.7% | 7 of 13 | 3 of 13 | -14.0% |
+| weekly gray->green | 17 | 9 | 163 | +27.4% | +97.1% | +137% | 4 of 8 | 1 of 8 | -89.2% |
+| daily green & close > 200 EMA | 17 | 14 | 82 | +17.3% | +92.3% | +65.7% | 7 of 13 | 3 of 13 | -14.0% |
 
 
 ### D. Entry-timing sensitivity around each major bottom
@@ -642,7 +642,7 @@ The entry moves to the month-end close nearest to the bottom date plus k months 
 |---|---|---|---|---|---|---|---|
 | 1987-10-26 | +12.4% | -42.9% | +23.0% | -55% | 11% | 14% | yes |
 | 1990-10-11 | +280% | +58.7% | +187% | -221% | -93% | 25% | yes |
-| 2002-10-07 | +188% | +55.7% | +125% | -132% | -63% | 18% | yes |
+| 2002-10-07 | +193% | +57.6% | +130% | -135% | -63% | 18% | yes |
 | 2008-11-20 | +326% | +9.0% | +356% | -316% | 31% | 26% | yes |
 | 2009-03-09 | +441% | +195% | +171% | -246% | -270% | 33% | yes |
 | 2020-03-20 | +157% | +20.8% | +70.5% | -136% | -86% | 16% | yes |
@@ -666,11 +666,11 @@ Over 7 bottoms with all three numbers: median |3-year return change| from enteri
 |  | 1x 3y | +69.3% | +54.9% | +94.2% | +133% | +129% | +100% | +50.1% |
 |  | MQQQ 1y | +26.0% | -6.4% | +87.3% | +152% | +148% | +134% | +32.0% |
 |  | entry date used | 90-03-30 | 90-06-29 | 90-08-31 | 90-10-11 | 90-10-31 | 90-12-31 | 91-03-28 |
-| 2002-10-07 | MQQQ 3y | -25.3% | +55.7% | +109% | +188% | +100% | +125% | +123% |
-|  | 2x twin 3y | -30.9% | +44.0% | +102% | +178% | +91.6% | +114% | +117% |
-|  | 3x model 3y | -59.7% | +28.6% | +131% | +281% | +122% | +169% | +182% |
-|  | 1x 3y | +2.3% | +44.9% | +67.6% | +95.1% | +61.0% | +68.6% | +68.8% |
-|  | MQQQ 1y | -56.7% | +14.3% | +76.9% | +166% | +85.8% | +108% | +86.5% |
+| 2002-10-07 | MQQQ 3y | -24.9% | +57.6% | +112% | +193% | +104% | +130% | +128% |
+|  | 2x twin 3y | -30.5% | +45.7% | +106% | +183% | +95.4% | +118% | +122% |
+|  | 3x model 3y | -59.4% | +30.8% | +137% | +292% | +129% | +178% | +192% |
+|  | 1x 3y | +2.6% | +45.8% | +69.0% | +97.0% | +62.6% | +70.4% | +70.7% |
+|  | MQQQ 1y | -56.9% | +14.0% | +76.4% | +165% | +85.3% | +108% | +86.2% |
 |  | entry date used | 02-03-28 | 02-06-28 | 02-08-30 | 02-10-07 | 02-10-31 | 02-12-31 | 03-03-31 |
 | 2008-11-20 | MQQQ 3y | +0.6% | +9.0% | +158% | +326% | +197% | +356% | +171% |
 |  | 2x twin 3y | -6.6% | -0.6% | +137% | +267% | +181% | +342% | +164% |
@@ -713,11 +713,11 @@ Over 7 bottoms with all three numbers: median |3-year return change| from enteri
 |  | 1x 3y | +69.3% | +54.9% | +94.2% | +133% | +129% | +100% | +50.1% |
 |  | MQQQ 1y | +24.6% | -7.3% | +85.9% | +150% | +147% | +133% | +31.6% |
 |  | entry date used | 90-03-30 | 90-06-29 | 90-08-31 | 90-10-11 | 90-10-31 | 90-12-31 | 91-03-28 |
-| 2002-10-07 | MQQQ 3y | -23.5% | +59.2% | +113% | +194% | +104% | +129% | +127% |
-|  | 2x twin 3y | -29.2% | +47.3% | +107% | +184% | +95.6% | +118% | +120% |
-|  | 3x model 3y | -59.7% | +28.6% | +131% | +281% | +122% | +169% | +182% |
-|  | 1x 3y | +2.3% | +44.9% | +67.6% | +95.1% | +61.0% | +68.6% | +68.8% |
-|  | MQQQ 1y | -56.3% | +15.2% | +78.3% | +168% | +87.3% | +110% | +88.1% |
+| 2002-10-07 | MQQQ 3y | -23.1% | +61.1% | +117% | +199% | +108% | +134% | +132% |
+|  | 2x twin 3y | -28.9% | +49.1% | +110% | +189% | +99.4% | +122% | +125% |
+|  | 3x model 3y | -59.4% | +30.8% | +137% | +292% | +129% | +178% | +192% |
+|  | 1x 3y | +2.6% | +45.8% | +69.0% | +97.0% | +62.6% | +70.4% | +70.7% |
+|  | MQQQ 1y | -56.5% | +14.9% | +77.8% | +167% | +86.8% | +109% | +87.8% |
 |  | entry date used | 02-03-28 | 02-06-28 | 02-08-30 | 02-10-07 | 02-10-31 | 02-12-31 | 03-03-31 |
 | 2008-11-20 | MQQQ 3y | +4.0% | +12.8% | +167% | +340% | +207% | +372% | +180% |
 |  | 2x twin 3y | -3.5% | +2.9% | +146% | +280% | +191% | +358% | +174% |
@@ -887,7 +887,7 @@ The first 90 trading days after the S&P 500 (2009-03-09, 2020-03-23) and Nasdaq-
 |---|---|---|---|---|---|---|
 | 1987-10-26 | $17,326 | $16,075 | $18,759 | $22,095 | $17,615 | $11,240 |
 | 1990-10-11 | $26,182 | $25,156 | $29,181 | $26,663 | $31,909 | $37,994 |
-| 2002-10-07 | $15,844 | $26,572 | $29,349 | $27,370 | $27,993 | $28,759 |
+| 2002-10-07 | $15,824 | $26,506 | $29,267 | $27,296 | $28,223 | $29,304 |
 | 2008-11-20 | $18,690 | $29,183 | $29,214 | $39,776 | $47,462 | $42,553 |
 | 2009-03-09 * | $24,657 | $31,094 | $29,458 | $43,465 | $37,152 | $54,090 |
 | 2020-03-20 | $23,948 | $32,613 | $43,412 | $38,834 | $24,439 | $25,690 |
@@ -899,7 +899,7 @@ The first 90 trading days after the S&P 500 (2009-03-09, 2020-03-23) and Nasdaq-
 |---|---|---|---|---|---|---|
 | 1987-10-26 | $17,251 | $16,085 | $18,765 | $22,124 | $17,711 | $11,622 |
 | 1990-10-11 | $26,342 | $25,318 | $29,312 | $26,588 | $31,704 | $37,682 |
-| 2002-10-07 | $15,695 | $26,109 | $28,414 | $26,337 | $26,900 | $27,796 |
+| 2002-10-07 | $15,675 | $26,042 | $28,333 | $26,265 | $27,120 | $28,323 |
 | 2008-11-20 | $16,528 | $25,687 | $25,942 | $35,403 | $42,016 | $36,697 |
 | 2009-03-09 * | $24,369 | $30,830 | $29,204 | $43,334 | $36,071 | $52,339 |
 | 2020-03-20 | $22,997 | $30,571 | $40,678 | $35,908 | $22,551 | $23,683 |
@@ -911,7 +911,7 @@ The first 90 trading days after the S&P 500 (2009-03-09, 2020-03-23) and Nasdaq-
 |---|---|---|---|---|---|---|
 | 1987-10-26 | $21,060 | $18,474 | $22,679 | $28,212 | $19,598 | $9,824 |
 | 1990-10-11 | $40,863 | $37,348 | $44,521 | $37,523 | $47,791 | $60,884 |
-| 2002-10-07 | $17,944 | $37,138 | $41,250 | $36,030 | $36,689 | $38,073 |
+| 2002-10-07 | $17,909 | $36,996 | $41,074 | $35,882 | $37,139 | $39,159 |
 | 2008-11-20 | $19,079 | $36,267 | $36,126 | $56,425 | $72,536 | $56,003 |
 | 2009-03-09 * | $36,405 | $51,179 | $45,788 | $82,245 | $60,040 | $102,337 |
 | 2020-03-20 | $32,612 | $48,283 | $73,648 | $58,669 | $26,971 | $27,382 |
@@ -923,7 +923,7 @@ The first 90 trading days after the S&P 500 (2009-03-09, 2020-03-23) and Nasdaq-
 |---|---|---|---|---|---|---|
 | 1987-10-26 | $13,783 | $13,773 | $15,428 | $17,395 | $16,144 | $13,688 |
 | 1990-10-11 | $16,881 | $17,092 | $19,031 | $18,612 | $20,831 | $23,251 |
-| 2002-10-07 | $13,110 | $17,359 | $18,501 | $18,201 | $18,779 | $19,512 |
+| 2002-10-07 | $13,101 | $17,336 | $18,474 | $18,176 | $18,855 | $19,696 |
 | 2008-11-20 | $13,495 | $17,147 | $17,556 | $20,915 | $23,117 | $22,277 |
 | 2009-03-09 * | $16,050 | $18,351 | $18,271 | $22,586 | $21,139 | $26,000 |
 | 2020-03-20 | $15,704 | $18,546 | $21,710 | $20,927 | $17,274 | $18,398 |
@@ -933,10 +933,10 @@ The first 90 trading days after the S&P 500 (2009-03-09, 2020-03-23) and Nasdaq-
 
 | series | 0.5y | 1y | 1.5y | 2y | 2.5y | 3y |
 |---|---|---|---|---|---|---|
-| MQQQ (calendar-reset, modeled) | $18,718 | $26,572 | $29,246 | $33,464 | $31,909 | $37,994 |
+| MQQQ (calendar-reset, modeled) | $18,718 | $26,506 | $29,246 | $33,464 | $31,909 | $37,994 |
 | 2x daily twin | $18,604 | $25,687 | $29,171 | $32,784 | $31,704 | $36,697 |
-| TQQQ_MODEL (3x daily model) | $24,561 | $37,138 | $44,521 | $53,032 | $47,791 | $56,003 |
-| 1x index (total return) | $14,073 | $17,147 | $18,501 | $20,444 | $20,831 | $22,277 |
+| TQQQ_MODEL (3x daily model) | $24,561 | $36,996 | $44,521 | $53,032 | $47,791 | $56,003 |
+| 1x index (total return) | $14,073 | $17,147 | $18,474 | $20,444 | $20,831 | $22,277 |
 
 **Key facts per bottom** (3-year CAGR and max drawdown inside the 3 years; CAGR is annualized, so +114% over 3 years is 28.9%/yr)
 
@@ -944,7 +944,7 @@ The first 90 trading days after the S&P 500 (2009-03-09, 2020-03-23) and Nasdaq-
 |---|---|---|---|---|---|---|---|
 | 1987-10-26 | -40% | 2.08x | 4.0% / -60% | 5.1% / -59% | -0.6% / -76% | 11.0% / -33% | 0 |
 | 1990-10-11 | -33% | 2.17x | 56.0% / -37% | 55.6% / -38% | 82.6% / -53% | 32.5% / -18% | 0 |
-| 2002-10-07 | -83% | 2.07x | 42.2% / -32% | 40.6% / -33% | 56.1% / -46% | 25.0% / -16% | 0 |
+| 2002-10-07 | -83% | 2.07x | 43.1% / -32% | 41.5% / -33% | 57.6% / -46% | 25.3% / -16% | 0 |
 | 2008-11-20 | -54% | 2.82x | 62.2% / -34% | 54.4% / -35% | 77.8% / -49% | 30.7% / -19% | 0 |
 | 2009-03-09 * | -53% | 2.15x | 75.5% / -31% | 73.6% / -31% | 117.1% / -44% | 37.5% / -16% | 0 |
 | 2020-03-20 | -28% | 2.54x | 37.0% / -64% | 33.3% / -64% | 39.9% / -82% | 22.6% / -35% | 0 |
@@ -958,7 +958,7 @@ The first 90 trading days after the S&P 500 (2009-03-09, 2020-03-23) and Nasdaq-
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1987-10-26 | 2.08x | $17,326 | $16,075 | $18,759 | $22,095 | $17,615 | $11,240 | 4.0% | -60% | 0 |
 | 1990-10-11 | 2.17x | $26,182 | $25,156 | $29,181 | $26,663 | $31,909 | $37,994 | 56.0% | -37% | 0 |
-| 2002-10-07 | 2.07x | $15,844 | $26,572 | $29,349 | $27,370 | $27,993 | $28,759 | 42.2% | -32% | 0 |
+| 2002-10-07 | 2.07x | $15,824 | $26,506 | $29,267 | $27,296 | $28,223 | $29,304 | 43.1% | -32% | 0 |
 | 2008-11-20 | 2.82x | $18,690 | $29,183 | $29,214 | $39,776 | $47,462 | $42,553 | 62.2% | -34% | 0 |
 | 2009-03-09 * | 2.15x | $24,657 | $31,094 | $29,458 | $43,465 | $37,152 | $54,090 | 75.5% | -31% | 0 |
 | 2020-03-20 | 2.54x | $23,948 | $32,613 | $43,412 | $38,834 | $24,439 | $25,690 | 37.0% | -64% | 0 |
@@ -966,7 +966,7 @@ The first 90 trading days after the S&P 500 (2009-03-09, 2020-03-23) and Nasdaq-
 
 | median | 0.5y | 1y | 1.5y | 2y | 2.5y | 3y |
 |---|---|---|---|---|---|---|
-| MQQQ | $18,718 | $26,572 | $29,246 | $33,464 | $31,909 | $37,994 |
+| MQQQ | $18,718 | $26,506 | $29,246 | $33,464 | $31,909 | $37,994 |
 
 *QQQP (quarterly reset; live product, modeled)*
 
@@ -974,7 +974,7 @@ The first 90 trading days after the S&P 500 (2009-03-09, 2020-03-23) and Nasdaq-
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1987-10-26 | 2.08x | $17,651 | $16,471 | $19,328 | $22,866 | $18,394 | $10,570 | 1.9% | -64% | 0 |
 | 1990-10-11 | 2.17x | $25,527 | $24,671 | $28,944 | $26,500 | $31,594 | $38,130 | 56.2% | -36% | 0 |
-| 2002-10-07 | 2.07x | $16,400 | $27,277 | $30,014 | $28,102 | $28,335 | $29,445 | 43.3% | -33% | 0 |
+| 2002-10-07 | 2.07x | $16,381 | $27,214 | $29,936 | $28,031 | $28,574 | $30,004 | 44.2% | -33% | 0 |
 | 2008-11-20 | 4.40x | $16,799 | $25,773 | $26,128 | $35,348 | $42,073 | $37,923 | 56.1% | -35% | 1 |
 | 2009-03-09 * | 2.40x | $25,040 | $31,775 | $30,134 | $44,263 | $37,797 | $54,771 | 76.2% | -31% | 0 |
 | 2020-03-20 | 2.70x | $24,112 | $32,406 | $43,160 | $38,321 | $23,346 | $25,058 | 35.9% | -64% | 0 |
@@ -990,7 +990,7 @@ The first 90 trading days after the S&P 500 (2009-03-09, 2020-03-23) and Nasdaq-
 |---|---|---|---|---|---|---|---|---|---|---|
 | 1987-10-26 | 2.31x | $17,650 | $16,474 | $19,226 | $22,633 | $17,997 | $11,766 | 5.6% | -59% | 0 |
 | 1990-10-11 | 2.18x | $26,373 | $25,419 | $29,600 | $26,956 | $32,285 | $38,501 | 56.7% | -37% | 0 |
-| 2002-10-07 | 2.03x | $16,047 | $26,779 | $29,372 | $27,166 | $27,863 | $28,759 | 42.2% | -33% | 0 |
+| 2002-10-07 | 2.03x | $16,027 | $26,711 | $29,288 | $27,092 | $28,091 | $29,304 | 43.1% | -33% | 0 |
 | 2008-11-20 | 2.32x | $17,291 | $26,834 | $27,061 | $36,943 | $43,900 | $38,522 | 56.9% | -34% | 0 |
 | 2009-03-09 * | 2.04x | $24,596 | $31,084 | $29,399 | $43,681 | $36,556 | $52,809 | 74.1% | -31% | 0 |
 | 2020-03-20 | 2.00x | $23,321 | $31,109 | $41,531 | $36,841 | $23,438 | $24,751 | 35.3% | -64% | 0 |
@@ -998,7 +998,7 @@ The first 90 trading days after the S&P 500 (2009-03-09, 2020-03-23) and Nasdaq-
 
 | median | 0.5y | 1y | 1.5y | 2y | 2.5y | 3y |
 |---|---|---|---|---|---|---|
-| HYP_NDX_W | $18,684 | $26,779 | $29,372 | $32,863 | $32,285 | $38,501 |
+| HYP_NDX_W | $18,684 | $26,711 | $29,288 | $32,863 | $32,285 | $38,501 |
 
 ## What could not be tested, and judgment calls
 
@@ -1007,6 +1007,6 @@ The first 90 trading days after the S&P 500 (2009-03-09, 2020-03-23) and Nasdaq-
 - The real UPRO / TQQQ series are price only: they leave out distributions and are NAV-proxies, not NAVs; they exist only for the 2020 and later entries.
 - Hindsight bottoms are, by construction, not knowable at the time; the rule entries (B) and the Guppy-confirmed entries (C) are. There are few independent crashes (about 7 per index), so medians over them are descriptive, not evidence of a rule.
 - Index data start 1950 (S&P 500) and 1985 (Nasdaq-100), so earlier falls cannot be seen; the first drawdown in each file is measured from the first close, not a true earlier high.
-- Dividend yields before 1988 (S&P, Shiller measured) and before 2006 (Nasdaq-100, 0.3% ASSUMED) enter the total-return underlying (B7).
+- Dividend yields before 1988 (S&P, Shiller measured) and before 2006 (Nasdaq-100: QQQ's measured yields 1999-2006, 0.3% ASSUMED before 1999) enter the total-return underlying (B7).
 - TQQQ_MODEL's 0.82% fee is as given in the brief; no TQQQ expense ratio is on file, so its status is ASSUMED. SOXL not used.
 - Judgment calls: tiering (major = the brief's list, plus NDX 1987 / 1990, plus any trough deeper than 40% the list omits; shallow = the rest); troughs are found inside long falls too; ties on the month-end for the timing shifts go to the earlier month-end; Guppy fills are at the next close; the 3x and margin comparators use the same entry close as the fund.

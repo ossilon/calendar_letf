@@ -93,13 +93,14 @@ class Und:
         """The base case watches the ETF's daily low (intraday_trigger=True, trigger_basis="etf"); the v1 trigger (index
         price, close only) is Und(name, False, "index"), used only by the labeled trigger sensitivity."""
         self.name = name
-        self.world, self.prov = study.build_world(name, intraday_trigger=intraday_trigger, trigger_basis=trigger_basis)
+        self.world, self.prov = study.build_world(name, intraday_trigger=intraday_trigger, trigger_basis=trigger_basis,
+                                                   end=study.V010_END[name])
         w = self.world
         self.dates = w.dates
         self.n = len(self.dates)
         # The underlying PRICE index: what every signal reads. It is the INDEX price in both cases (the ETF-based trigger
         # series drifts from it by the ETF's fee), so a rule's signals are the same in the base case and the v1 run.
-        self.close = study.TRIGGER_FOR[name]().to_numpy(dtype=np.float64)
+        self.close = study.TRIGGER_FOR[name]().loc[:study.V010_END[name]].to_numpy(dtype=np.float64)
         self.u = w.u_arr                                            # total-return level: what the 1x benchmark earns
         self.cash = backtest.cash_rate_with_proxy(self.dates)
         self.r_cash = backtest.cash_returns(self.dates, self.cash.to_numpy())
@@ -845,7 +846,7 @@ def write_outputs(R, unds, variants, raw_ms, load_s, wall0, inputs, banner):
     md.append("- **The weekly products and the live funds are modeled.** There is no live calendar fund before 2024-08; every rule result is a simulation on a synthetic NAV with ASSUMED residual costs "
               "(FINDINGS F3-F5), carried into history under two encodings that disagree by more than a point a year when rates move (the passive study's `encoding_gap` table). Regime-dependent exposure does not net that out, which is why both are shown.\n"
               "- **Half-spreads are assumed**, not measured from quotes; QQQP and SPYQ trade a few thousand shares a day, so a real round trip may cost more than 0.20%. The `edge @2x cost` column shows the literal-formula alternative.\n"
-              "- **Whole-sample caveats of step 3 still apply**: pre-1988 S&P dividends are Shiller's measured monthly series and pre-2006 Nasdaq-100 dividends are assumed (0.3% a year), pre-1954 reference and cash rates are a TB3MS proxy, the 35% trigger is tested on the ETF's daily low in the base case (the v1 close-only index trigger is section 7) and has never fired live.\n"
+              "- **Whole-sample caveats of step 3 still apply**: pre-1988 S&P dividends are Shiller's measured monthly series and Nasdaq-100 dividends are QQQ's measured yields for 1999-2006 and assumed (0.3% a year) before 1999, pre-1954 reference and cash rates are a TB3MS proxy, the 35% trigger is tested on the ETF's daily low in the base case (the v1 close-only index trigger is section 7) and has never fired live.\n"
               "- **One history.** Windows overlap; the Nasdaq-100 sample has few independent 10-year windows. Few rules x few eras means any single edge can be luck; the multiple-testing count is stated at the top.\n"
               "- **Guppy multi-start treats the follower as already running.** A Guppy investor who starts flat on a given day and waits for the first green is a different (and path-dependent) experiment, not run here.\n"
               "- **Taxes, slippage beyond the half-spread, market impact, intraday execution and cash-account frictions are not modeled.** Signals are close-to-close with at least a one-day delay.\n"

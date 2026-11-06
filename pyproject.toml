@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "calendar_letf"
-version = "0.1.0"
-description = "Simulate 2x leveraged ETFs that reset leverage weekly, monthly or quarterly, and their daily-reset twins. Research tooling, not investment advice."
+version = "0.1.1"
+description = "Simulate leveraged ETFs from 1x to 3x that reset leverage weekly, monthly or quarterly, and their daily-reset twins. Research tooling, not investment advice."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]

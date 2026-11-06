@@ -2,6 +2,46 @@
 
 All notable changes to this project. Dates are release dates (UTC).
 
+## 0.1.1 (2026-11-06)
+
+The final release. It closes the backlog; nobody maintains the repository after it.
+
+### Engine grade
+
+EXACT A, PROVEN A, UNCERTAINTY A, TRACEABLE A (independent audit, 2026-11-06, confirmed after two fix loops). The first
+pass read EXACT A, PROVEN A-, UNCERTAINTY B, TRACEABLE B. FINDINGS.md (build log) lists its findings and the fixes.
+
+### New studies
+
+- Leverage from 1x to 3x on both indexes, with the fee at which each design breaks even (FINDINGS F23).
+- A block-bootstrap Monte Carlo of the reset gap, for the uncertainty of the best leverage (F24).
+- The 3x weekly, monthly and quarterly designs, with several early-reset triggers (F25).
+- The semiconductor index (SOX), with the real 2x and 3x funds as checks (F26).
+- The reset day, and entries on any trading day (F27).
+- The reset gap split into its sum-of-squares parts (F28).
+- A rolling two-year LEAP on the S&P 500 as a comparator (F29).
+- The real monthly-reset mutual funds since 2009, as a live check of the cost model (F22, extended).
+
+### Changed inputs
+
+- The Nasdaq-100 dividend yield for 1999-2006 comes from QQQ's filings, not from an assumption (F30).
+- The five studies of 0.1.0 re-run on their 0.1.0 data ends, so a later top-up of the price library moves nothing.
+  The new studies stop at a fixed end, 2026-09-30.
+- The engine replaces a bad SOX low on 1997-08-08 with the close. Every reset anchor is an NYSE session.
+
+### Theory
+
+- THEORY.md explains the products, their risks, the mathematics of the payoff and every formula the engine uses. It
+  maps each equation to its code and to a test.
+- `docs/theory_examples.py` computes every number THEORY.md quotes, from planted inputs, so it needs no market data.
+
+### Maintenance
+
+- Golden files record the fingerprints of their inputs. A study re-run on other data skips its golden test and
+  names the files that differ.
+- `constraints.txt` holds the tested version of each package; the README also names the Python version.
+- The README names every fund sponsor and the cuts: short funds are out of scope.
+
 ## 0.1.0 (2026-10-31)
 
 First public release.

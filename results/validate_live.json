@@ -1,11 +1,11 @@
 {
   "meta": {
     "title": "Live-fund validation (step 2, R2 refit)",
-    "run_date": "2026-10-29",
+    "run_date": "2026-11-06",
     "code": {
       "script": "run_validate_live.py",
-      "files": 23,
-      "sha256": "da6f7f680256f748f6901aa0681e42709d3515f6d44b971a4a9e6ede943931f4"
+      "files": 27,
+      "sha256": "1fe19d6058fccc853b9ceaa3124fcb980e4297227dcfcdcf48d21d9b49e474e3"
     }
   },
   "provenance": {
@@ -15,91 +15,107 @@
       "files": [
         {
           "file": "NASDAQ_SPYQ_daily.csv",
-          "sha256": "9e29f3f4a7f6f19f9ca6006892d11c47902df11865d4fd98e6b09a6794f311e3",
-          "bytes": 37499,
+          "sha256": "124564fb1a3b68ebc00b3fb694401b559ea854ba3066c97d328d19665d005c0a",
+          "bytes": 36990,
           "rows": 508,
           "first_date": "2024-10-01",
           "last_date": "2026-10-09"
         },
         {
           "file": "AMEX_SPY_daily.csv",
-          "sha256": "38bb2ae821ff99d3d3aa92e86bf16a652b28c2a0bc21d8f1ae308f798a2d0964",
-          "bytes": 614777,
-          "rows": 8482,
+          "sha256": "643d6ef08b88086f17ac834fd8c2c729736d65e2841d6d0209c0c467ff5a78cc",
+          "bytes": 607605,
+          "rows": 8498,
           "first_date": "1993-01-29",
-          "last_date": "2026-10-09"
+          "last_date": "2026-11-02"
         },
         {
           "file": "SP_SPX_daily.csv",
-          "sha256": "8b0c1596b57ee2f159bebf4fd44ddbd707838a7d84f4e124d3e863dcd5d89d21",
-          "bytes": 1424201,
-          "rows": 19326,
+          "sha256": "b146c9af89ccb7f0a62bac558c404e281d6ff3c95450358f68aae9973595c098",
+          "bytes": 1405472,
+          "rows": 19333,
           "first_date": "1950-01-03",
-          "last_date": "2026-10-22"
+          "last_date": "2026-11-02"
         },
         {
           "file": "SP_SPXTR_daily.csv",
-          "sha256": "ac309a0b90f5d8a071d3bffb8583b0b66a7f9656d1378721f684a17b1285df9e",
-          "bytes": 752586,
-          "rows": 9780,
+          "sha256": "edab5090825ed31cffd1016bd027da45668da9991d0035782c2c80a57a44b04c",
+          "bytes": 743369,
+          "rows": 9787,
           "first_date": "1988-01-04",
-          "last_date": "2026-10-23"
+          "last_date": "2026-11-03"
         },
         {
           "file": "NASDAQ_MQQQ_daily.csv",
-          "sha256": "f800ff51d54d64faa5217a176832d28d313e8d85f3794346e8d648271e2e53ec",
-          "bytes": 38330,
-          "rows": 528,
+          "sha256": "b71324843b8a6920d77b8c697d40ae409c834ea8a2bf8e018f4ea78ee228d999",
+          "bytes": 38981,
+          "rows": 542,
           "first_date": "2024-09-03",
-          "last_date": "2026-10-09"
+          "last_date": "2026-10-29"
         },
         {
           "file": "NASDAQ_QQQ_daily.csv",
-          "sha256": "1bf106f83579ca717584e5e075ac01ec8769fdfa8a7ddddb9c0df3df5aa9cf47",
-          "bytes": 485867,
-          "rows": 6940,
+          "sha256": "f096cd6c6b7511901c68d674baafd658f0541abb7513addda9a04fd78f4eec74",
+          "bytes": 480184,
+          "rows": 6955,
           "first_date": "1999-03-10",
-          "last_date": "2026-10-09"
+          "last_date": "2026-10-30"
         },
         {
           "file": "NASDAQ_NDX_daily.csv",
-          "sha256": "4c3219bda7204173a389675e1d38789718800222853ae4617b79387665343061",
-          "bytes": 904772,
-          "rows": 10504,
+          "sha256": "79d8e8688fa365d3ca2755ccbfbbcb96f0023df65f263f16091a1a1b478697dc",
+          "bytes": 895791,
+          "rows": 10519,
           "first_date": "1985-01-31",
-          "last_date": "2026-10-09"
+          "last_date": "2026-10-30"
         },
         {
           "file": "NASDAQ_XNDX_daily.csv",
-          "sha256": "a10dab98993e4502596d2e09f608e08eedf128ed909d16b9af3afe946fd1fd86",
-          "bytes": 426325,
-          "rows": 5004,
+          "sha256": "d7dcc6dffa24f6cefaf44cb4f4a8c17fed7e8dbafea5ddebd7754efe93cfc507",
+          "bytes": 422682,
+          "rows": 5019,
           "first_date": "2006-11-08",
-          "last_date": "2026-10-09"
+          "last_date": "2026-10-30"
         },
         {
           "file": "NASDAQ_QQQP_daily.csv",
-          "sha256": "916e98537ab41d594a46af563883d04b7073a65f8e6c050e52f7e3417d82ed05",
-          "bytes": 37387,
-          "rows": 508,
+          "sha256": "233444f2dcc7824e86bbfd67e7495067843de93f7e4fb334bc891cc4c3006cfb",
+          "bytes": 38059,
+          "rows": 522,
           "first_date": "2024-10-01",
-          "last_date": "2026-10-09"
+          "last_date": "2026-10-29"
+        },
+        {
+          "file": "AMEX_SSO_daily.csv",
+          "sha256": "0df3e43a82dba161dda5393d6c01cfd554031a7c657dab661edf029cea084231",
+          "bytes": 365541,
+          "rows": 5103,
+          "first_date": "2006-06-21",
+          "last_date": "2026-10-02"
+        },
+        {
+          "file": "AMEX_QLD_daily.csv",
+          "sha256": "9e5453cb02e0463c598e53c454cd4887d843234feafad6df45bdce9411cd91e2",
+          "bytes": 376503,
+          "rows": 5123,
+          "first_date": "2006-06-21",
+          "last_date": "2026-10-30"
         },
         {
           "file": "OBFR.csv",
-          "sha256": "c84cb6b91ac3da7fdb3d7a510e8ccadfd989165b7ab8478ae38fe930a916623b",
-          "bytes": 43902,
-          "rows": 2666,
+          "sha256": "bbef2a371e6244e3d60d0c3d5fa21ec83710cab3d8cc0a0bdace3db1668fee78",
+          "bytes": 44186,
+          "rows": 2683,
           "first_date": "2016-03-01",
-          "last_date": "2026-10-08"
+          "last_date": "2026-11-03"
         },
         {
           "file": "DFF.csv",
-          "sha256": "a93504210b53532fda653a7ee8d543b00b1780c83f2131e35bb94827a973c2df",
-          "bytes": 424203,
-          "rows": 26398,
+          "sha256": "e84a934a50143ae0c7590aa7ff0f90b5e8778c81579fff17f00449a9b49efc59",
+          "bytes": 424619,
+          "rows": 26424,
           "first_date": "1954-07-01",
-          "last_date": "2026-10-08"
+          "last_date": "2026-11-03"
         }
       ],
       "reference_dir": "reference",
@@ -127,6 +143,22 @@
           "rows": 23,
           "first_date": null,
           "last_date": null
+        },
+        {
+          "file": "daily_etf_distributions.csv",
+          "sha256": "e830b4cf86bee5e108776c0f688d40d7f6f747092fc6e851a8e427fb3b7b7c04",
+          "bytes": 3315,
+          "rows": 20,
+          "first_date": "2026-09-23",
+          "last_date": "2024-06-26"
+        },
+        {
+          "file": "daily_etf_highlights.csv",
+          "sha256": "f89a303f5fbfc1a1a48008fc3ffdff697e87b4e10a49597829ec91f0585ac3b9",
+          "bytes": 1347,
+          "rows": 4,
+          "first_date": null,
+          "last_date": null
         }
       ],
       "reference_json": [
@@ -138,22 +170,26 @@
       ]
     },
     "banner": [
-      "Inputs: 11 files; prices from <external>/library, rates from <external>/rates",
-      "  NASDAQ_SPYQ_daily.csv: 508 rows, 2024-10-01 to 2026-10-09, sha256 9e29f3f4a7f6",
-      "  AMEX_SPY_daily.csv: 8482 rows, 1993-01-29 to 2026-10-09, sha256 38bb2ae821ff",
-      "  SP_SPX_daily.csv: 19326 rows, 1950-01-03 to 2026-10-22, sha256 8b0c1596b57e",
-      "  SP_SPXTR_daily.csv: 9780 rows, 1988-01-04 to 2026-10-23, sha256 ac309a0b90f5",
-      "  NASDAQ_MQQQ_daily.csv: 528 rows, 2024-09-03 to 2026-10-09, sha256 f800ff51d54d",
-      "  NASDAQ_QQQ_daily.csv: 6940 rows, 1999-03-10 to 2026-10-09, sha256 1bf106f83579",
-      "  NASDAQ_NDX_daily.csv: 10504 rows, 1985-01-31 to 2026-10-09, sha256 4c3219bda720",
-      "  NASDAQ_XNDX_daily.csv: 5004 rows, 2006-11-08 to 2026-10-09, sha256 a10dab98993e",
-      "  NASDAQ_QQQP_daily.csv: 508 rows, 2024-10-01 to 2026-10-09, sha256 916e98537ab4",
-      "  OBFR.csv: 2666 rows, 2016-03-01 to 2026-10-08, sha256 c84cb6b91ac3",
-      "  DFF.csv: 26398 rows, 1954-07-01 to 2026-10-08, sha256 a93504210b53",
-      "Reference tables (reference/): 3 files",
+      "Inputs: 13 files; prices from <external>/library, rates from <external>/rates",
+      "  NASDAQ_SPYQ_daily.csv: 508 rows, 2024-10-01 to 2026-10-09, sha256 124564fb1a3b",
+      "  AMEX_SPY_daily.csv: 8498 rows, 1993-01-29 to 2026-11-02, sha256 643d6ef08b88",
+      "  SP_SPX_daily.csv: 19333 rows, 1950-01-03 to 2026-11-02, sha256 b146c9af89cc",
+      "  SP_SPXTR_daily.csv: 9787 rows, 1988-01-04 to 2026-11-03, sha256 edab5090825e",
+      "  NASDAQ_MQQQ_daily.csv: 542 rows, 2024-09-03 to 2026-10-29, sha256 b71324843b8a",
+      "  NASDAQ_QQQ_daily.csv: 6955 rows, 1999-03-10 to 2026-10-30, sha256 f096cd6c6b75",
+      "  NASDAQ_NDX_daily.csv: 10519 rows, 1985-01-31 to 2026-10-30, sha256 79d8e8688fa3",
+      "  NASDAQ_XNDX_daily.csv: 5019 rows, 2006-11-08 to 2026-10-30, sha256 d7dcc6dffa24",
+      "  NASDAQ_QQQP_daily.csv: 522 rows, 2024-10-01 to 2026-10-29, sha256 233444f2dcc7",
+      "  AMEX_SSO_daily.csv: 5103 rows, 2006-06-21 to 2026-10-02, sha256 0df3e43a82db",
+      "  AMEX_QLD_daily.csv: 5123 rows, 2006-06-21 to 2026-10-30, sha256 9e5453cb02e0",
+      "  OBFR.csv: 2683 rows, 2016-03-01 to 2026-11-03, sha256 bbef2a371e62",
+      "  DFF.csv: 26424 rows, 1954-07-01 to 2026-11-03, sha256 e84a934a5014",
+      "Reference tables (reference/): 5 files",
       "  distributions.csv: 3 rows, 2024-12-23 to 2025-12-23, sha256 8b458ea8ed7c",
       "  etf_distributions.csv: 20 rows, 2024-06-21 to 2026-09-21, sha256 bae169d11be1",
       "  nav_anchors.csv: 23 rows, None to None, sha256 b1a6456897f7",
+      "  daily_etf_distributions.csv: 20 rows, 2026-09-23 to 2024-06-26, sha256 e830b4cf86be",
+      "  daily_etf_highlights.csv: 4 rows, None to None, sha256 f89a303f5fbf",
       "Fee timeline (annual expense ratio, ACT/365; SPYQ / MQQQ / QQQP):",
       "  inception to 2025-03-31: 1.30 / 1.31 / 1.30%  [FILED: N-CSR FY2025 financial highlights (MQQQ includes 0.01% excise tax); reference/nav_anchors.csv rows 10-12]",
       "  2025-04-01 to 2025-09-30: 1.30 / 1.30 / 1.30%  [FILED: N-CSRS to 2025-09-30, expense ratio annualized; reference/nav_anchors.csv rows 19-21]",
@@ -258,8 +294,8 @@
       "NASDAQ:QQQ": 0.0018
     },
     "etf_dividends": "reference/etf_distributions.csv (SECONDARY)",
-    "obfr_to": "2026-10-08",
-    "dff_to": "2026-10-08",
+    "obfr_to": "2026-11-03",
+    "dff_to": "2026-11-03",
     "price_vs_nav_bound": "N-CSR FY to 2025-03-31: market-price total returns -8.12 / -7.94 / -12.12% against NAV -8.08 / -7.90 / -12.04% (SPYQ / MQQQ / QQQP), so price and NAV differed by 0.04-0.08 pp over six to seven months",
     "anchors_file": "reference/nav_anchors.csv",
     "anchors_rows": 23,
@@ -2012,5 +2048,164 @@
       },
       "period_resets_inside_month": 4
     }
+  },
+  "real_vs_real_daily": {
+    "peer_hard_test": "PASS",
+    "peer_checks": [
+      {
+        "fund": "SSO",
+        "fiscal_year_end": "2025-05-31",
+        "start_row": "2024-05-31",
+        "end_row": "2025-05-30",
+        "total_return_rebuilt_pct": 15.684733948028429,
+        "total_return_market_filed_pct": 15.68,
+        "total_return_nav_filed_pct": 16.03,
+        "payouts": 0.38798,
+        "payouts_filed": 0.39,
+        "tr_error_pp": 0.004733948028428969,
+        "payout_error": -0.0020200000000000218,
+        "passed": true
+      },
+      {
+        "fund": "SSO",
+        "fiscal_year_end": "2026-05-31",
+        "start_row": "2025-05-30",
+        "end_row": "2026-05-29",
+        "total_return_rebuilt_pct": 57.16867473453069,
+        "total_return_market_filed_pct": 57.17,
+        "total_return_nav_filed_pct": 56.8,
+        "payouts": 0.42632000000000003,
+        "payouts_filed": 0.43,
+        "tr_error_pp": -0.001325265469311887,
+        "payout_error": -0.003679999999999961,
+        "passed": true
+      },
+      {
+        "fund": "QLD",
+        "fiscal_year_end": "2025-05-31",
+        "start_row": "2024-05-31",
+        "end_row": "2025-05-30",
+        "total_return_rebuilt_pct": 17.79565605624578,
+        "total_return_market_filed_pct": 17.8,
+        "total_return_nav_filed_pct": 18.1,
+        "payouts": 0.12223,
+        "payouts_filed": 0.12,
+        "tr_error_pp": -0.004343943754221868,
+        "payout_error": 0.0022300000000000098,
+        "passed": true
+      },
+      {
+        "fund": "QLD",
+        "fiscal_year_end": "2026-05-31",
+        "start_row": "2025-05-30",
+        "end_row": "2026-05-29",
+        "total_return_rebuilt_pct": 88.3865327308361,
+        "total_return_market_filed_pct": 88.39,
+        "total_return_nav_filed_pct": 88.15,
+        "payouts": 0.1182,
+        "payouts_filed": 0.12,
+        "tr_error_pp": -0.0034672691639059394,
+        "payout_error": -0.001799999999999996,
+        "passed": true
+      }
+    ],
+    "rows": [
+      {
+        "calendar_fund": "SPYQ",
+        "daily_fund": "AMEX:SSO",
+        "reset": "quarterly",
+        "L": 2.0,
+        "inception": "2024-09-30",
+        "start": "2024-10-01",
+        "end": "2026-09-30",
+        "years": 1.9959,
+        "rows": 501,
+        "cagr_calendar": 0.25377697418724066,
+        "cagr_daily": 0.26249887125095417,
+        "gap": -0.008721897063713513,
+        "log_gap": -0.006932413240383489,
+        "fee_calendar": 0.012044000000000003,
+        "fee_daily": 0.008499000000000001,
+        "fee_difference": 0.0035450000000000013,
+        "gap_fee_adjusted": -0.005176897063713512,
+        "model_gap": 0.012717362857126435,
+        "residual_vs_model": -0.01789425992083995,
+        "model_early_resets": [],
+        "residual_spread_calendar": 0.02170805931091309,
+        "residual_spread_daily": 0.0074687480926513665,
+        "residual_spread_difference": -0.014239311218261722,
+        "cost_drag_calendar": 0.04188035816244806,
+        "cost_drag_daily": 0.020441188497222207,
+        "decomposition_error": -9.025561409359284e-08,
+        "interval": null,
+        "interval_note": "two years: too few independent years for an interval (too noisy to test)"
+      },
+      {
+        "calendar_fund": "MQQQ",
+        "daily_fund": "AMEX:QLD",
+        "reset": "monthly",
+        "L": 2.0,
+        "inception": "2024-08-30",
+        "start": "2024-09-03",
+        "end": "2026-09-30",
+        "years": 2.0726,
+        "rows": 521,
+        "cagr_calendar": 0.43108876003357,
+        "cagr_daily": 0.4369586503731673,
+        "gap": -0.0058698903395972835,
+        "log_gap": -0.00409330648733891,
+        "fee_calendar": 0.011940576923076924,
+        "fee_daily": 0.00911346153846154,
+        "fee_difference": 0.0028271153846153828,
+        "gap_fee_adjusted": -0.0030427749549819007,
+        "model_gap": 0.02248559615939949,
+        "residual_vs_model": -0.02552837111438139,
+        "model_early_resets": [],
+        "residual_spread_calendar": 0.0236302375793457,
+        "residual_spread_daily": 0.0066283226013183595,
+        "residual_spread_difference": -0.01700191497802734,
+        "cost_drag_calendar": 0.051256161468894446,
+        "cost_drag_daily": 0.02290060240977354,
+        "decomposition_error": 7.256012413137114e-08,
+        "interval": null,
+        "interval_note": "two years: too few independent years for an interval (too noisy to test)"
+      },
+      {
+        "calendar_fund": "QQQP",
+        "daily_fund": "AMEX:QLD",
+        "reset": "quarterly",
+        "L": 2.0,
+        "inception": "2024-09-30",
+        "start": "2024-10-01",
+        "end": "2026-09-30",
+        "years": 1.9959,
+        "rows": 501,
+        "cagr_calendar": 0.38445038568338985,
+        "cagr_daily": 0.40177029162311806,
+        "gap": -0.01731990593972821,
+        "log_gap": -0.012432704400001604,
+        "fee_calendar": 0.011944000000000003,
+        "fee_daily": 0.009098,
+        "fee_difference": 0.002846000000000003,
+        "gap_fee_adjusted": -0.014473905939728205,
+        "model_gap": 0.003937480733150256,
+        "residual_vs_model": -0.018411386672878463,
+        "model_early_resets": [],
+        "residual_spread_calendar": 0.02002506256103516,
+        "residual_spread_daily": 0.006468248367309571,
+        "residual_spread_difference": -0.013556814193725588,
+        "cost_drag_calendar": 0.04334722952177894,
+        "cost_drag_daily": 0.022089913215419976,
+        "decomposition_error": -7.036651950009798e-08,
+        "interval": null,
+        "interval_note": "two years: too few independent years for an interval (too noisy to test)"
+      }
+    ],
+    "peer_tr_tol_pp": 0.02,
+    "peer_dist_tol": 0.005,
+    "end": "2026-09-30",
+    "peer_fee_note": "the N-CSR net expense ratio of each fiscal year (to May 31); the FY2026 ratio held after 2026-05-31 (ASSUMED: no later filing yet)",
+    "peer_payouts": "reference/daily_etf_distributions.csv (SECONDARY; fiscal-year sums checked)",
+    "peer_filing": "reference/daily_etf_highlights.csv (N-CSR, accession on every row)"
   }
 }

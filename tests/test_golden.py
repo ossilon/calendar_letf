@@ -82,6 +82,41 @@ with tempfile.TemporaryDirectory() as tmp:
           [(s, st) for s, st, _n, _c in out_all] == [("validate_live", "unchanged"), ("coverage_sim", "refrozen")]
           and rec_c["refrozen"][-1]["moved"] == 1 and rec_c["keys"]["summary.pooled_min"] == 0.95, out_all)
 
+    # B20: a re-run on other inputs skips with the reason; a moved number on the frozen inputs still fails
+    def _doc(sha, gap, ref_sha="r1"):
+        return {"meta": {"inputs": {"files": [{"file": "SP_SPX_daily.csv", "sha256": sha}],
+                                    "reference_files": [{"file": "qqq_income_ratios.csv", "sha256": ref_sha}]}},
+                "full": {"SPX": {"SPYQ": {"cagr": gap, "start": "2000-01-03"}}}}
+    (res / "strategies.json").write_text(json.dumps(_doc("a1", 0.10)), encoding="utf-8")
+    G.refreeze("strategies", "first", res, gold, today="2026-11-06")
+    _gs = G.load_golden("strategies", gold)
+    check("B20: a frozen golden file records the input fingerprints of its run",
+          _gs["inputs"] == {"files/SP_SPX_daily.csv": "a1", "reference_files/qqq_income_ratios.csv": "r1"}, _gs.get("inputs"))
+    _mode, _msg = G.compare(_gs, _doc("b2", 0.12), strict=False)
+    check("B20 planted: other data -> skip, naming the file and the count of numbers that differ",
+          _mode == "skip" and "SP_SPX_daily.csv" in _msg and "1 of 2 pinned numbers differ" in _msg and G.STRICT_ENV in _msg, _msg)
+    _mode, _msg = G.compare(_gs, _doc("a1", 0.10, ref_sha="r2"), strict=False)
+    check("B20 planted: a changed reference table also skips, and names it", _mode == "skip" and "qqq_income_ratios.csv" in _msg, _msg)
+    _mode, _d = G.compare(_gs, _doc("a1", 0.12), strict=False)
+    check("B20 planted: same inputs, a moved number -> compared, and the difference is reported",
+          _mode == "compare" and [x[0] for x in _d] == ["full.SPX.SPYQ.cagr"], _d)
+    _mode, _d = G.compare(_gs, _doc("b2", 0.12), strict=True)
+    check("B20 planted: strict mode compares even on other inputs", _mode == "compare" and len(_d) == 1, _d)
+    _mode, _d = G.compare(_gs, _doc("a1", 0.10), strict=False)
+    check("B20 planted: same inputs and numbers -> compared, no difference", _mode == "compare" and _d == [], _d)
+    _old = {k: v for k, v in _gs.items() if k != "inputs"}
+    check("B20: an older golden file without an inputs record is compared as before (never skipped)",
+          G.compare(_old, _doc("b2", 0.10), strict=False) == ("compare", []))
+    (res / "strategies.json").write_text(json.dumps(_doc("b2", 0.10)), encoding="utf-8")
+    G.refreeze("strategies", "new data, same numbers", res, gold, today="2026-11-07")
+    _gs = G.load_golden("strategies", gold)
+    check("B20: a re-freeze on new inputs with no number moved is allowed and logs inputs_changed",
+          _gs["refrozen"][-1] == {"date": "2026-11-07", "reason": "new data, same numbers", "keys_changed": 0, "added": 0,
+                                  "removed": 0, "moved": 0, "inputs_changed": 1} and _gs["inputs"]["files/SP_SPX_daily.csv"] == "b2",
+          _gs["refrozen"])
+    raises("B20: with inputs and numbers both unchanged, a re-freeze is still refused",
+           lambda: G.refreeze("strategies", "again", res, gold, today="2026-11-08"), "nothing changed")
+
     spec = importlib.util.spec_from_file_location("refreeze_golden", ROOT / "scripts" / "refreeze_golden.py")
     cli = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(cli)
@@ -117,14 +152,17 @@ for study in G.STUDIES:
     # Entries before the R4 review carry {date, reason, keys_changed}; later ones add the split, which must sum to it.
     _base, _split = {"date", "reason", "keys_changed"}, {"added", "removed", "moved"}
     check(f"{study}: every re-freeze entry has date, reason and keys_changed (and, where present, added + removed + moved = keys_changed)",
-          all(e["reason"].strip() and (set(e) == _base or (set(e) == _base | _split and e["added"] + e["removed"] + e["moved"] == e["keys_changed"]))
+          all(e["reason"].strip() and (set(e) == _base or (set(e) - {"inputs_changed"} == _base | _split
+                                                           and e["added"] + e["removed"] + e["moved"] == e["keys_changed"]))
               for e in gold["refrozen"]), [sorted(e) for e in gold["refrozen"]][-1:])
     src = G.RESULTS / f"{study}.json"
     if not src.exists():
         print(f"skip {study}: results/{study}.json is absent, golden comparison not run")
         continue
-    current = G.flatten(json.loads(src.read_text(encoding="utf-8")))
-    diffs = G.differences(gold["keys"], current)
+    mode, diffs = G.compare(gold, json.loads(src.read_text(encoding="utf-8")))
+    if mode == "skip":
+        print(f"skip golden {study}: {diffs}")
+        continue
     LIMIT = 50                  # one failing check per difference up to here; the rest are counted in one check
     for path, old, new in diffs[:LIMIT]:
         shown = "absent from the results" if new is G.MISSING else repr(new)

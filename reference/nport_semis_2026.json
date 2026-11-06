@@ -1,0 +1,89 @@
+{
+ "source": "SEC Form N-PORT (EDGAR, public), the swap tables of each fund; copied verbatim from the letf kit's extract",
+ "read_on": "2026-10-03",
+ "method": "SEC N-PORT primary_doc.xml, <swapDeriv>/<floatingPmntDesc floatingRtIndex floatingRtSpread>, notionalAmt; period end as listed",
+ "USD": {
+  "series": "ProShares Ultra Semiconductors",
+  "accession": "0002071691-26-017435",
+  "cik": 1174610,
+  "period_end": "2026-05-31",
+  "net_assets": 3045034170.47,
+  "equity_over_nav": 0.2678,
+  "swap_notional_over_nav": 1.7401,
+  "futures_notional_over_nav": 0.0,
+  "reference": "FEDL01",
+  "spread_units": "percent",
+  "weighted_spread_pct": 0.9391,
+  "spread_range_pct": [
+   0.8,
+   1.2
+  ],
+  "n_swaps": 9
+ },
+ "SOXL": {
+  "series": "Direxion Daily Semiconductor Bull 3X Shares",
+  "accession": "0001193125-26-404435",
+  "cik": 1424958,
+  "period_end_as_filed": "2026-10-31 (fiscal year end)",
+  "as_of_date": "2026-07-31",
+  "net_assets": 19443769829.21,
+  "equity_over_nav": 0.689,
+  "swap_notional_over_nav": 2.3109,
+  "reference": "'1 month Sofr + spread'",
+  "spread_units": "NOT STATED (values 4.18-10.65 as filed)",
+  "weighted_value_as_filed": 8.668,
+  "n_swaps": 9,
+  "swaps_musd_value": [
+   [
+    "Barclays",
+    6718,
+    10.65
+   ],
+   [
+    "Bank of America",
+    9040,
+    8.3
+   ],
+   [
+    "Nomura",
+    1712,
+    10.65
+   ],
+   [
+    "Societe Generale",
+    257,
+    4.18
+   ],
+   [
+    "UBS",
+    2966,
+    4.55
+   ],
+   [
+    "BNP Paribas",
+    3669,
+    7.65
+   ],
+   [
+    "Citibank",
+    7424,
+    10.65
+   ],
+   [
+    "Goldman Sachs",
+    3588,
+    7.65
+   ],
+   [
+    "J.P. Morgan",
+    9558,
+    7.9
+   ]
+  ],
+  "note": "If these are basis points the spread is 0.087%, far below the 0.94% reported by the user. Not resolved. Termination dates are 2049-12-31 (open-ended)."
+ },
+ "status": {
+  "USD": "VERIFIED: spread units stated (percent), reference FEDL01 (effective fed funds)",
+  "SOXL": "NOT RESOLVED: spread units not stated in the filing; not used as a cost"
+ }
+}

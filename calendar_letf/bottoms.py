@@ -280,6 +280,22 @@ def effective_leverage(u, trig, rate, accrual_fin, accrual_fee, period_end, row,
     return float((nav1[-1] - nav[-1]) / LEVERAGE_EPS / nav[-1])
 
 
+def leverage_series(world, spec, enc, rows=None, period_end=None):
+    """Effective leverage after the close of each row in `rows` (default: every row) of a calendar `spec`, run exactly as
+    World.nav runs it (encoding `enc`: spread per NAV, the encoding's fee or the product's, rate x rate turns; the
+    world's trigger and its lows; the base early mode). Read from the kernel's own state (effective_leverage), so it
+    holds after an early reset too, where the base is the trigger level and not a close (re-grade 2026-11-06: the
+    B10 and B15 loops had re-based at the close). NaN where the fund is finished or a nudge flips an early reset."""
+    spread, fee, turns = enc.spread_per_nav, (spec.fee if enc.fee is None else enc.fee), enc.rate_turns
+    pe = periods.period_end_flags(world.dates, spec.reset) if period_end is None else np.asarray(period_end, dtype=bool)
+    trig = world.trigger.to_numpy(dtype=np.float64)
+    low = None if world.trigger_low is None else world.trigger_low.to_numpy(dtype=np.float64)
+    rate = world.rate_arr * turns
+    rows = range(len(world.dates)) if rows is None else rows
+    return np.array([effective_leverage(world.u_arr, trig, rate, world.accrual_fin, world.accrual_fee, pe, int(r), spec.L,
+                                        spread, fee, spec.early_drop, trig_low=low) for r in rows], dtype=np.float64)
+
+
 def effective_leverage_nav_ratio(u, nav, reset_row, row, L=2.0):
     """The same leverage from a NAV series and the level at the last reset: L x (U_t / U_0) / (NAV_t / NAV_0).
     Valid when the fund's base is the close of `reset_row` (no early reset since)."""

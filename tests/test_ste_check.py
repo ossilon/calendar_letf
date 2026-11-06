@@ -65,6 +65,19 @@ with tempfile.TemporaryDirectory() as tmp:
           "banned word" in why and "words (limit" in why and "paragraph of 7 sentences" in why, why)
     check("main returns 0 for a clean file and 1 for a bad one", ste.main([str(good)]) == 0 and ste.main([str(bad)]) == 1)
 
+# Math (B18, THEORY.md): display blocks and inline math are not prose; a dollar amount still is.
+check("inline math is skipped: $L(L-1)\\sigma^2/2$ and $L$ become MATH",
+      "sigma" not in ste.strip_markup("The drag $L(L-1)\\sigma^2/2$ grows with $L$.")
+      and ste.strip_markup("The drag $L(L-1)\\sigma^2/2$ grows with $L$.").count("MATH") == 2)
+check("a dollar amount is not math: '$4,522 of $10,000' stays prose",
+      ste.strip_markup("The fund kept $4,522 of $10,000.") == "The fund kept $4,522 of $10,000.")
+_m = ["Prose before.", "", "$$", "x = \\frac{a}{b} \\text{ is computed by the kernel and it is long}", "\\tag{1}", "$$", "",
+      "$$ y = 2 $$", "Prose after."]
+_b = [t for _l, _k, t in ste.blocks(_m)]
+check("display math between $$ lines and a one-line $$ ... $$ block are skipped; the prose around them is kept",
+      _b == ["Prose before.", "Prose after."], _b)
+check("THEORY.md is on the public list", "THEORY.md" in ste.PUBLIC)
+
 # Real documents: reported, not yet enforced.
 files = ste.public_files()
 check("the public document list names files that exist", len(files) >= 3, [f.name for f in files])

@@ -226,7 +226,7 @@ def main():
         # BASE CASE (R2 step 3, R1 E4): the prospectus trigger watches the ETF's price, intraday. From the day the ETF exists
         # the trigger is the ETF's own price and daily low; before that it is the index price (close and daily low where the
         # export has a real low). The index-only, close-only run of the v1 results stays as a row of the trigger-basis table.
-        worlds[name], wprov[name] = study.build_world(name, intraday_trigger=True, trigger_basis="etf")
+        worlds[name], wprov[name] = study.build_world(name, intraday_trigger=True, trigger_basis="etf", end=study.V010_END[name])
         print("\n" + wprov[name]["banner"])
         print(f"rate: {wprov[name]['rate']}")
         tr = wprov[name]["trigger"]
@@ -673,7 +673,7 @@ def main():
               "- **Costs were fitted on 2024-26 only** and are carried back as two different ASSUMED encodings (a fixed spread; a rate-proportional charge). They agree in "
               f"2024-26 and part when rates move ({encoding_gap_text(R)}; `encoding_gap` under each underlying). The fitted residual is not a verified input; crisis financing spreads are not modeled.\n"
               "- **Pre-1988 S&P 500 dividend yields are Shiller's measured monthly series** (MEASURED; the decade map and flat yields are sensitivities). "
-              "Nasdaq-100 yields before 2006 are assumed (0.3% a year, ASSUMED).\n"
+              "Nasdaq-100 yields 1999-2006 are QQQ's measured fiscal-year income yields (MEASURED); before 1999 they are assumed (0.3% a year, ASSUMED).\n"
               "- **Pre-1954-07 reference rates are a proxy** (monthly 3-month T-bill, shifted one month); the 1950-54 rows are flagged.\n"
               "- **Prices, not NAVs.** The funds' own validation compared model with traded prices (bid-ask noise on thin funds); the underlying indexes are index levels.\n"
               "- **Few early-reset events.** Any quarterly-versus-monthly difference that rests on 1-3 days (see section 6 of each underlying) is an anecdote, not a statistic.\n"

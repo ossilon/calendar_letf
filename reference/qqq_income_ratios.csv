@@ -1,0 +1,9 @@
+fiscal_year,first_day,last_day,expense_ratio_pct,nii_ratio_pct,gross_income_yield_pct,accession,status,note
+1999,1999-03-05,1999-09-30,0.18,-0.12,0.06,0001206774-04-000023,PRIMARY,"annualized ratios of the first, partial period; pair printed net of the fee waiver; the sum (the gross yield) is the same before it"
+2000,1999-10-01,2000-09-30,0.18,-0.15,0.03,0001206774-04-000023,PRIMARY,pair printed net of the fee waiver; the sum (the gross yield) is the same before it
+2001,2000-10-01,2001-09-30,0.18,-0.13,0.05,0001206774-04-000023,PRIMARY,pair printed net of the fee waiver; the sum (the gross yield) is the same before it
+2002,2001-10-01,2002-09-30,0.2,-0.13,0.07,0001206774-04-000023,PRIMARY,
+2003,2002-10-01,2003-09-30,0.2,-0.03,0.17,0001206774-04-000023,PRIMARY,
+2004,2003-10-01,2004-09-30,0.2,0.07,0.27,0001206774-07-000279,PRIMARY,
+2005,2004-10-01,2005-09-30,0.2,1.19,1.39,0001206774-07-000279,PRIMARY,includes Microsoft's special dividend (the filing's note 5)
+2006,2005-10-01,2006-09-30,0.2,0.41,0.61,0001206774-07-000279,PRIMARY,

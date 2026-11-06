@@ -1,4 +1,4 @@
-﻿"""Underlying index series: S&P 500 and Nasdaq-100, as price or total return.
+"""Underlying index series: S&P 500 and Nasdaq-100, as price or total return.
 
 "Price" means the index level alone. "Total return" means price plus reinvested dividends. A leveraged fund earns
 a multiple of the TOTAL return, so using a price-only index understates it by roughly L x dividend yield a year.
@@ -19,7 +19,14 @@ from . import loader
 XNDX_TRUST_FROM = "2010-01-04"   # first date the XNDX daily bars line up with NDX
 XNDX_LEVEL_FROM = "2006-11-08"   # XNDX starts here; before XNDX_TRUST_FROM only its LEVEL change is trusted
 MID_YIELD = 0.0073               # measured: annual level change of ln(XNDX/NDX) 2006-11-08 -> 2010-01-04
-NDX_PRE_YIELD = 0.003            # ASSUMED dividend yield before 2006-11-08
+NDX_PRE_YIELD = 0.003            # ASSUMED dividend yield before QQQ's measured years (before 1999-03-05)
+# Measured Nasdaq-100 dividend yield 1999-03-05 .. 2006-11-07 (BACKLOG B7b): QQQ's gross income as a share of average
+# net assets, per fiscal year (October to September), from the financial highlights of two prospectuses on SEC EDGAR
+# (485BPOS 0001206774-04-000023 and 0001206774-07-000279). Gross income = the expense ratio + the net-investment-income
+# ratio on one basis (the sum is the same before or after a fee waiver): what the trust's stocks paid, before its costs. The file is parsed from the
+# filings by a script, never typed. Days after the last fiscal year (2006-10-01 .. 2006-11-07) keep its yield.
+QQQ_INCOME_FILE = Path(__file__).resolve().parent.parent / "reference" / "qqq_income_ratios.csv"
+QQQ_INCOME_STATUS = "MEASURED (QQQ gross income / average net assets by fiscal year; SEC 485BPOS financial highlights)"
 # S&P 500 dividend yield before SPXTR starts (1988-01-04), by decade (key = first year of the decade, value = yield
 # per year as a decimal). COPIED from a private financing kit (DECADE_DIV, in
 # percent); that kit's register quotes it as "4.2, 3.1, 4.0, 3.7, 2.6, 1.8% ..."
@@ -161,6 +168,29 @@ def shiller_yield_series(index, path=SHILLER_FILE):
     return pd.Series([by_month[m] for m in months], index=index, dtype=float)
 
 
+def qqq_income_table(path=QQQ_INCOME_FILE):
+    """The QQQ fiscal-year income table, sorted, with first_day / last_day as dates and the yield as a decimal.
+    Raises if the years overlap or leave a gap (each year must start the day after the previous one ends)."""
+    tbl = pd.read_csv(path, parse_dates=["first_day", "last_day"]).sort_values("first_day").reset_index(drop=True)
+    tbl["yield"] = tbl["gross_income_yield_pct"].astype(float) / 100.0
+    step = (tbl["first_day"].iloc[1:].values - tbl["last_day"].iloc[:-1].values) / pd.Timedelta(days=1)
+    if len(tbl) > 1 and not (step == 1).all():
+        raise ValueError(f"{Path(path).name}: fiscal years must follow each other day by day; steps {list(step)}")
+    return tbl
+
+
+def qqq_yield_series(index, until, path=QQQ_INCOME_FILE):
+    """Measured yield per row for rows from the table's first day up to (not including) `until`: each row gets the
+    yield of the fiscal year that contains it, and rows after the last fiscal year keep that year's yield. Rows
+    outside that range are NaN, for the caller to fill."""
+    tbl = qqq_income_table(path)
+    out = pd.Series(float("nan"), index=index, dtype=float)
+    for k, r in tbl.iterrows():
+        hi = r["last_day"] if k < len(tbl) - 1 else pd.Timestamp(until) - pd.Timedelta(days=1)
+        out.loc[(index >= r["first_day"]) & (index <= hi)] = r["yield"]
+    return out
+
+
 def spx_total_return(pre_yield="shiller", max_trailing_fill=MAX_TRAILING_FILL, data_dir=None):
     """S&P 500 total-return level on SPX's calendar, 1.0 on the first day.
 
@@ -216,15 +246,20 @@ def spx_total_return(pre_yield="shiller", max_trailing_fill=MAX_TRAILING_FILL, d
 
 
 def ndx_total_return(pre_yield=NDX_PRE_YIELD, mid_yield=MID_YIELD, trust_from=XNDX_TRUST_FROM,
-                     max_trailing_fill=MAX_TRAILING_FILL, data_dir=None):
+                     max_trailing_fill=MAX_TRAILING_FILL, data_dir=None, qqq_yield="measured"):
     """Nasdaq-100 total-return level on NDX's calendar, 1.0 on the first day.
 
     2010-01-04 on: published NASDAQ:XNDX (the official total-return index).
     2006-11-08 .. 2010: XNDX bars are mis-dated, so only its level change is used: NDX + `mid_yield` (0.73%/yr,
         measured) per year.
-    Before 2006-11-08: NDX + `pre_yield` per year (0.3%, ASSUMED).
+    1999-03-05 .. 2006-11-07 (qqq_yield="measured", the default since v0.1.1): NDX + QQQ's measured gross income
+        yield of each fiscal year (reference/qqq_income_ratios.csv). qqq_yield=None restores the v0.1.0 series
+        (`pre_yield` all the way to 2006-11-08), kept as a sensitivity and for cross-checks.
+    Before that: NDX + `pre_yield` per year (0.3%, ASSUMED).
     A trading day XNDX lacks (2012-10-31, Hurricane Sandy reopening) is carried by NDX's move and listed in attrs.
     """
+    if qqq_yield not in ("measured", None):
+        raise ValueError(f"qqq_yield must be 'measured' or None, got {qqq_yield!r}")
     px = ndx_price(data_dir)
     xn = loader.close("NASDAQ:XNDX", data_dir)
     if pd.Timestamp(trust_from) not in xn.index:
@@ -236,6 +271,15 @@ def ndx_total_return(pre_yield=NDX_PRE_YIELD, mid_yield=MID_YIELD, trust_from=XN
     xn = xn.drop(after_end)
     y = pd.Series(pre_yield, index=px.index, dtype=float)
     y.loc[XNDX_LEVEL_FROM:] = mid_yield
+    if qqq_yield == "measured":
+        q = qqq_yield_series(px.index, XNDX_LEVEL_FROM)
+        y = q.where(q.notna(), y)
+        used = q.dropna()
+        qqq = dict(qqq_yield="measured", qqq_yield_status=QQQ_INCOME_STATUS, qqq_file=QQQ_INCOME_FILE.name,
+                   qqq_from=str(used.index[0].date()) if len(used) else None,
+                   qqq_yield_mean_pct=float(used.mean() * 100) if len(used) else None)
+    else:
+        qqq = dict(qqq_yield=None)
     out, filled, trailing = _splice(px, xn, pre_yield, y, "NDX_TR", max_trailing_fill, "NASDAQ:XNDX")
     out.attrs.update(symbols=["NASDAQ:NDX", "NASDAQ:XNDX"], basis="constructed",
                      series="Nasdaq-100 total return (constructed)",
@@ -247,7 +291,7 @@ def ndx_total_return(pre_yield=NDX_PRE_YIELD, mid_yield=MID_YIELD, trust_from=XN
                      mid_yield_status="MEASURED (level change of mis-dated XNDX block)",
                      mid_from=XNDX_LEVEL_FROM,
                      published_from=str(xn.index[0].date()),
-                     published_status="VERIFIED (NASDAQ:XNDX, anchor-checked)")
+                     published_status="VERIFIED (NASDAQ:XNDX, anchor-checked)", **qqq)
     return out
 
 
@@ -275,8 +319,13 @@ def banner(series):
     if a.get("basis") == "constructed":
         if "mid_yield" in a:
             txt += (f"; published {a['published_from']} on ({a['published_status']}); "
-                    f"{a['mid_from']}..{a['splice_date']} price + {a['mid_yield']:.2%}/yr ({a['mid_yield_status']}); "
-                    f"before {a['mid_from']} price + {a['pre_yield']:.2%}/yr ({a['pre_yield_status']})")
+                    f"{a['mid_from']}..{a['splice_date']} price + {a['mid_yield']:.2%}/yr ({a['mid_yield_status']}); ")
+            if a.get("qqq_yield") == "measured" and a.get("qqq_from"):
+                txt += (f"{a['qqq_from']}..{a['mid_from']} price + QQQ's fiscal-year income yield "
+                        f"(mean {a['qqq_yield_mean_pct']:.2f}%/yr; {a['qqq_yield_status']}); "
+                        f"before {a['qqq_from']} price + {a['pre_yield']:.2%}/yr ({a['pre_yield_status']})")
+            else:
+                txt += f"before {a['mid_from']} price + {a['pre_yield']:.2%}/yr ({a['pre_yield_status']})"
         else:
             if a["pre_yield"] == "shiller":
                 yl = f"Shiller's measured monthly dividend yield (mean {a.get('pre_yield_mean_pct', float('nan')):.2f}%/yr over the pre-splice years)"

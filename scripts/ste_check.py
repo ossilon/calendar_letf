@@ -7,7 +7,9 @@ spelling; ported from the sibling target_funds project's checker on 2026-10-24).
 
 Rules the script can test: sentence length (25 words; 20 for an instruction), passive voice, -ing forms used as
 nouns or as a progressive tense, banned words (slang, vague words, Latin abbreviations), British spelling,
-paragraph length (6 sentences). It skips fenced code, inline code, link targets, headings' length and HTML.
+paragraph length (6 sentences). It skips fenced code, inline code, link targets, headings' length, HTML and math
+(display blocks between lines that start with $$, and inline $...$ whose first character is not a digit or a space, so
+a dollar amount such as $4,522 stays prose).
 What it cannot test (the approved-word list, one topic per sentence) a reader checks.
 """
 import re
@@ -18,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 MAX_WORDS, MAX_INSTRUCTION, MAX_SENTENCES = 25, 20, 6
 
 # The public documents of this repository. Generated tables in results/ are not prose and are not checked.
-PUBLIC = ["README.md", "ASSUMPTIONS.md", "FINDINGS.md", "data/README.md", "CHANGELOG.md"]
+PUBLIC = ["README.md", "ASSUMPTIONS.md", "FINDINGS.md", "data/README.md", "CHANGELOG.md", "THEORY.md"]
 IGNORE_FILE = re.compile(r"(_draft|_DRAFT)\.md$|^(PROMPT|DESIGN|BACKLOG)\.md$")
 
 IMPERATIVE = {"run", "read", "use", "open", "copy", "install", "start", "check", "do", "set", "pass", "call", "write",
@@ -82,6 +84,7 @@ CODE_SPAN = re.compile(r"`[^`]*`")
 LINK = re.compile(r"\[([^\]]*)\]\([^)]*\)")
 URL = re.compile(r"https?://\S+")
 HTML = re.compile(r"<[^>]+>")
+INLINE_MATH = re.compile(r"\$(?=[^\s\d$])[^$\n]*?[^\s$]\$|\$[^\s\d$]\$")   # $L$ and $\sigma^2$; never $4,522 or $ 5
 
 
 def public_files(root=ROOT):
@@ -99,6 +102,7 @@ def _quote(m):
 
 def strip_markup(text):
     text = CODE_SPAN.sub(" CODE ", text)
+    text = INLINE_MATH.sub(" MATH ", text)
     text = QUOTED.sub(_quote, text)
     text = LINK.sub(r"\1", text)
     text = URL.sub(" URL ", text)
@@ -108,10 +112,21 @@ def strip_markup(text):
 
 
 def blocks(lines):
-    """Yield (line_no, kind, text) for paragraphs, list items, table cells and headings; skip fenced code."""
-    in_code, para, start = False, [], 0
+    """Yield (line_no, kind, text) for paragraphs, list items, table cells and headings; skip fenced code and display
+    math (a block opened and closed by lines that start with $$; a line that opens and closes itself is skipped)."""
+    in_code, in_math, para, start = False, False, [], 0
     for i, raw in enumerate(lines, 1):
         line = raw.rstrip("\n")
+        s0 = line.strip()
+        if not in_code and s0.startswith("$$"):
+            if not (len(s0) >= 4 and s0.endswith("$$")):        # "$$ x $$" on one line opens and closes itself
+                in_math = not in_math
+            if para:
+                yield start, "para", " ".join(para)
+                para = []
+            continue
+        if in_math:
+            continue
         if line.strip().startswith("```"):
             in_code = not in_code
             if para:

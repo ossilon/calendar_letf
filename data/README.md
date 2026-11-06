@@ -113,7 +113,9 @@ results table prints the same fields in its banner. The files in `tests/golden/`
   (`reference/`, the default since S5a; ASSUMPTIONS section 3). The sensitivity runs use the earlier ASSUMED yield
   **by decade** (1950s 4.2%, 1960s 3.1%, 1970s 4.0%, 1980s 3.7%). They also use a flat yield
   (`spx_total_return(pre_yield=0.03)`, or 0 or 0.04). Every result's `attrs` and `banner()` name the yield used.
-* **Nasdaq-100 before 2010**: flat assumed yields (0.3% before 2006-11-08, 0.73% measured after). See `series.py`.
+* **Nasdaq-100 before 2010**: 0.73% measured from 2006-11-08; QQQ's MEASURED fiscal-year income yields from
+  1999-03-05 to 2006-11-07 (`reference/qqq_income_ratios.csv`, since v0.1.1); 0.3% ASSUMED before 1999. The
+  option `ndx_total_return(qqq_yield=None)` gives the v0.1.0 series. See `series.py`.
 
 ## Refresh rules (the package refuses stale or holey files instead of guessing)
 
