@@ -1,7 +1,7 @@
 {
  "meta": {
   "title": "B16: calendar-reset funds on semiconductors",
-  "run_date": "2026-11-06",
+  "run_date": "2026-11-07",
   "caption": "Data: TradingView (via local export), FRED, SEC N-PORT. Every fund is HYPOTHETICAL; the index is PRICE ONLY; SOXL is a price-only overlay on another index since 2021. Not investment advice.",
   "study_end": "2026-09-30",
   "symbol": "NASDAQ:SOX",
@@ -162,7 +162,7 @@
    "sha256": "8182dbc11f2357a218e70501812125a22e1a2cf460e95da7134443b7c251b220"
   },
   "timing": {
-   "total_wall_seconds": 13.748625699998229
+   "total_wall_seconds": 13.068312399998831
   }
  },
  "world": {
@@ -5657,7 +5657,7 @@
     }
    ],
    "max_abs_gap_pp": 0.05222005526797843,
-   "validate_live_sha256": "8da0418666c40ab3b60cccb24395c84481b695a95a694a70807b3816865d69ca",
+   "validate_live_sha256": "209ce19336612955b3db59ef2f90828f6a0e5fd210a50b32fc752fed9f3cae2f",
    "funds": [
     "SOXM",
     "SOXW"

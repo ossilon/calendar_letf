@@ -1,11 +1,11 @@
 {
   "meta": {
     "title": "Live-fund validation (step 2, R2 refit)",
-    "run_date": "2026-11-06",
+    "run_date": "2026-11-07",
     "code": {
       "script": "run_validate_live.py",
       "files": 27,
-      "sha256": "1fe19d6058fccc853b9ceaa3124fcb980e4297227dcfcdcf48d21d9b49e474e3"
+      "sha256": "283e7adbd63a2453647c4b11aacfa77f8c41ca1a1e9543842bc1e28942e2da62"
     }
   },
   "provenance": {

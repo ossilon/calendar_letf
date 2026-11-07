@@ -1,8 +1,8 @@
 {
  "study": "semis",
- "frozen_on": "2026-11-06",
- "reason": "Fix loop 1 after the independent re-grade of 2026-11-06. T1: text files now hash with CR LF folded to LF (provenance.sha256_of, byte_count), so every input fingerprint changes once and validate_live's file records change; no number moves in calendar_vs_daily, strategies, from_bottoms, coverage_sim, gfc_oracle, live_monthly, sub2x, montecarlo, three_x, semis or compounding. reset_day: B10 entry leverage now read from the kernel state (bottoms.leverage_series; a level-fill early reset re-bases at the trigger level), and the history comparisons gain t, p and Holm p (U1). leap: theta is a causal expanding mean of VIX^2 (E1), the rate enters BSM as 365 ln(1 + r/360) (E2), the yearly roll runs at all three costs, and LEAP-minus-fund yearly intervals are new (U2).",
- "source_json_sha256": "762cc85da8027ed1eab8acb1b0c1cd9b1a062b5a90dd31bfe0e60b5e153dccf0",
+ "frozen_on": "2026-11-07",
+ "reason": "Docs fix after the 0.1.1 release: results/validate_live.md said SOXM and SOXW were out of scope, but run_semis.py checks them (F26). The fix changes one sentence in scripts/run_validate_live.py, so validate_live re-runs with a new code fingerprint and a new file hash. semis re-runs on unchanged inputs and records that hash (world.validation.validate_live_sha256). No number moved in either study.",
+ "source_json_sha256": "ff2e7bf35100190ccd7a720465bf5c52f53b5d6fec214961af2db260af9ef6de",
  "n_keys": 5816,
  "inputs": {
   "files/NASDAQ_SOX_daily.csv": "0f8d336a166675a4aa1f207c3d80a275f756bc6ee1ef1da6e39e6579c9e18d7c",
@@ -50,6 +50,14 @@
    "removed": 0,
    "moved": 1,
    "inputs_changed": 5
+  },
+  {
+   "date": "2026-11-07",
+   "reason": "Docs fix after the 0.1.1 release: results/validate_live.md said SOXM and SOXW were out of scope, but run_semis.py checks them (F26). The fix changes one sentence in scripts/run_validate_live.py, so validate_live re-runs with a new code fingerprint and a new file hash. semis re-runs on unchanged inputs and records that hash (world.validation.validate_live_sha256). No number moved in either study.",
+   "keys_changed": 1,
+   "added": 0,
+   "removed": 0,
+   "moved": 1
   }
  ],
  "keys": {
@@ -4435,7 +4443,7 @@
   "world.validation.rows[weekly].cash_yield_c": 0.9081382751464844,
   "world.validation.rows[weekly].source": "semi-annual report period ended 2024-09-30 p.52",
   "world.validation.max_abs_gap_pp": 0.05222005526797843,
-  "world.validation.validate_live_sha256": "8da0418666c40ab3b60cccb24395c84481b695a95a694a70807b3816865d69ca",
+  "world.validation.validate_live_sha256": "209ce19336612955b3db59ef2f90828f6a0e5fd210a50b32fc752fed9f3cae2f",
   "world.validation.funds[0]": "SOXM",
   "world.validation.funds[1]": "SOXW",
   "world.validation.anchor_rows[0].ticker": "SOXM",

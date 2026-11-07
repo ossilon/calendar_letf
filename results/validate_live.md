@@ -164,7 +164,7 @@ SPYM (2x SPY monthly), SPYB (2x SPY weekly) and QQQW (2x QQQ weekly) launched 20
 
 SECONDARY liquidation values (brokerage corporate-actions record, not a filing; shown, not used): QQQW 2025-02-28 30.2606 per share from 25.00 (+21.04%); SPYM 2025-02-28 28.3384 per share from 25.00 (+13.35%); TLTQ 2025-02-28 20.9744 per share from 25.00 (-16.10%).
 
-Out of scope (underlying not in this kit): SOXM, SOXW (SOXX), NVDW (NVDA, 1.75x), TSLW (TSLA, 1.5x), TLTM, TLTQ (TLT); their one-month anchors are in `reference/nav_anchors.csv`.
+Not in this study: SOXM and SOXW (SOXX) have their one-month check in `scripts/run_semis.py` (FINDINGS F26). NVDW (NVDA, 1.75x), TSLW (TSLA, 1.5x), TLTM and TLTQ (TLT) are out of scope: their underlyings are not in this kit. All their one-month anchors are in `reference/nav_anchors.csv`.
 
 
 ## Real calendar fund vs real daily fund, inception to 2026-09-30 (BACKLOG B19)

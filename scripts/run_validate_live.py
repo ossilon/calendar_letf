@@ -868,8 +868,9 @@ def main():
     md.append("\nSECONDARY liquidation values (brokerage corporate-actions record, not a filing; shown, not used): "
               + "; ".join(f"{r.ticker} {r.end_date} {r.nav_end} per share from 25.00 ({float(r.total_return_nav_pct):+.2f}%)"
                           for r in secondary.itertuples()) + ".\n")
-    md.append("Out of scope (underlying not in this kit): SOXM, SOXW (SOXX), NVDW (NVDA, 1.75x), TSLW (TSLA, 1.5x), TLTM, TLTQ (TLT); "
-              "their one-month anchors are in `reference/nav_anchors.csv`.\n")
+    md.append("Not in this study: SOXM and SOXW (SOXX) have their one-month check in `scripts/run_semis.py` (FINDINGS F26). "
+              "NVDW (NVDA, 1.75x), TSLW (TSLA, 1.5x), TLTM and TLTQ (TLT) are out of scope: their underlyings are not in this "
+              "kit. All their one-month anchors are in `reference/nav_anchors.csv`.\n")
 
     # ---- 7. real vs real: each live calendar fund against the real 2x daily fund on the same index (B19) ----
     peer_tr, peer_fee, checks = {}, {}, []

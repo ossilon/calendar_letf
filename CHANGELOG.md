@@ -2,6 +2,12 @@
 
 All notable changes to this project. Dates are release dates (UTC).
 
+## 0.1.1, one wording fix in a results table (2026-11-07)
+
+- `results/validate_live.md` no longer calls SOXM and SOXW out of scope, because F26 checks them. One sentence in
+  `scripts/run_validate_live.py` changed. So validate_live and semis re-ran on unchanged inputs, and no number moved.
+  The semis golden file now records the new hash of `results/validate_live.json`.
+
 ## 0.1.1, documentation fixes (2026-11-06)
 
 No code, input or result changed.
