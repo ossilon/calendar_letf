@@ -25,7 +25,7 @@ identify the products that the project models.
 
 | Question | Short answer | Detail |
 |---|---|---|
-| Are 2x funds better than the index? | A little, at twice the pain. Over 1950-2026 the S&P 500 compounded at 11.7% a year and the monthly 2x design at 12.6%, with an 89% drawdown against 55%. SPYQ made 11.5%, below the index. On simulated decades a 2x fund ends above the index on about half the paths. | F12, F24 |
+| Are 2x funds better than the index? | Slightly, with much deeper drawdowns. Over 1950-2026 the S&P 500 compounded at 11.7% a year and the monthly 2x design at 12.6%, with an 89% drawdown against 55%. SPYQ made 11.5%, below the index. On simulated decades a 2x fund ends above the index on about half the paths. | F12, F24 |
 | Does a weekly or monthly reset beat a daily one? | They led in history, in real mutual funds and on simulated Nasdaq-100 decades. But no ten-year gap clears zero on one history. Quarterly resets trailed in history. | F6, F22, F24 |
 | Did buying at a bottom pay? | Against the 2x daily twin, a little. Over 3 years SPYQ made a median +173% against +161%, and it led at 6 of 7 S&P 500 bottoms. From the GFC low every calendar design beat its twin. A 3x daily fund made more, after drawdowns of 38-64% on the S&P 500. | F17, F21 |
 | What is a calendar fund after a crash? | Bought mid-period after a 30% fall, it is a 3.5x position until its next reset. | F17 |
