@@ -9,7 +9,11 @@ All notable changes to this project. Dates are release dates (UTC).
   designs ended above their own twins under both cost encodings.
 - A new section, "How big the edge is, and when it appears", gives the size of the edge in every test, with its
   interval or the reason it has none. A second table lists the conditions under which the calendar design led, and
-  which of them a buyer can see in advance. No code, input or result changed.
+  which of them a buyer can see in advance.
+- A new section, "What leverage itself did", answers whether 2x beat the index at all. It gives the full-history
+  growth rates and drawdowns (F12) and the spread of simulated outcomes with the bad decades (F24). It also gives 3x
+  on both sides (F25) and a buy-once margin position (F11). The horizon chart now appears in the README. No code,
+  input or result changed.
 
 ## 0.1.1, one wording fix in a results table (2026-11-07)
 

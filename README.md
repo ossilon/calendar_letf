@@ -25,6 +25,7 @@ identify the products that the project models.
 
 | Question | Short answer | Detail |
 |---|---|---|
+| Are 2x funds better than the index? | A little, at twice the pain. Over 1950-2026 the S&P 500 compounded at 11.7% a year and the monthly 2x design at 12.6%, with an 89% drawdown against 55%. SPYQ made 11.5%, below the index. On simulated decades a 2x fund ends above the index on about half the paths. | F12, F24 |
 | Does a weekly or monthly reset beat a daily one? | They led in history, in real mutual funds and on simulated Nasdaq-100 decades. But no ten-year gap clears zero on one history. Quarterly resets trailed in history. | F6, F22, F24 |
 | Did buying at a bottom pay? | Against the 2x daily twin, a little. Over 3 years SPYQ made a median +173% against +161%, and it led at 6 of 7 S&P 500 bottoms. From the GFC low every calendar design beat its twin. A 3x daily fund made more, after drawdowns of 38-64% on the S&P 500. | F17, F21 |
 | What is a calendar fund after a crash? | Bought mid-period after a 30% fall, it is a 3.5x position until its next reset. | F17 |
@@ -72,6 +73,39 @@ Two cautions. The study did not test a rule that switches between calendar and d
 the conditions that show only afterwards (chop, volatility, trend) describe the mechanism, not a timing rule
 (FINDINGS F24, F28). Of the visible ones, entry leverage after a fall mattered most. SPYQ's three largest leads over
 its twin came from the three entries above 3x (1987, 2009 and 2020). But seven bottoms per index is a small sample.
+
+![Calendar fund minus daily twin by holding period](results/horizon_curve.png)
+
+### What leverage itself did
+
+The reset rule moves the result by tenths of a point a year. The leverage sets the rest, so a buyer should know what
+2x and 3x did on their own (FINDINGS F12, F24, F25, F11).
+
+Over the full history, 1950-2026, the S&P 500 compounded at 11.7% a year with a 55% maximum drawdown. The monthly 2x
+design made 12.6% with an 89% drawdown, its daily twin 12.2% with 91%, and SPYQ 11.5% with 93%: below the index. Every
+2x series spent 94% of the time below its last peak. On the Nasdaq-100 from 1985 the index made 14.8% a year with an
+83% drawdown. MQQQ made 15.1% and QQQP 11.8%, each with a 99% drawdown.
+
+The spread of outcomes is wide. Over a simulated decade, $1 in the S&P 500 monthly design has a median of 3.22,
+against 3.03 for the index. But its 5th percentile is 0.51. On the Nasdaq-100 the median is 5.23 against 4.37, and
+the 5th percentile 0.18. The 2x fund ends above the index on 0.54 and 0.56 of the paths.
+
+The bad decades are the point. Take a flat decade, with each day's move less the history's mean. There the 2x funds
+end at 0.32-0.33 of their money on the S&P 500, while the index ends at 0.98. Now take a decade of 1973-74, 1980-82
+and 2022 days, with fed funds at a mean of 10.44%. There they end at 0.004-0.005, against 0.17 for the index. On
+1929-39, SPYQ ends at 0.07 against 0.66.
+
+At 3x the history itself has such decades. $10,000 in the Nasdaq-100 daily twin through 2000-02 became $12, while
+the index kept $2,660. Through 2008-09 on the S&P 500 the 3x twin kept $2,159.
+
+The other side is real too. From its first bar in 2009, the real UPRO price grew 32.08% a year, and TQQQ 42.48% from
+2010. Both ended above their models. That is what 3x does in a long rise that starts near a low. From the GFC low,
+$10,000 in the 3x models became $2,608,783 and $11,505,261.
+
+Leverage you hold yourself does not keep up. Consider a position bought once on margin at the fund's own costs and
+never reset. It beat every 2x fund by 1.52-2.09 pp a year in the S&P 500 10-year windows it survived. It lost all its
+equity in 24% of those windows, and in 16% on the Nasdaq-100. The reset is what keeps a fund alive, which is its real
+edge over margin. No interval here excludes zero.
 
 ### Calendar or daily reset
 
