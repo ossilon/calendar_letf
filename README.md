@@ -26,14 +26,52 @@ identify the products that the project models.
 | Question | Short answer | Detail |
 |---|---|---|
 | Does a weekly or monthly reset beat a daily one? | They led in history, in real mutual funds and on simulated Nasdaq-100 decades. But no ten-year gap clears zero on one history. Quarterly resets trailed in history. | F6, F22, F24 |
+| Did buying at a bottom pay? | Against the 2x daily twin, a little. Over 3 years SPYQ made a median +173% against +161%, and it led at 6 of 7 S&P 500 bottoms. From the GFC low every calendar design beat its twin. A 3x daily fund made more, after drawdowns of 38-64% on the S&P 500. | F17, F21 |
+| What is a calendar fund after a crash? | Bought mid-period after a 30% fall, it is a 3.5x position until its next reset. | F17 |
 | Which leverage grows fastest? | On the S&P 500, 2x or more for the daily, weekly and monthly resets. On the Nasdaq-100, any L from 1x to 2x: one history cannot choose. On bad-case measures 1x wins in every design. | F23, F24 |
 | Does leverage pay on semiconductors? | No. From 1994 to 2026 no fund from 1.2x to 3x kept up with the index, even with no fee. | F26 |
 | What changes at 3x? | The early-reset rule decides survival. On the two broad indexes a trigger scaled to 3x prevents every wipeout, in history and on simulated paths. | F25 |
 | Do timing rules help? | None is a reliable improvement over buy-and-hold on both indexes. | F13-F16 |
-| What is a calendar fund after a crash? | Bought mid-period after a 30% fall, it is a 3.5x position until its next reset. | F17 |
 
 The sections below give the numbers. [FINDINGS.md](FINDINGS.md) gives every result with its provenance and its
 interval.
+
+### How big the edge is, and when it appears
+
+Against its daily twin at the same costs, a weekly or monthly fund led by a small amount. On the S&P 500 the monthly
+edge is +0.38 pp a year, well inside the noise. On the Nasdaq-100 the monthly and weekly edges are +1.04 and +1.17 pp
+a year. That adds up over a decade, but one history cannot rule out zero. The large gaps come from single hindsight
+paths, such as the GFC low, so they show the mechanism and not what to expect.
+
+| Test | Edge of the calendar fund over its daily twin | Clear of zero? |
+|---|---|---|
+| S&P 500, monthly reset, 10-year holds, 1950-2026 | +0.38 pp a year | No: [-0.59, +1.35] |
+| Nasdaq-100, monthly and weekly resets, 10-year holds, 1985-2026 | +1.04 and +1.17 pp a year | No: [-2.23, +4.31] and [-0.24, +2.58] |
+| Real monthly-reset mutual funds against real daily funds, 2009-2022 | +1.49 (S&P 500) and +1.72 (Nasdaq-100) pp a year | No: [-0.12, +2.48] and [-0.17, +2.79] |
+| 5000 simulated decades | Nasdaq-100: +0.61 (weekly) and +0.68 (monthly) pp a year. S&P 500: -0.01 to +0.19 | A spread of outcomes, not a test. The Nasdaq-100 weekly design leads on 0.79 of the paths. |
+| Seven S&P 500 bottoms, 3-year holds | +173% against +161% (medians) | Too few to test. Ahead at 6 of 7. |
+| GFC low to 2026, one path | $703,542 against $590,843 (S&P 500 monthly). $3,080,655 against $2,200,375 (MQQQ) | One hindsight path: no interval |
+| Semiconductors at 1.2x to 1.7x, weekly and monthly resets, 1994-2026 | Ahead at every L | Yes, and the intervals pass the coverage check: [+0.05, +0.33] at 1.2x weekly, [+0.15, +2.12] at 1.7x monthly |
+| Real Tradr ETFs against SSO and QLD, 2024-26 | -0.59 to -1.73 pp a year: higher costs erased the edge | Two years: no interval |
+
+When did the calendar design lead? The conditions below come from history and the simulations. Some you can see
+before you buy; others show only afterwards.
+
+| Condition | What history and the simulations show | Visible in advance? |
+|---|---|---|
+| Choppy markets, with daily moves that reverse | The monthly design led in every S&P 500 decade from the 1980s on, by up to +1.84 pp a year (the 2000s). In the 1950s-70s daily moves followed through, and the daily fund led every decade. | Partly. Past reversal is measurable, but it can flip, and since 1990 it is weak evidence (FINDINGS F7). |
+| High volatility | On simulated decades the most volatile third led the calmest third by +0.44 (S&P 500) and +0.73 pp a year (Nasdaq-100), weekly design. The quarterly gap shrinks instead. | No. A decade's volatility is known only at its end. |
+| A smooth, steady rise | The daily fund gains here. In the third of S&P 500 10-year windows with the strongest trend, the monthly design trailed its twin (FINDINGS F28). A year that ends +50% at 10% volatility gives daily 2x +122.6% and quarterly +115.8%. | No. A trend is known only afterwards. |
+| Bought mid-period after a fall | The fund holds more than 2x until its next reset: 3.5x after a 30% fall. From market bottoms it beat its twin (table above). | Yes. Its leverage now is `2 x (U_t / U_0) / (NAV_t / NAV_0)`, from its NAV and the index at its last reset. |
+| A long hold | The S&P 500 monthly edge is flat for a year (+0.03 pp a year at 12 months) and grows after three (+0.29 at 10 years). Short holds carry a heavy left tail. | Yes: it is your holding period. |
+| A weekly or monthly reset, not quarterly | Over random 10-year holds the quarterly design trailed (-0.5 S&P 500, -2.1 Nasdaq-100), mostly in windows where a crash fired its 35% trigger. | Yes: it is the fund's design. |
+| A volatile index | The edge was larger on the Nasdaq-100 than on the S&P 500. On semiconductors below 2x it is the one edge whose intervals exclude zero. | Yes. |
+| Fees close to the daily fund's | The Tradr funds' fitted costs of 2.00-2.36% a year, against 0.65-0.75% for SSO and QLD, more than erased the edge in 2024-26. | Yes: compare the costs. |
+
+Two cautions. The study did not test a rule that switches between calendar and daily funds on these conditions. And
+the conditions that show only afterwards (chop, volatility, trend) describe the mechanism, not a timing rule
+(FINDINGS F24, F28). Of the visible ones, entry leverage after a fall mattered most. SPYQ's three largest leads over
+its twin came from the three entries above 3x (1987, 2009 and 2020). But seven bottoms per index is a small sample.
 
 ### Calendar or daily reset
 
@@ -94,6 +132,19 @@ not show it. Detail: FINDINGS F27.
 Why the gap exists: the calendar fund gains when the days inside a period reverse, and the daily fund gains in a
 smooth trend. On the S&P 500 a second-order formula explains the weekly and monthly 2x gaps (R^2 0.93-0.99). Detail:
 FINDINGS F28.
+
+### Bought at a bottom
+
+A calendar fund bought after a crash holds more than 2x until its next reset, and from the bottoms that helped a
+little (FINDINGS F17). Over 3 years SPYQ beat its daily twin at 6 of the 7 S&P 500 bottoms since 1974. Its median return was
++173%, against +161% for the twin and +85% for the index. On the Nasdaq-100 MQQQ made +280%, its twin +267% and the
+index +123%. A 3x daily fund made more (+264% on the S&P 500), but it fell 38-64% inside those three years.
+
+From the GFC low to the end of the data, all six calendar designs ended above their own daily twins (FINDINGS F21).
+That holds under both cost encodings. Every entry here uses hindsight, so these results illustrate the mechanism and
+are not statistics. The section on
+[what a calendar fund is after a crash](#what-a-calendar-fund-is-after-a-crash-and-why-it-is-not-a-2x-fund) gives the
+detail.
 
 ### Which leverage grows fastest
 
@@ -169,6 +220,20 @@ volatility-threshold rule has the largest median (+2.3 on MQQQ, +5.9 on QQQP). F
   2024-26, because they cost more. (F22)
 - **On 5000 simulated decades the Nasdaq-100 weekly design led its daily twin on 0.79 of the paths, by a median
   +0.61 pp/yr.** The S&P 500 median gaps stayed within 0.19 pp of zero. (F24)
+- **Bought at a market bottom, the calendar funds beat their 2x daily twins by a small margin.** SPYQ beat its twin at six of the seven
+  S&P 500 bottoms since 1974, over 3 years. Its median return was +173%, against +161% for the twin and +85% for the
+  index. On the Nasdaq-100 MQQQ made +280%, its twin +267% and the index +123%. A 3x daily fund made more (+264% on the
+  S&P 500), after drawdowns of 38-64% inside those years. Over a random 10-year hold SPYQ was the worst calendar
+  design; bought at a bottom, its longer period holds the extra leverage longest (F17).
+- **From the GFC low to the end of the data, every calendar design ended above its daily twin.** An entry of $10,000
+  became $703,542 in the S&P monthly design, against $590,843 in its twin and $158,186 in the index. In MQQQ it became
+  $3,080,655, against $2,200,375 and $355,113. The real SSO and QLD reached $776,671 and $3,053,260 (price only). They
+  cost less than the Tradr funds, so which side ends ahead of them depends on the assumed costs (rate encoding:
+  $804,289 and $3,531,497). The entry uses hindsight and gives one path, so it is an illustration, not a statistic
+  (F21; [full table](results/gfc_oracle.md)).
+- **Bought mid-period after a 30% fall, a calendar fund is a 3.5x position, not a 2x one.** At the 2020 bottom SPYQ
+  was a 3.66x fund. In three years, $10,000 became $31,391. The same sum became $26,113 in a daily 2x fund and
+  $36,394 in a 3x daily fund (which ran a -64% drawdown on the way). (F17)
 - **Growth peaks at 2x or more on the S&P 500 (Kelly 2.96). On the Nasdaq-100 any L from 1x to 2x is a tie
   (Kelly 1.99).** On both bad-case measures 1x wins. A 1.2x fund needs a fee under 0.45-0.49% to keep pace with the
   S&P 500. (F23, F24)
@@ -184,20 +249,9 @@ volatility-threshold rule has the largest median (+2.3 on MQQQ, +5.9 on QQQP). F
   moves by at most 0.06 pp/yr for the monthly and weekly designs. The limit for the quarterly ones is 0.14. The
   leverage sets the risk. On the S&P 500, every 2x structure had an 89-93% maximum drawdown since 1950 and spent 94%
   of the time below its previous peak. The Nasdaq-100 2x series fell about 99% (F8, F12).
-- **Bought mid-period after a 30% fall, a calendar fund is a 3.5x position, not a 2x one.** At the 2020 bottom SPYQ
-  was a 3.66x fund. In three years, $10,000 became $31,391. The same sum became $26,113 in a daily 2x fund and
-  $36,394 in a 3x daily fund (which ran a -64% drawdown on the way). (F17)
-- **From the GFC low to the end of the data, $10,000 became $703,542 in the S&P monthly design and $3,080,655 in
-  MQQQ.** Both figures come from MODELED designs at the fixed cost encoding; the rate encoding gives $804,289 and $3,531,497. The real
-  SSO and QLD reached $776,671 and $3,053,260 (price only). So which side ends ahead depends on the assumed costs.
-  The entry uses hindsight and gives one path: an illustration, not a statistic.
-  [results/gfc_oracle.md](results/gfc_oracle.md) has the full table. (F21)
 - **The 35% early reset fired once on the S&P 500 in 76 years (2008-11-20). On the Nasdaq-100 it fired four times
   for a quarterly fund (1987, 2000, 2001, 2008) and once for a monthly one (1987).** It never fired for a monthly
   fund on the S&P. (F9)
-- **Bought at the seven S&P 500 bottoms since 1974, the quarterly fund beat its daily twin six times.** Over any
-  random 10-year hold, it was the worst calendar structure. The longer the period, the more leverage waits at the
-  low. (F17)
 - **No timing rule is a reliable improvement on buy-and-hold on both indexes, and every rule's 10-year edge is noisy
   on the headline interval.** The S&P 200-day rule's edge was positive before 2009 and negative after. Its full-run
   edge by era was +5.29 / +6.91 / -8.37 pp/yr, and its whole-era out-of-sample edge was -0.05 pp/yr (1990-2026 as

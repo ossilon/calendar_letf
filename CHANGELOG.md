@@ -2,6 +2,15 @@
 
 All notable changes to this project. Dates are release dates (UTC).
 
+## 0.1.1, README: entries at market bottoms (2026-11-07)
+
+- README.md now leads its bottom-entry results with the fair comparison, the 2x daily twin at the same costs. A
+  summary-table row, a short section and the headline facts give it (F17, F21). From the GFC low, all six calendar
+  designs ended above their own twins under both cost encodings.
+- A new section, "How big the edge is, and when it appears", gives the size of the edge in every test, with its
+  interval or the reason it has none. A second table lists the conditions under which the calendar design led, and
+  which of them a buyer can see in advance. No code, input or result changed.
+
 ## 0.1.1, one wording fix in a results table (2026-11-07)
 
 - `results/validate_live.md` no longer calls SOXM and SOXW out of scope, because F26 checks them. One sentence in
